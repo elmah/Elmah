@@ -19,10 +19,6 @@ Creative Commons Attribution-ShareAlike 3.0 Unported License.
 Example: wgets http://www.example.com/ -</example>
     </runtime>
     <script language="JavaScript">
-//
-// Global variables
-//
-
 var stdin  = WScript.StdIn;
 var stdout = WScript.StdOut;
 var stderr = WScript.StdErr;
@@ -68,18 +64,12 @@ var About =
     }
 }
 
-//
-// Global functions
-//
-
 function writeln(s) { stdout.WriteLine(s); }
 function write(s)   { stdout.Write(s); }
 function alert(s)   { echo(s); }
 function echo(s)    { WScript.Echo(s); }
 
-//
-// ADO Constants
-//
+// Modules
 
 var ADO = 
 {
@@ -95,36 +85,12 @@ var ADO =
     }
 };
 
-//
-// Mask
-//
-
-var Mask = 
-{
-    nullString : function(s) 
-    {
-        return s == null ? "" : s;
-    },
-    emptyString : function (s, mask)
-    {
-        return s == null || s.length == 0 ? mask : s;
-    },
-    nullObject : function(o, mask)
-    {
-        return o == null ? mask : o;
-    }
-};
-
-//
-// Path
-//
-
 var Path =
 {
     combine : function(path1, path2)
     {
-        path1 = Mask.nullString(path1);
-        path2 = Mask.nullString(path2);
+        path1 = path1 || "";
+        path2 = path2 || "";
         
         var sb = [];
         sb.push(path1);
@@ -135,22 +101,14 @@ var Path =
     }
 };
 
-//
-// Test
-//
-
 var Test =
 {
     assertEquals : function(expected, actual, message)
     {
         if (actual != expected)
-            throw new Exception("Equality assertion test failed. " + Mask.nullString(message));
+            throw new Exception("Equality assertion test failed. " + (message || ""));
     }
 };
-
-//
-// Reflection
-//
 
 var Reflection =
 {
@@ -160,10 +118,6 @@ var Reflection =
         return match == null ? "(anonymous)" : match[1];
     }
 };
-
-//
-// Diagnostics
-//
 
 var Diagnostics =
 {
@@ -194,10 +148,6 @@ var Diagnostics =
     }
 };
 
-//
-// HTTP
-//
-
 var HTTP = 
 {
     getResponseHeaders : function(http)
@@ -219,14 +169,7 @@ var HTTP =
     }
 };
 
-//
 // String (extensions)
-//
-
-String.prototype.mask = function(mask)
-{
-    return Mask.emptyString(this, mask);
-}
 
 String.prototype.trim = function()
 {
@@ -235,17 +178,13 @@ String.prototype.trim = function()
 
 String.prototype.clipLeft = function(width, decoration)
 {
-    decoration = Mask.emptyString(decoration, "...");
-    
     if (this.length <= width)
         return this;
     
-    return decoration + this.slice(-width);
+    return (decoration || "...") + this.slice(-width);
 }
 
-//
 // Exception
-//
 
 function Exception(message)
 {
@@ -254,7 +193,7 @@ function Exception(message)
 
 Exception.prototype.init = function(message)
 {
-    this.message = Mask.emptyString(message, "A general error has occurred.");
+    this.message = message || "A general error has occurred.";
     this.stackTrace = Diagnostics.stackTrace();
 }
 
@@ -263,9 +202,7 @@ Exception.prototype.toString = function()
     return this.message;
 }
 
-//
 // ProgramArgumentException extends Exception
-//
 
 ProgramArgumentException.prototype = new Exception();
 ProgramArgumentException.prototype.constructor = ProgramArgumentException;
@@ -273,11 +210,13 @@ ProgramArgumentException.base = Exception.prototype;
 
 function ProgramArgumentException(message) 
 {
-    message = Mask.emptyString(message, "Error with program argument.") + 
+    message = (message || "Error with program argument.") + 
         " Use the /? for help.";
         
     ProgramArgumentException.base.init.call(this, message);
 }
+
+// Bootstrapper
 
 try
 {
@@ -356,9 +295,9 @@ function main(args)
         return;
 
     var headers = HTTP.getResponseHeaders(http);
-    var contentLength = parseInt(Mask.nullObject(headers["content-length"], -1));
+    var contentLength = parseInt(headers["content-length"] || -1);
     
-    var outputDirectory = Mask.nullString(args.getNamed("od"));
+    var outputDirectory = args.getNamed("od") || "";
     var outputPath = outputDirectory.length > 0 ?
         Path.combine(outputDirectory, outputFileName) : outputFileName;
         
@@ -394,13 +333,6 @@ function getFileNameFromURL(url, defaultFileName)
     var result = path.substring(lastSlashIndex + 1);
 
     return result.length > 0 ? result : defaultFileName;
-}
-
-function getScriptNameFromHost()
-{
-    var name = WScript.ScriptName;
-    var dotIndex = name.lastIndexOf('.');
-    return dotIndex >= 0 ? name = name.substring(0, dotIndex) : name;
 }
 
 function test() {}
