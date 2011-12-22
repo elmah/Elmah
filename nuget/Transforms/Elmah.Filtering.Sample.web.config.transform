@@ -1,0 +1,37 @@
+<configuration>
+  <elmah>
+    <errorFilter>
+      <!--
+      For a more info please see:
+      - http://code.google.com/p/elmah/wiki/ErrorFiltering
+      - http://code.google.com/p/elmah/wiki/ErrorFilterExamples
+      -->
+      <test>
+        <jscript>
+          <expression>
+          <![CDATA[
+          // @assembly mscorlib
+          // @assembly System.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+          // @import System.IO
+          // @import System.Web
+
+          // HTTP Status 404 - File not found
+          HttpStatusCode == 404
+          // FileNotFoundException or HttpRequestValidationException
+          || BaseException instanceof FileNotFoundException 
+          || BaseException instanceof HttpRequestValidationException
+          /* Using RegExp below (see http://msdn.microsoft.com/en-us/library/h6e2eb7w.aspx) */
+          // Filter all errors caused by search engine crawlers
+          || Context.Request.UserAgent.match(/crawler/i)                      
+          // Filter out all "local" errors          
+          // || Context.Request.ServerVariables['REMOTE_ADDR'] == '127.0.0.1' // IPv4 only
+          // Filter out errors related to webresource.axd and scriptresource.axd
+          || Context.Request.ServerVariables['URL'].match(/webresource/i)
+          || Context.Request.ServerVariables['URL'].match(/scriptresource/i)
+          ]]>
+          </expression>
+        </jscript>
+      </test>
+    </errorFilter>
+  </elmah>
+</configuration>

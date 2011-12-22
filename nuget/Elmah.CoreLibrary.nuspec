@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.corelibrary</id>
+    <version>1.2</version>
+    <title>ELMAH Core Library (no config)</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Core library for ELMAH (Error Logging Modules and Handlers) without any configuration.</description>
+    <summary>Core library for ELMAH (Error Logging Modules and Handlers) without any configuration.</summary>
+    <language>en-US</language>
+    <tags>elmah error logging unhandled exception</tags>
+  </metadata>
+  <files>
+    <file src="..\base\bin\net-2.0\release\Elmah.dll" target="lib" />
+  </files>
+</package>

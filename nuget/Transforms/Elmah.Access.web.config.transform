@@ -1,0 +1,8 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.AccessErrorLog, Elmah" connectionStringName="elmah-access" />
+  </elmah>
+  <connectionStrings>
+    <add name="elmah-access" connectionString="Provider=Microsoft.Jet.OLEDB.4.0;Data Source=|DataDirectory|Elmah.mdb" />
+  </connectionStrings>
+</configuration>

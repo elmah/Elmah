@@ -1,0 +1,9 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.MySqlErrorLog, Elmah" connectionStringName="elmah-mysql" />
+  </elmah>
+  <connectionStrings>
+    <!-- TODO: Replace the ****'s with the correct entries -->
+    <add name="elmah-mysql" connectionString="****"/>
+  </connectionStrings>
+</configuration>

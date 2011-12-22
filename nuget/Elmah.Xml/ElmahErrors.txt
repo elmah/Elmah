@@ -1,0 +1,1 @@
+ELMAH.Xml will log XML errors into this folder

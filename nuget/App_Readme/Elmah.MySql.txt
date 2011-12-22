@@ -1,0 +1,5 @@
+Please note that in order to complete the installation of ELMAH.MySql you will have to do the following:
+
+1) Make sure you have the latest MySQL Connector installed from http://dev.mysql.com/downloads/connector/net/ (this is optional, since we already include MySql.Data.dll, if you download the latest connector you don't need our version)
+2) Run the Elmah.MySql.sql script against your database
+3) Edit your web.config with the correct settings in the elmah <connectionString> to connect to your database

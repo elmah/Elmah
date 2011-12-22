@@ -1,0 +1,8 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.SqlServerCompactErrorLog, Elmah" connectionStringName="elmah-sqlservercompact" />
+  </elmah>
+  <connectionStrings>
+    <add name="elmah-sqlservercompact" connectionString="Data Source=|DataDirectory|\Elmah.sdf"/>
+  </connectionStrings>
+</configuration>

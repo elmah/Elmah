@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.msaccess</id>
+    <version>1.2</version>
+    <title>ELMAH on Microsoft Access</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ELMAH with configuration for getting started quickly on a Microsoft Access database as the error log.</description>
+    <summary>ELMAH with configuration for getting started quickly on a Microsoft Access database as the error log.</summary>
+    <language>en-US</language>
+    <tags>access elmah error logging unhandled exception</tags>
+    <dependencies>
+      <dependency id="elmah" version="1.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="App_Data\*" target="Content\App_Data" />
+    <file src="Transforms\Elmah.Access.web.config.transform" target="content\web.config.transform" />
+  </files>
+</package>

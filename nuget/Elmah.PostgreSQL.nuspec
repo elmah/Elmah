@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.postgresql</id>
+    <version>1.2</version>
+    <title>ELMAH on PostgreSQL (requires manual config)</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ELMAH with configuration for getting started quickly on a PostgreSQL database as the error log. NB requires manual configuration.</description>
+    <summary>ELMAH with configuration for getting started quickly on a PostgreSQL database as the error log. NB requires manual configuration.</summary>
+    <language>en-US</language>
+    <tags>postgresql elmah error logging unhandled exception</tags>
+    <dependencies>
+      <dependency id="elmah" version="1.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\base\lib\Npgsql.dll" target="lib" />
+    <file src="..\base\lib\Mono.Security.dll" target="lib" />
+    <file src="Transforms\Elmah.PostgreSQL.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.PostgreSQL.txt" target="content\App_Readme" />
+    <file src="..\base\src\Elmah\Pgsql.sql" target="content\App_Readme\Elmah.PostgreSQL.sql" />
+  </files>
+</package>

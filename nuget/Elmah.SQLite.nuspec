@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.sqlite</id>
+    <version>1.2</version>
+    <title>ELMAH on SQLite</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ELMAH with configuration for getting started quickly on a SQLite database as the error log.</description>
+    <summary>ELMAH with configuration for getting started quickly on a SQLite database as the error log.</summary>
+    <language>en-US</language>
+    <tags>sqlite elmah error logging unhandled exception</tags>
+    <dependencies>
+      <dependency id="elmah" version="1.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="App_Data\*" target="Content\App_Data" />
+    <!-- TODO Add a dependency to System.Data.SQLite instead -->
+    <file src="..\base\lib\System.Data.SQLite.DLL" target="NativeBinaries\x86\System.Data.SQLite.DLL" />
+    <file src="..\base\lib\x64\System.Data.SQLite.DLL" target="NativeBinaries\x64\System.Data.SQLite.DLL" />
+    <file src="32v64BitTools\*" target="Tools" />
+    <file src="Transforms\Elmah.SQLite.web.config.transform" target="content\web.config.transform" />
+  </files>
+</package>

@@ -1,0 +1,5 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.XmlFileErrorLog, Elmah" logPath="~/App_Data/Elmah.Errors" />
+  </elmah>
+</configuration>

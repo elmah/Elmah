@@ -1,0 +1,3 @@
+ELMAH.Access will create Elmah.mdb and log errors here
+ELMAH.SQLite will create Elmah.db  and log errors here
+ELMAH.SQLite will create Elmah.sdf and log errors here

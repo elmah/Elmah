@@ -1,0 +1,14 @@
+<configuration>
+  <elmah>
+    <!--
+            The schemaOwner parameter is *optional*. Use this if the owner of the
+            ELMAH package (pkg_elmah$error) is not the same user that you are 
+            using to connect to the database.
+    -->
+    <errorLog type="Elmah.OracleErrorLog, Elmah" connectionStringName="elmah-oracle" schemaOwner="" />
+  </elmah>
+  <connectionStrings>
+    <!-- TODO: Replace the ****'s with the correct entries -->
+    <add name="elmah-oracle" connectionString="Data Source=****;User ID=****;Password=****;"/>
+  </connectionStrings>
+</configuration>

@@ -1,0 +1,13 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.SQLiteErrorLog, Elmah" connectionStringName="elmah-sqlite" />
+  </elmah>
+  <connectionStrings>
+    <add name="elmah-sqlite" connectionString="Data Source=|DataDirectory|\Elmah.db"/>
+  </connectionStrings>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <probing privatePath="bin/x86;bin/x64" />
+    </assemblyBinding>
+  </runtime>
+</configuration>

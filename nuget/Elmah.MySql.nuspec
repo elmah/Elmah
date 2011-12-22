@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.mysql</id>
+    <version>1.2</version>
+    <title>ELMAH on MySQL (requires manual config)</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ELMAH with configuration for getting started quickly on an MySQL 5.0+ database as the error log. NB requires manual configuration.</description>
+    <summary>ELMAH with configuration for getting started quickly on an MySQL 5.0+ database as the error log. NB requires manual configuration.</summary>
+    <language>en-US</language>
+    <tags>mysql elmah error logging unhandled exception</tags>
+    <dependencies>
+      <dependency id="elmah" version="1.2" />
+      <dependency id="MySql.Data" version="6.3.6" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Transforms\Elmah.MySql.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.MySql.txt" target="content\App_Readme" />
+    <file src="..\base\src\Elmah\MySql.sql" target="content\App_Readme\Elmah.MySql.sql" />
+  </files>
+</package>

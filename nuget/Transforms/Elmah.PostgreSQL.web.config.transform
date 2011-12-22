@@ -1,0 +1,9 @@
+<configuration>
+  <elmah>
+    <errorLog type="Elmah.PgsqlErrorLog, Elmah" connectionStringName="elmah-postgresql" />
+  </elmah>
+  <connectionStrings>
+    <!-- TODO: Replace the ****'s with the correct entries -->
+    <add name="elmah-postgresql" connectionString="Server=****;Port=****;Database=****;User Id=****;Password=****;" />
+  </connectionStrings>
+</configuration>

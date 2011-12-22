@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>elmah.sqlservercompact</id>
+    <version>1.2</version>
+    <title>ELMAH on MS SQL Server Compact</title>
+    <authors>Atif Aziz</authors>
+    <owners>Atif Aziz, James Driscoll</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://elmah.googlecode.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ELMAH with configuration for getting started quickly on a Microsoft SQL Server Compact database as the error log.</description>
+    <summary>ELMAH with configuration for getting started quickly on a Microsoft SQL Server Compact database as the error log.</summary>
+    <language>en-US</language>
+    <tags>sqlce sql compact elmah error logging unhandled exception</tags>
+    <dependencies>
+      <dependency id="elmah" version="1.2" />
+      <dependency id="SqlServerCompact" version="4.0.8482.1" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="App_Data\*" target="Content\App_Data" />
+    <file src="Transforms\Elmah.SqlServerCompact.web.config.transform" target="content\web.config.transform" />
+  </files>
+</package>
