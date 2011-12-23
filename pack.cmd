@@ -4,15 +4,15 @@ setlocal
 pushd "%~dp0"
 
 set hr=---------------------------------------------------------------------------
-set binzip=ELMAH-1.2-bin-x86.zip
+set binzip=ELMAH-1.2-sp1-bin-x86.zip
 set nuget=nuget\Tools\nuget.exe
 
 :main
 call :clean ^
  && call :md tmp ^
  && call :download %binzip% /od:tmp ^
- && call :download ELMAH-1.2-src.zip /od:tmp ^
- && call :unzip tmp\ELMAH-1.2-src.zip -obase -y ^
+ && call :download ELMAH-1.2-sp1-src.zip /od:tmp ^
+ && call :unzip tmp\ELMAH-1.2-sp1-src.zip -obase -y ^
  && call :unzip tmp\%binzip% -obase -y ^
  && call :autoupdate ^
  && call :packall nuget\*.nuspec
@@ -47,7 +47,7 @@ goto :EOF
 :autoupdate
 echo %hr%
 echo Making sure that NuGet.exe is up to date...
-"%nuget%" update
+"%nuget%" update -self
 goto :EOF
 
 :packall
