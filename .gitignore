@@ -1,4 +1,5 @@
 bin/
+Bin/
 *.dll
 *.pdb
 *.user
@@ -14,4 +15,6 @@ pkg/*/**
 PrecompiledWeb
 elmah.xml
 Elmah.xml
-
+samples/Demo/Mails/*
+samples/Demo/App_Data/*
+samples/Demo/Web.config
