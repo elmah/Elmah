@@ -235,7 +235,7 @@ namespace Elmah
         /// </summary>
         /// 
 
-        public override int GetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (pageIndex < 0)
                 throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);

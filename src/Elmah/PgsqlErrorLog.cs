@@ -171,7 +171,7 @@ namespace Elmah
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);

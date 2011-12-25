@@ -159,7 +159,7 @@ namespace Elmah
         /// of logged time.
         /// </summary>
 
-        public override int GetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
@@ -216,8 +216,7 @@ namespace Elmah
         /// Begins an asynchronous version of <see cref="GetErrors"/>.
         /// </summary>
 
-        public override IAsyncResult BeginGetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList,
-            AsyncCallback asyncCallback, object asyncState)
+        public override IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
         {
             if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
@@ -293,7 +292,7 @@ namespace Elmah
             }
         }
 
-        private void ErrorsXmlToList(string xml, IList<ErrorLogEntry> errorEntryList)
+        private void ErrorsXmlToList(string xml, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (xml == null || xml.Length == 0) 
                 return;

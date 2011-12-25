@@ -213,7 +213,7 @@ namespace Elmah
         /// Returns a page of errors from the databse in descending order 
         /// of logged time.
         /// </summary>
-        public override int GetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (pageIndex < 0)
                 throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);

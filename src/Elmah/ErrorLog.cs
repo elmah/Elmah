@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
     
     using System;
+    using System.Collections;
     using System.Web;
     using System.Collections.Generic;
 
@@ -106,14 +107,14 @@ namespace Elmah
         /// descending order of logged time.
         /// </summary>
 
-        public abstract int GetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList);
+        public abstract int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList);
 
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
         /// of <see cref="GetErrors"/>.
         /// </summary>
 
-        public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
+        public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
         {
             return BeginSyncImpl(asyncCallback, asyncState, new GetErrorsHandler(GetErrors), pageIndex, pageSize, errorEntryList);
         }
