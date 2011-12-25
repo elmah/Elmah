@@ -31,5 +31,6 @@ namespace Elmah
     
     internal sealed partial class ErrorLogPage
     {
+        public ErrorLog ErrorLog { get; set; }
     }
 }

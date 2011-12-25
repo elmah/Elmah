@@ -107,7 +107,7 @@ WriteLiteral("\r\n");
     // Read the error records.
     //
 
-    var log = ErrorLog.GetDefault(Context);
+    var log = this.ErrorLog ?? ErrorLog.GetDefault(Context);
     var errorEntryList = new List<ErrorLogEntry>(pageSize);
     var totalCount = log.GetErrors(pageIndex, pageSize, errorEntryList);
 
