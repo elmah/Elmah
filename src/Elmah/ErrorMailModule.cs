@@ -302,7 +302,7 @@ namespace Elmah
 
         protected virtual void OnError(object sender, EventArgs e)
         {
-            HttpContext context = ((HttpApplication) sender).Context;
+            var context = new HttpContextWrapper(((HttpApplication) sender).Context);
             OnError(context.Server.GetLastError(), context);
         }
 
@@ -319,7 +319,7 @@ namespace Elmah
         /// Reports the exception.
         /// </summary>
 
-        protected virtual void OnError(Exception e, HttpContext context)
+        protected virtual void OnError(Exception e, HttpContextBase context)
         {
             if (e == null) 
                 throw new ArgumentNullException("e");

@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "src\Elmah\Elmah.cs
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "samples\Demo\", "{FDA7116E-67C7-4F79-851A-446DDF54846F}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv2.0"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv3.5"
 		ProjectReferences = "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}|Elmah.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/Demo"
 		Debug.AspNetCompiler.PhysicalPath = "samples\Demo\"

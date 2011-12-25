@@ -39,9 +39,14 @@ namespace Elmah
 
     internal sealed class ErrorXmlHandler : IHttpHandler
     {
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
         {
-            HttpResponse response = context.Response;
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+
+        public void ProcessRequest(HttpContextBase context)
+        {
+            HttpResponseBase response = context.Response;
             response.ContentType = "application/xml";
 
             //

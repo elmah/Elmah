@@ -46,9 +46,14 @@ namespace Elmah
 
     internal sealed class ErrorDigestRssHandler : IHttpHandler
     {
-        private HttpContext _context;
+        private HttpContextBase _context;
 
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            ProcessRequest(new HttpContextWrapper(context));            
+        }
+
+        public void ProcessRequest(HttpContextBase context)
         {
             _context = context;
             Render();
@@ -59,17 +64,17 @@ namespace Elmah
             get { return false; }
         }
 
-        private HttpRequest Request
+        private HttpRequestBase Request
         {
             get { return _context.Request; }
         }
 
-        private HttpResponse Response
+        private HttpResponseBase Response
         {
             get { return _context.Response; }
         }
 
-        private HttpServerUtility Server
+        private HttpServerUtilityBase Server
         {
             get { return _context.Server; }
         }

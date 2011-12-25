@@ -91,8 +91,8 @@ namespace Elmah
 
         private void OnBeginRequest(object sender, EventArgs e)
         {
-            HttpApplication app = sender as HttpApplication;
-            HttpContext context = app.Context;
+            HttpApplication app = (HttpApplication) sender;
+            HttpContextBase context = new HttpContextWrapper(app.Context);
             string path = context.Request.Path;
 
             //

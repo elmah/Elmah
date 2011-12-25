@@ -73,7 +73,7 @@ namespace Elmah
 
         private void OnPostMapRequestHandler(object sender, EventArgs args)
         {
-            HttpContext context = ((HttpApplication) sender).Context;
+            HttpContextBase context = new HttpContextWrapper(((HttpApplication)sender).Context);
 
             if (!IsAsyncPostBackRequest(context.Request))
                 return;
@@ -94,7 +94,7 @@ namespace Elmah
             if (exception == null)
                 return;
 
-            HttpContext context = HttpContext.Current;
+            HttpContextBase context = new HttpContextWrapper(HttpContext.Current);
             LogException(exception, context);
         }
 
@@ -102,12 +102,12 @@ namespace Elmah
         /// Logs an exception and its context to the error log.
         /// </summary>
 
-        protected virtual void LogException(Exception e, HttpContext context)
+        protected virtual void LogException(Exception e, HttpContextBase context)
         {
             ErrorSignal.FromContext(context).Raise(e, context);
         }
 
-        protected virtual bool IsAsyncPostBackRequest(HttpRequest request)
+        protected virtual bool IsAsyncPostBackRequest(HttpRequestBase request)
         {
             if (request == null) 
                 throw new ArgumentNullException("request");

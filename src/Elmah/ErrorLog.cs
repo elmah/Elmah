@@ -163,12 +163,12 @@ namespace Elmah
         /// none is configured.
         /// </summary>
 
-        public static ErrorLog GetDefault(HttpContext context)
+        public static ErrorLog GetDefault(HttpContextBase context)
         {
             return (ErrorLog) ServiceCenter.GetService(context, typeof(ErrorLog));
         }
 
-        internal static ErrorLog GetDefaultImpl(HttpContext context)
+        internal static ErrorLog GetDefaultImpl(HttpContextBase context)
         {
             ErrorLog log;
 
@@ -213,7 +213,7 @@ namespace Elmah
             return log;
         }
 
-        private static string InferApplicationName(HttpContext context)
+        private static string InferApplicationName(HttpContextBase context)
         {
             Debug.Assert(context != null);
 

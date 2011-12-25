@@ -39,7 +39,7 @@ namespace Elmah
             return TryGetMachineName(null);
         }
 
-        public static string TryGetMachineName(HttpContext context)
+        public static string TryGetMachineName(HttpContextBase context)
         {
             return TryGetMachineName(context, null);
         }
@@ -49,7 +49,7 @@ namespace Elmah
         /// method will still return an empty string.
         /// </remarks>
 
-        public static string TryGetMachineName(HttpContext context, string unknownName)
+        public static string TryGetMachineName(HttpContextBase context, string unknownName)
         {
             //
             // System.Web.HttpServerUtility.MachineName and 

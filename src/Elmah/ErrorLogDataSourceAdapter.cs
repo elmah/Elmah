@@ -52,7 +52,7 @@ namespace Elmah
 
         public ErrorLogDataSourceAdapter()
         {
-            _log = ErrorLog.GetDefault(HttpContext.Current);
+            _log = ErrorLog.GetDefault(new HttpContextWrapper(HttpContext.Current));
         }
 
         /// <summary>

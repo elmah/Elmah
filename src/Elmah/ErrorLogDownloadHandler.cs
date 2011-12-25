@@ -53,10 +53,20 @@ namespace Elmah
         private ErrorLog _log;
         private DateTime _lastBeatTime;
         private List<ErrorLogEntry> _errorEntryList;
-        private HttpContext _context;
+        private HttpContextBase _context;
         private AsyncCallback _callback;
 
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+
+        IAsyncResult IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
+        {
+            return BeginProcessRequest(new HttpContextWrapper(context), cb, extraData);
+        }
+
+        private void ProcessRequest(HttpContextBase context)
         {
             EndProcessRequest(BeginProcessRequest(context, null, null));
         }
@@ -66,7 +76,7 @@ namespace Elmah
             get { return false; }
         }
 
-        public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
+        public IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback cb, object extraData)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
@@ -74,7 +84,7 @@ namespace Elmah
             if (_result != null)
                 throw new InvalidOperationException("An asynchronous operation is already pending.");
 
-            HttpRequest request = context.Request;
+            HttpRequestBase request = context.Request;
             NameValueCollection query = request.QueryString;
 
             //
@@ -177,7 +187,7 @@ namespace Elmah
             _format.Entries(_errorEntryList, 0, count, total);
             _downloadCount += count;
 
-            HttpResponse response = _context.Response;
+            var response = _context.Response;
             response.Flush();
 
             //
@@ -222,15 +232,15 @@ namespace Elmah
 
         private abstract class Format
         {
-            private readonly HttpContext _context;
+            private readonly HttpContextBase _context;
 
-            protected Format(HttpContext context)
+            protected Format(HttpContextBase context)
             {
                 Debug.Assert(context != null);
                 _context = context;
             }
 
-            protected HttpContext Context { get { return _context; } }
+            protected HttpContextBase Context { get { return _context; } }
 
             public virtual void Header() {}
 
@@ -244,12 +254,12 @@ namespace Elmah
 
         private sealed class CsvFormat : Format
         {
-            public CsvFormat(HttpContext context) : 
+            public CsvFormat(HttpContextBase context) : 
                 base(context) {}
 
             public override void Header()
             {
-                HttpResponse response = Context.Response;
+                var response = Context.Response;
                 response.AppendHeader("Content-Type", "text/csv; header=present");
                 response.AppendHeader("Content-Disposition", "attachment; filename=errorlog.csv");
                 response.Output.Write("Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n");
@@ -320,10 +330,10 @@ namespace Elmah
             private string _callback;
             private readonly bool _wrapped;
 
-            public JsonPaddingFormat(HttpContext context) :
+            public JsonPaddingFormat(HttpContextBase context) :
                 this(context, false) {}
 
-            public JsonPaddingFormat(HttpContext context, bool wrapped) : 
+            public JsonPaddingFormat(HttpContextBase context, bool wrapped) : 
                 base(context)
             {
                 _wrapped = wrapped;
@@ -342,7 +352,7 @@ namespace Elmah
 
                 _callback = callback;
 
-                HttpResponse response = Context.Response;
+                var response = Context.Response;
 
                 if (!_wrapped)
                 {

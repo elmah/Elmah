@@ -59,14 +59,19 @@ namespace Elmah
             _responseEncoding = responseEncoding;
         }
 
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+
+        public void ProcessRequest(HttpContextBase context)
         {
             //
             // Set the response headers for indicating the content type 
             // and encoding (if specified).
             //
 
-            HttpResponse response = context.Response;
+            var response = context.Response;
             response.ContentType = _contentType;
 
             if (_responseEncoding != null)

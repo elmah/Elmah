@@ -38,9 +38,14 @@ namespace Elmah
 
     internal sealed class ErrorJsonHandler : IHttpHandler
     {
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
         {
-            HttpResponse response = context.Response;
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+        
+        public void ProcessRequest(HttpContextBase context)
+        {
+            var response = context.Response;
             response.ContentType = "application/json";
 
             //

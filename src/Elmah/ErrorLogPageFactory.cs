@@ -46,6 +46,11 @@ namespace Elmah
         private static readonly object _authorizationHandlersKey = new object();
         private static readonly IRequestAuthorizationHandler[] _zeroAuthorizationHandlers = new IRequestAuthorizationHandler[0];
 
+        IHttpHandler IHttpHandlerFactory.GetHandler(HttpContext context, string requestType, string url, string pathTranslated)
+        {
+            return GetHandler(new HttpContextWrapper(context), requestType, url, pathTranslated);
+        }
+
         /// <summary>
         /// Returns an object that implements the <see cref="IHttpHandler"/> 
         /// interface and which is responsible for serving the request.
@@ -54,7 +59,7 @@ namespace Elmah
         /// A new <see cref="IHttpHandler"/> object that processes the request.
         /// </returns>
 
-        public virtual IHttpHandler GetHandler(HttpContext context, string requestType, string url, string pathTranslated)
+        public virtual IHttpHandler GetHandler(HttpContextBase context, string requestType, string url, string pathTranslated)
         {
             //
             // The request resource is determined by the looking up the
@@ -80,7 +85,7 @@ namespace Elmah
                     && !SecurityConfiguration.Default.AllowRemoteAccess))
             {
                 (new ManifestResourceHandler("RemoteAccessError.htm", "text/html")).ProcessRequest(context);
-                HttpResponse response = context.Response;
+                var response = context.Response;
                 response.Status = "403 Forbidden";
                 response.End();
 
@@ -157,7 +162,7 @@ namespace Elmah
         /// were available to answer.
         /// </returns>
 
-        private static int IsAuthorized(HttpContext context)
+        private static int IsAuthorized(HttpContextBase context)
         {
             Debug.Assert(context != null);
 
@@ -171,7 +176,7 @@ namespace Elmah
             return authorized;
         }
 
-        private static IList<IRequestAuthorizationHandler> GetAuthorizationHandlers(HttpContext context)
+        private static IList<IRequestAuthorizationHandler> GetAuthorizationHandlers(HttpContextBase context)
         {
             Debug.Assert(context != null);
 
@@ -207,7 +212,7 @@ namespace Elmah
             return handlers;
         }
 
-        internal static Uri GetRequestUrl(HttpContext context)
+        internal static Uri GetRequestUrl(HttpContextBase context)
         {
             if (context == null) throw new ArgumentNullException("context");
 
@@ -218,6 +223,6 @@ namespace Elmah
 
     public interface IRequestAuthorizationHandler
     {
-        bool Authorize(HttpContext context);
+        bool Authorize(HttpContextBase context);
     }
 }

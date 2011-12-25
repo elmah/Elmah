@@ -62,7 +62,7 @@ namespace Elmah
         /// will log exceptions.
         /// </summary>
         
-        protected virtual ErrorLog GetErrorLog(HttpContext context)
+        protected virtual ErrorLog GetErrorLog(HttpContextBase context)
         {
             return ErrorLog.GetDefault(context);
         }
@@ -75,7 +75,7 @@ namespace Elmah
         protected virtual void OnError(object sender, EventArgs args)
         {
             HttpApplication application = (HttpApplication) sender;
-            LogException(application.Server.GetLastError(), application.Context);
+            LogException(application.Server.GetLastError(), new HttpContextWrapper(application.Context));
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Elmah
         /// Logs an exception and its context to the error log.
         /// </summary>
 
-        protected virtual void LogException(Exception e, HttpContext context)
+        protected virtual void LogException(Exception e, HttpContextBase context)
         {
             if (e == null)
                 throw new ArgumentNullException("e");

@@ -28,6 +28,8 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Web;
+    using System.Web.Profile;
     using System.Web.UI;
 
     using CultureInfo = System.Globalization.CultureInfo;
@@ -43,11 +45,30 @@ namespace Elmah
     {
         private string _title;
         private ErrorLog _log;
+        private HttpContextBase _context;
 
         protected string BasePageName
         {
             get { return this.Request.ServerVariables["URL"]; }
         }
+
+        protected new HttpContextBase Context
+        {
+            get
+            {
+                var baseContext = base.Context;
+                var context = _context;
+                if (context == null || !ReferenceEquals(baseContext, context.ApplicationInstance.Context))
+                    _context = context = new HttpContextWrapper(baseContext);
+                return context;
+            }
+        }
+
+        public new HttpApplicationStateBase Application { get { return Context.Application; } }
+        public new HttpResponseBase Response { get { return Context.Response; } }
+        public new HttpRequestBase Request { get { return Context.Request; } }
+        public new HttpServerUtilityBase Server { get { return Context.Server; } }
+        public new HttpSessionStateBase Session { get { return Context.Session; } }
 
         protected virtual ErrorLog ErrorLog
         {

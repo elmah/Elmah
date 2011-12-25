@@ -42,7 +42,12 @@ namespace Elmah
 
     internal sealed class ErrorRssHandler : IHttpHandler
     {
-        public void ProcessRequest(HttpContext context)
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+
+        public void ProcessRequest(HttpContextBase context)
         {
             context.Response.ContentType = "application/xml";
 

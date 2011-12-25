@@ -45,10 +45,10 @@ namespace Elmah
             Raise(e, null);
         }
 
-        public void Raise(Exception e, HttpContext context)
+        public void Raise(Exception e, HttpContextBase context)
         {
             if (context == null)
-                context = HttpContext.Current;
+                context = new HttpContextWrapper(HttpContext.Current);
 
             ErrorSignalEventHandler handler = Raised;
 
@@ -58,10 +58,16 @@ namespace Elmah
 
         public static ErrorSignal FromCurrentContext()
         {
-            return FromContext(HttpContext.Current);
+            return FromContext(new HttpContextWrapper(HttpContext.Current));
         }
 
+        [Obsolete("Use the FromContext(HttpContextBase) overload instead.")]
         public static ErrorSignal FromContext(HttpContext context)
+        {
+            return FromContext(new HttpContextWrapper(context));
+        }
+
+        public static ErrorSignal FromContext(HttpContextBase context)
         {
             if (context == null) 
                 throw new ArgumentNullException("context");
@@ -126,9 +132,9 @@ namespace Elmah
     {
         private readonly Exception _exception;
         [ NonSerialized ]
-        private readonly HttpContext _context;
+        private readonly HttpContextBase _context;
 
-        public ErrorSignalEventArgs(Exception e, HttpContext context)
+        public ErrorSignalEventArgs(Exception e, HttpContextBase context)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
@@ -142,7 +148,7 @@ namespace Elmah
             get { return _exception; }
         }
 
-        public HttpContext Context
+        public HttpContextBase Context
         {
             get { return _context; }
         }

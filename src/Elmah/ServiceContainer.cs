@@ -34,19 +34,22 @@ namespace Elmah
 
     internal sealed class ServiceContainer : IServiceProvider
     {
-        private readonly object _context;
+        private readonly HttpContextBase _context;
 
         public ServiceContainer(object context)
         {
             // NOTE: context is allowed to be null
 
-            _context = context;
+            var httpContext = context as HttpContext;
+            _context = httpContext != null 
+                     ? new HttpContextWrapper(httpContext) 
+                     : context as HttpContextBase;
         }
 
         public object GetService(Type serviceType)
         {
             return serviceType == typeof(ErrorLog) 
-                 ? ErrorLog.GetDefaultImpl(_context as HttpContext) 
+                 ? ErrorLog.GetDefaultImpl(_context) 
                  : null;
         }
     }

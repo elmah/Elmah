@@ -83,7 +83,7 @@ namespace Elmah
         /// context during the exception.
         /// </summary>
 
-        public Error(Exception e, HttpContext context)
+        public Error(Exception e, HttpContextBase context)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
@@ -131,7 +131,7 @@ namespace Elmah
                     _user = webUser.Identity.Name;
                 }
 
-                HttpRequest request = context.Request;
+                var request = context.Request;
 
                 _serverVariables = CopyCollection(request.ServerVariables);
                 _queryString = CopyCollection(request.QueryString);
