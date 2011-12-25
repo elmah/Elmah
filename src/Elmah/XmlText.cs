@@ -35,10 +35,8 @@ namespace Elmah
     /// XML 1.0 services.
     /// </summary>
     
-    internal sealed class XmlText
+    internal static class XmlText
     {
-        private XmlText() { }
-
         /// <summary>
         /// Replaces illegal XML characters with a question mark (?).
         /// </summary>

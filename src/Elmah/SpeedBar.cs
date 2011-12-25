@@ -33,7 +33,7 @@ namespace Elmah
 
     #endregion
 
-    internal sealed class SpeedBar
+    internal static class SpeedBar
     {
         public static readonly ItemTemplate Home = new ItemTemplate("Errors", "List of logged errors", "{0}");
         public static readonly ItemTemplate RssFeed = new ItemTemplate("RSS Feed", "RSS feed of recent errors", "{0}/rss");
@@ -61,8 +61,6 @@ namespace Elmah
 
             writer.RenderEndTag( /* ul */);
         }
-
-        private SpeedBar() {}
 
         [ Serializable ]
         public abstract class Item

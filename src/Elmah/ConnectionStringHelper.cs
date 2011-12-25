@@ -41,7 +41,7 @@ namespace Elmah
     /// Helper class for resolving connection strings.
     /// </summary>
 
-    internal class ConnectionStringHelper
+    static class ConnectionStringHelper
     {
         /// <summary>
         /// Gets the connection string from the given configuration 
@@ -190,7 +190,5 @@ namespace Elmah
                  + Path.DirectorySeparatorChar
                  + path.Substring(dataDirectoryMacroString.Length).TrimStart(_dirSeparators);
         }
-
-        private ConnectionStringHelper() {}
     }
 }

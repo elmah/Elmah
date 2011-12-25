@@ -42,7 +42,7 @@ namespace Elmah
     /// Central point for locating arbitrary services.
     /// </summary>
 
-    public sealed class ServiceCenter
+    public static class ServiceCenter
     {
         /// <summary>
         /// The default and factory-supplied implementation of 
@@ -123,7 +123,5 @@ namespace Elmah
             
             return sp;
         }
-
-        private ServiceCenter() {}
     }
 }

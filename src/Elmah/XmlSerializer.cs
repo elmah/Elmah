@@ -37,10 +37,8 @@ namespace Elmah
     /// Serializes object to and from XML documents.
     /// </summary>
     
-    internal sealed class XmlSerializer
+    internal static class XmlSerializer
     {
-        private XmlSerializer() { }
-
         public static string Serialize(object obj)
         {
             StringWriter sw = new StringWriter();

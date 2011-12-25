@@ -32,7 +32,7 @@ namespace Elmah
 
     #endregion
 
-    internal sealed class Environment
+    static class Environment
     {
         public static string TryGetMachineName()
         {
@@ -88,7 +88,5 @@ namespace Elmah
 
             return unknownName ?? string.Empty;
         }
-
-        private Environment() { }
     }
 }
