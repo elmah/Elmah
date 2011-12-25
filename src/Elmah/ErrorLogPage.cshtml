@@ -119,15 +119,25 @@
             // selecting a stock page size re-starts the log 
             // display from the first page to get the right paging.
 
-            var stockSizes = new[] { 10, 15, 20, 25, 30, 50, 100 };
-            var x = string.Join(null, stockSizes.Select((n, i) =>
-                                                LinkHere(basePageName, HtmlLinkType.Start, n.ToString("N0"), 0, n).ToString()
-                                                + (i + 1 == stockSizes.Length ? null : i + 2 == stockSizes.Length ? " or " : ", ")).ToArray());
-
+            var stockSizes =
+                from sizes in new[]
+                {
+                    new[] { 10, 15, 20, 25, 30, 50, 100, },
+                }
+                from size in sizes.Index()
+                let separator = 
+                    size.Key + 1 == sizes.Length 
+                    ? null 
+                    : size.Key + 2 == sizes.Length 
+                    ? " or " 
+                    : ", "
+                select LinkHere(basePageName, HtmlLinkType.Start, size.Value.ToString("N0"), 0, size.Value)
+                     + separator;
+            
             <p>Errors @firstErrorNumber.ToString("N0") to @lastErrorNumber.ToString("N0") 
                 of total @totalCount.ToString("N0") 
                 (page @((pageIndex + 1).ToString("N0")) of @totalPages.ToString("N0"). 
-                Start with @Html(x) errors per page.</p>
+                Start with @Html(string.Join(null, stockSizes.ToArray())) errors per page.</p>
 
             // Write out the main table to display the errors.
 

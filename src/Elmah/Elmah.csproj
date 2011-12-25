@@ -196,6 +196,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Elnumerable.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Error.cs">
       <SubType>Code</SubType>
