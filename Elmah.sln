@@ -1,0 +1,56 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A240CA4F-E517-4493-9FD6-40F886ECF8DC}"
+	ProjectSection(SolutionItems) = preProject
+		samples\elmah.config = samples\elmah.config
+		samples\web.config = samples\web.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "src\Elmah\Elmah.csproj", "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "samples\Demo\", "{FDA7116E-67C7-4F79-851A-446DDF54846F}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv2.0"
+		ProjectReferences = "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}|Elmah.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/Demo"
+		Debug.AspNetCompiler.PhysicalPath = "samples\Demo\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\Demo\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/Demo"
+		Release.AspNetCompiler.PhysicalPath = "samples\Demo\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\Demo\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "51296"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Tests", "tests\Elmah.Tests.csproj", "{8F619C74-74F2-48B5-A06B-780BD329DD43}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDA7116E-67C7-4F79-851A-446DDF54846F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDA7116E-67C7-4F79-851A-446DDF54846F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDA7116E-67C7-4F79-851A-446DDF54846F}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDA7116E-67C7-4F79-851A-446DDF54846F}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

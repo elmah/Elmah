@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<configuration>
+    <configSections>
+        <sectionGroup name="elmah">
+            <section name="security" requirePermission="false" type="Elmah.SecuritySectionHandler, Elmah"/>
+            <section name="errorLog" requirePermission="false" type="Elmah.ErrorLogSectionHandler, Elmah"/>
+            <section name="errorMail" requirePermission="false" type="Elmah.ErrorMailSectionHandler, Elmah"/>
+        </sectionGroup>
+    </configSections>
+    <elmah>
+        <errorLog type="Elmah.SQLiteErrorLog, Elmah" connectionStringName="ELMAH.SQLite" />
+        <errorMail from="noreply@example.com" to="elmah@example.com" priority="high" />
+    </elmah>
+    <connectionStrings>
+        <add name="ELMAH.SQLite" connectionString="Data Source=|DataDirectory|errors.s3db"/>
+    </connectionStrings>
+    <system.net>
+        <mailSettings>
+            <smtp deliveryMethod="SpecifiedPickupDirectory">
+                <specifiedPickupDirectory pickupDirectoryLocation="{pickupDirectoryLocation}" />
+            </smtp>
+        </mailSettings>
+    </system.net>
+    <system.web>
+        <compilation debug="true" defaultLanguage="C#" />
+        <httpModules>
+            <add name="ErrorMail" type="Elmah.ErrorMailModule, Elmah"/>
+            <add name="ErrorLog" type="Elmah.ErrorLogModule, Elmah"/>
+            <add name="ErrorFilter" type="Elmah.ErrorFilterModule, Elmah"/>
+        </httpModules>
+        <httpHandlers>
+            <add verb="POST,GET,HEAD" path="elmah.axd" type="Elmah.ErrorLogPageFactory, Elmah"/>
+        </httpHandlers>
+        <trace enabled="true" requestLimit="10" pageOutput="false" traceMode="SortByTime" localOnly="true"/>
+        <globalization requestEncoding="utf-8" responseEncoding="utf-8" culture="en-US"/>
+        <trust level="Full"/>
+    </system.web>
+</configuration>

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>ELMAH README</title>
+    <style type="text/css">
+        body
+        {
+            font-family: Arial, Helvetica, Sans-Serif;
+            font-size: small;
+            background-color: #fff;
+        }
+        p
+        {
+            margin-left: 80px;
+        }
+        h1
+        {
+            font-size: x-large;
+        }
+        h2
+        {
+            font-size: large;
+        }
+        h3
+        {
+            font-size: medium;
+            margin-left: 40px;
+        }
+        h4
+        {
+            font-size: small;
+            margin-left: 80px;
+        }
+        code, pre
+        {
+            font-family: Courier New, Courier, Monospace;
+            font-size: small;
+        }
+        li
+        {
+            padding-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        ELMAH README</h1>
+    <p>
+        Please read this document carefully before using this release of ELMAH
+        as it contains important information.</p>
+    <p>
+        For peer help and support, vists the <a href="http://groups.google.com/group/elmah">ELMAH Discussion Group</a>.
+        Report bugs and issues to the <a href="http://code.google.com/p/elmah/issues/list">issue
+        tracker</a> on the <a href="http://elmah.googlecode.com/">project site</a>.
+        Avoid using the issue tracker to seek help with problems you are experiencing in
+        installing or running ELMAH. That is what the discussion group is for.</p>
+    <p>
+        The best way to get started with ELMAH is to take it for a spin by launching
+        the supplied demo Web site. Simply go the root of your ELMAH distribution and
+        execute the <code>demo.cmd</code> script. The demo Web site requires 
+        <a href="http://msdn.microsoft.com/en-us/netframework/aa731542.aspx">Microsoft .NET Framework 2.0</a>.
+    </p>
+    <h2>
+        Version 1.0 BETA 3 Notes</h2>
+    <h3>
+        Upgrading from ELMAH 1.0 BETA 2(a)</h3>
+    <h4>
+        Microsoft SQL Server Error Log</h4>
+    <p>
+        If you are using the Microsoft SQL Server (2000 or later) for your error log then you should re-create 
+        the stored procedures found in the supplied SQL script (see <code>SQLServer.sql</code>).
+        The script does not contain DDL <code>DROP</code> or <code>ALTER </code> statements so 
+        you will have to drop the stored procedures manually before applying the 
+        <code>CREATE PROCEDURE</code> parts of the script. Other than that, there have been no 
+        changes to the schema since BETA 2a so existing data in your logs can be left as it is.</p>
+    <h4>
+        Oracle Error Log</h4>
+    <p>
+        The Oracle error log is new in BETA 3, but if you have been compiling ELMAH
+        from sources between BETA 2 and 3 and using Oracle for your error log then you should re-create
+        the  <code>ELMAH$Error</code>  table,  its  indicies and related packages using  the
+        supplied SQL script (see <code>Oracle.sql</code> in your distribution). The  script
+        does  not contain  any <code>DROP</code>  statements so  you  will have to drop the 
+        table and package  manually before applying  the  script.  If you wish
+        to preserve the logged error data, you should consider archiving it in
+        a backup. Please  read the comments in this script file carefully  for
+        hints on users and synonyms. NB The original package has now been split in two to aid in
+        securing the database in enterprise scenarios.</p>
+    <h4>
+        VistaDB Error Log</h4>
+    <p>
+        The VistaDB error log is new in BETA 3, but if you have been compiling
+        ELMAH from  sources  between  BETA  2 and 3 and using VistaDB for your
+        error log  then  you  should  delete the <code>.vdb3</code> file and allow it to be
+        re-created.</p>
+    <h4>
+        Microsoft Access Error Log</h4>
+    <p>
+        The Access error log is new in BETA 3, but if you have been  compiling
+        ELMAH  from  sources  between  BETA  2 and 3 and using Access for your
+        error  log  then  you  should  delete the <code>.mdb</code> file and allow it to be
+        re-created.</p>
+   
+    <h2>
+        Version 1.0 BETA 2(a) Notes</h2>
+    <h3>
+        Upgrading from GDN-ELMAH or ELMAH 1.0 BETA 1</h3>
+    <p>
+        The configuration sections and entries have changed slightly if you are
+        using GDN-ELMAH, which is the original that was released on GotDotNet. 
+        Consult the <code>samples/web.config</code> file to see examples of 
+        how the configuration looks like now.</p>
+    <p>
+        If you are using the Microsoft SQL Server for your error log then you should re-create 
+        the <code>ELMAH_Error</code> table, its indicies and related stored procedures
+        using the supplied SQL script (see  <code>Database.sql</code> in your distribution).
+        The script does not contain DDL <code>DROP</code> statements so you will have to drop
+        the table and stored procedures manually before applying the script. If you wish to
+        preserve the logged error data, you should consider archiving it in a backup.
+    </p>
+    <hr />
+    <p>$Revision: 511 $</p>
+</body>
+</html>
