@@ -236,8 +236,11 @@
     <Compile Include="ErrorLogModule.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorLogPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
+    <Compile Include="ErrorLogPage.cs" />
+    <Compile Include="ErrorLogPage.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorLogPage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ErrorLogPageFactory.cs">
       <SubType>Code</SubType>
@@ -310,6 +313,7 @@
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RazorTemplateBase.cs" />
     <Compile Include="ReverseComparer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -365,6 +369,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ErrorLogPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
+    </None>
     <None Include="MySql.sql" />
     <None Include="Pgsql.sql" />
   </ItemGroup>

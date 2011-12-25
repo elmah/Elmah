@@ -1,0 +1,249 @@
+@* Generator: Template TypeVisibility: Internal *@
+@using System.Globalization
+@using System.IO
+@using System.Web
+@using Elmah
+@inherits WebTemplateBase
+@{
+    const int defaultPageSize = 15;
+    const int maximumPageSize = 100;
+
+    var basePageName = Request.ServerVariables["URL"];
+    
+    //
+    // Get the page index and size parameters within their bounds.
+    //
+
+    var pageSize = Convert.ToInt32(Request.QueryString["size"], CultureInfo.InvariantCulture);
+    pageSize = Math.Min(maximumPageSize, Math.Max(0, pageSize));
+
+    if (pageSize == 0)
+    {
+        pageSize = defaultPageSize;
+    }
+
+    var pageIndex = Convert.ToInt32(Request.QueryString["page"], CultureInfo.InvariantCulture);
+    pageIndex = Math.Max(1, pageIndex) - 1;
+
+    //
+    // Read the error records.
+    //
+
+    var log = ErrorLog.GetDefault(Context);
+    var errorEntryList = new List<ErrorLogEntry>(pageSize);
+    var totalCount = log.GetErrors(pageIndex, pageSize, errorEntryList);
+
+    //
+    // Set the title of the page.
+    //
+
+    var hostName = Elmah.Environment.TryGetMachineName(Context);
+    var title = string.Format(
+        hostName.Length > 0
+        ? "Error log for {0} on {2} (Page #{1})"
+        : "Error log for {0} (Page #{1})",
+        log.ApplicationName, (pageIndex + 1).ToString("N0"), hostName);    
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+        <title>@title</title>
+        <link rel="stylesheet" type="text/css" href="@basePageName/stylesheet" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="@basePageName/rss" />
+        @if (pageIndex == 0)
+        {
+            // If on the first page, then enable auto-refresh every minute
+            <meta http-equiv="refresh" content="60" />
+        }
+    </head>
+    <body>
+        @{
+            // If the application name matches the APPL_MD_PATH then its
+            // of the form /LM/W3SVC/.../<name>. In this case, use only the 
+            // <name> part to reduce the noise. The full application name is 
+            // still made available through a tooltip.
+
+            string simpleName = log.ApplicationName;
+
+            if (string.Compare(simpleName, Request.ServerVariables["APPL_MD_PATH"],
+                true, CultureInfo.InvariantCulture) == 0)
+            {
+                var lastSlashIndex = simpleName.LastIndexOf('/');
+
+                if (lastSlashIndex > 0)
+                {
+                    simpleName = simpleName.Substring(lastSlashIndex + 1);
+                }
+            }
+        }        
+        <h1 id="PageTitle">
+            Error Log for <span id="ApplicationName" title="@log.ApplicationName">@simpleName 
+            @if (!string.IsNullOrEmpty(hostName))
+            {
+                <text> on @hostName</text> 
+            }
+            </span>
+        </h1>
+        
+        @{
+            IHtmlString navbar;
+            using (var sw = new StringWriter())
+            {
+                using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
+                {
+                    SpeedBar.Render(writer,
+                        SpeedBar.RssFeed.Format(basePageName),
+                        SpeedBar.RssDigestFeed.Format(basePageName),
+                        SpeedBar.DownloadLog.Format(basePageName),
+                        SpeedBar.Help,
+                        SpeedBar.About.Format(basePageName));
+                    writer.Flush();
+                    navbar = Html(sw.ToString());
+                }
+            }
+        }
+        @navbar
+
+        @if (errorEntryList.Count > 0)
+        {
+            // Write error number range displayed on this page and the
+            // total available in the log, followed by stock
+            // page sizes.
+
+            var firstErrorNumber = pageIndex * pageSize + 1;
+            var lastErrorNumber = firstErrorNumber + errorEntryList.Count - 1;
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            // Write out a set of stock page size choices. Note that
+            // selecting a stock page size re-starts the log 
+            // display from the first page to get the right paging.
+
+            var stockSizes = new[] { 10, 15, 20, 25, 30, 50, 100 };
+            var x = string.Join(null, stockSizes.Select((n, i) =>
+                                                LinkHere(basePageName, HtmlLinkType.Start, n.ToString("N0"), 0, n).ToString()
+                                                + (i + 1 == stockSizes.Length ? null : i + 2 == stockSizes.Length ? " or " : ", ")).ToArray());
+
+            <p>Errors @firstErrorNumber.ToString("N0") to @lastErrorNumber.ToString("N0") 
+                of total @totalCount.ToString("N0") 
+                (page @((pageIndex + 1).ToString("N0")) of @totalPages.ToString("N0"). 
+                Start with @Html(x) errors per page.</p>
+
+            // Write out the main table to display the errors.
+
+            <table id="ErrorLog" cellspacing="0" style="border-collapse:collapse;">
+                <tr>
+                    <th class="host-col" style="white-space:nowrap;">Host</th>
+                    <th class="code-col" style="white-space:nowrap;">Code</th>
+                    <th class="type-col" style="white-space:nowrap;">Type</th>
+                    <th class="error-col" style="white-space:nowrap;">Error</th>
+                    <th class="user-col" style="white-space:nowrap;">User</th>
+                    <th class="date-col" style="white-space:nowrap;">Date</th>
+                    <th class="time-col" style="white-space:nowrap;">Time</th>
+                </tr>
+
+            @foreach (var item in errorEntryList.Select((e, i) => new { Index = i, Entry = e, }))
+            {
+                var errorIndex = item.Index;
+                var errorEntry = item.Entry;
+                var error = errorEntry.Error;
+
+                <tr class="@(errorIndex % 2 == 0 ? "even-row" : "odd-row")">
+                    
+                    <td class="host-col" style="white-space:nowrap;">@error.HostName</td>
+                    <td class="code-col" style="white-space:nowrap;"><span title="@HttpWorkerRequest.GetStatusDescription(error.StatusCode)">@error.StatusCode</span></td>
+                    <td class="type-col" style="white-space:nowrap;"><span title="@error.Type">@ErrorDisplay.HumaneExceptionErrorType(error)</span></td>
+                    
+                    <td class="error-col"><span>@error.Message</span> 
+                        <a href="@basePageName/detail?id=@errorEntry.Id">Details&hellip;</a></td>
+                    
+                    <td class="user-col" style="white-space:nowrap;">@error.User</td>
+                    <td class="date-col" style="white-space:nowrap;"><span title="@error.Time.ToLongDateString()">@error.Time.ToShortDateString()</span></td>
+                    <td class="time-col" style="white-space:nowrap;"><span title="@error.Time.ToLongTimeString()">@error.Time.ToShortTimeString()</span></td>
+                </tr>
+            }
+            </table>
+
+            // Write out page navigation links.
+
+            //
+            // If not on the last page then render a link to the next page.
+            //
+
+            var nextPageIndex = pageIndex + 1;
+            var moreErrors = nextPageIndex * pageSize < totalCount;
+            
+            <p>
+
+                @if (moreErrors)
+                {
+                    @LinkHere(basePageName, HtmlLinkType.Next, "Next errors", nextPageIndex, pageSize)
+                }
+                @if (pageIndex > 0 && totalCount > 0)
+                {
+                    if (moreErrors) {
+                        Write("; ");
+                    }
+                    @LinkHere(basePageName, HtmlLinkType.Start, "Back to first page", 0, pageSize)
+                }
+
+            </p>
+        }
+        else
+        {
+            // No errors found in the log, so display a corresponding
+            // message.
+
+            // It is possible that there are no error at the requested 
+            // page in the log (especially if it is not the first page).
+            // However, if there are error in the log
+
+            if (pageIndex > 0 && totalCount > 0)
+            {
+                <p>@LinkHere(basePageName, HtmlLinkType.Start, "Go to first page", 0, pageSize).</p>
+            }
+            else
+            {
+                <p>No errors found.</p>
+            }
+        }
+
+        @{ 
+            var now = DateTime.Now;
+            var tz = TimeZone.CurrentTimeZone;
+        }
+
+        <p id="Footer">
+            <span>Powered by <a href="http://elmah.googlecode.com/">ELMAH</a>, 
+                  version @* TODO Version goes here *@ ?.?.?.?. 
+                  Copyright (c) 2004, Atif Aziz. All rights reserved. 
+                  Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
+            </span>
+            Server date is @now.ToString("D", CultureInfo.InvariantCulture). 
+            Server time is @now.ToString("T", CultureInfo.InvariantCulture). 
+            All dates and times displayed are in the 
+            @(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName) zone. 
+            This log is provided by the @log.Name.
+        </p>
+    </body>
+</html>
+@functions
+{
+    IHtmlString LinkHere(string basePageName, string type, string text, int pageIndex, int pageSize)
+    {
+        return new HtmlString(
+            "<a"
+            + new HtmlString(!string.IsNullOrEmpty(type) ? " rel=\"" + type + "\"" : null)
+            + " href=\""
+            + Encode(
+                string.Format(CultureInfo.InvariantCulture, 
+                    @"{0}?page={1}&size={2}",
+                    basePageName,
+                    pageIndex + 1,
+                    pageSize))
+            + "\">"
+            + Encode(text)
+            + "</a>"
+        );
+    } 
+}
