@@ -74,9 +74,10 @@ namespace Elmah
 
             try
             {
-                _context = new HttpContextWrapper(context);
+                var contextWrapper = new HttpContextWrapper(context);
+                _context = contextWrapper;
                 _isContextFrozen = true;
-                context.Response.Write(TransformText());
+                contextWrapper.Response.Write(TransformText());
             }
             finally
             {
