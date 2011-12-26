@@ -196,10 +196,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="DictionarySectionHandler.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Error.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ErrorBuilding.cs" />
     <Compile Include="ErrorDetailPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

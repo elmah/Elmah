@@ -184,7 +184,6 @@ namespace Elmah
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            int index = 0;
             ArrayList customizations = new ArrayList(config.Count);
 
             IDictionaryEnumerator e = config.GetEnumerator();
@@ -310,7 +309,8 @@ namespace Elmah
 
         private static void InitHostName(ErrorInitializationEventArgs args)
         {
-            args.Error.HostName = Environment.TryGetMachineName(args.Context as HttpContext);
+            var context = args.Context as HttpContext;
+            args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
         }
 
         public static void InitUserName(ExtensionContainer container)
@@ -320,7 +320,7 @@ namespace Elmah
 
         private static void InitUserName(object sender, ExtensionInvocationEventArgs args)
         {
-            ((ErrorInitializationEventArgs) args.Payload).Error.User = Mask.NullString(Thread.CurrentPrincipal.Identity.Name);
+            ((ErrorInitializationEventArgs) args.Payload).Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
         }
 
         public static void InitWebCollections(ExtensionContainer container)
@@ -348,7 +348,7 @@ namespace Elmah
             if (httpException != null)
             {
                 error.StatusCode = httpException.GetHttpCode();
-                error.WebHostHtmlMessage = Mask.NullString(httpException.GetHtmlErrorMessage());
+                error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
             }
 
             //
@@ -366,7 +366,7 @@ namespace Elmah
                     {
                         IPrincipal webUser = hc.User;
                         if (webUser != null
-                            && Mask.NullString(webUser.Identity.Name).Length > 0)
+                            && (webUser.Identity.Name ?? string.Empty).Length > 0)
                         {
                             error.User = webUser.Identity.Name;
                         }
@@ -458,7 +458,6 @@ namespace Elmah
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            int index = 0;
             ArrayList customizations = new ArrayList(config.Count);
 
             IDictionaryEnumerator e = config.GetEnumerator();
@@ -579,7 +578,8 @@ namespace Elmah
 
         private static void InitHostName(object sender, ErrorInitializationEventArgs args)
         {
-            args.Error.HostName = Environment.TryGetMachineName(args.Context as HttpContext);
+            var context = args.Context as HttpContext;
+            args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
         }
 
         public static void InitUserName(ErrorInitialization initialization)
@@ -589,7 +589,7 @@ namespace Elmah
 
         private static void InitUserName(object sender, ErrorInitializationEventArgs args)
         {
-            args.Error.User = Mask.NullString(Thread.CurrentPrincipal.Identity.Name);
+            args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
         }
 
         public static void InitWebCollections(ErrorInitialization initialization)
@@ -612,7 +612,7 @@ namespace Elmah
             if (httpException != null)
             {
                 error.StatusCode = httpException.GetHttpCode();
-                error.WebHostHtmlMessage = Mask.NullString(httpException.GetHtmlErrorMessage());
+                error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
             }
 
             //
@@ -630,7 +630,7 @@ namespace Elmah
                     {
                         IPrincipal webUser = hc.User;
                         if (webUser != null
-                            && Mask.NullString(webUser.Identity.Name).Length > 0)
+                            && (webUser.Identity.Name ?? string.Empty).Length > 0)
                         {
                             error.User = webUser.Identity.Name;
                         }
