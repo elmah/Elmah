@@ -58,8 +58,20 @@ WriteLiteral("\r\n");
             #line 10 "..\..\MasterPage.cshtml"
   
     var basePageName = Request.ServerVariables["URL"];
+    
     var now = DateTime.Now;
     var tz = TimeZone.CurrentTimeZone;
+    
+    var about = PoweredBy.GetAbout(Context.Cache, (version, fileVersion, product, copyright) => new
+    {
+        Version   = version != null
+                  ? version.ToString()
+                  : fileVersion != null 
+                  ? fileVersion.ToString() 
+                  : "?.?.?.?",
+        Product   = Mask.EmptyString(product, "(product)"),
+        Copyright = copyright,
+    });
 
 
             
@@ -72,7 +84,7 @@ WriteLiteral("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \
 
 
             
-            #line 19 "..\..\MasterPage.cshtml"
+            #line 31 "..\..\MasterPage.cshtml"
          if (!string.IsNullOrEmpty(Title))
         {
 
@@ -83,7 +95,7 @@ WriteLiteral("            <title>");
 
 
             
-            #line 21 "..\..\MasterPage.cshtml"
+            #line 33 "..\..\MasterPage.cshtml"
               Write(Title);
 
             
@@ -93,7 +105,7 @@ WriteLiteral("</title>\r\n");
 
 
             
-            #line 22 "..\..\MasterPage.cshtml"
+            #line 34 "..\..\MasterPage.cshtml"
         }
 
             
@@ -103,7 +115,7 @@ WriteLiteral("        <link rel=\"stylesheet\" type=\"text/css\" href=\"");
 
 
             
-            #line 23 "..\..\MasterPage.cshtml"
+            #line 35 "..\..\MasterPage.cshtml"
                                                 Write(basePageName);
 
             
@@ -113,25 +125,50 @@ WriteLiteral("/stylesheet\" />\r\n    </head>\r\n    <body>\r\n        ");
 
 
             
-            #line 26 "..\..\MasterPage.cshtml"
+            #line 38 "..\..\MasterPage.cshtml"
    Write(RenderBody());
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n        <p id=\"Footer\">\r\n            <span>Powered by <a href=\"http://elmah.goo" +
-"glecode.com/\">ELMAH</a>, \r\n                version ");
-
-
-
-WriteLiteral(" ?.?.?.?. \r\n                Copyright (c) 2004, Atif Aziz. All rights reserved. \r" +
-"\n                Licensed under <a href=\"http://www.apache.org/licenses/LICENSE-" +
-"2.0\">Apache License, Version 2.0</a>. \r\n            </span>\r\n            Server " +
-"date is ");
+"glecode.com/\">");
 
 
             
-            #line 33 "..\..\MasterPage.cshtml"
+            #line 40 "..\..\MasterPage.cshtml"
+                                                               Write(about.Product);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a>, \r\n                version ");
+
+
+            
+            #line 41 "..\..\MasterPage.cshtml"
+                   Write(about.Version);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(".\r\n                ");
+
+
+            
+            #line 42 "..\..\MasterPage.cshtml"
+           Write(about.Copyright);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" \r\n                Licensed under <a href=\"http://www.apache.org/licenses/LICENSE" +
+"-2.0\">Apache License, Version 2.0</a>. \r\n            </span>\r\n            Server" +
+" date is ");
+
+
+            
+            #line 45 "..\..\MasterPage.cshtml"
                       Write(now.ToString("D", CultureInfo.InvariantCulture));
 
             
@@ -141,7 +178,7 @@ WriteLiteral(". \r\n            Server time is ");
 
 
             
-            #line 34 "..\..\MasterPage.cshtml"
+            #line 46 "..\..\MasterPage.cshtml"
                       Write(now.ToString("T", CultureInfo.InvariantCulture));
 
             
@@ -151,7 +188,7 @@ WriteLiteral(". \r\n            All dates and times displayed are in the \r\n   
 
 
             
-            #line 36 "..\..\MasterPage.cshtml"
+            #line 48 "..\..\MasterPage.cshtml"
         Write(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName);
 
             
@@ -161,7 +198,7 @@ WriteLiteral(" zone. \r\n            ");
 
 
             
-            #line 37 "..\..\MasterPage.cshtml"
+            #line 49 "..\..\MasterPage.cshtml"
        Write(Footnote);
 
             
