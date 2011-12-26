@@ -9,7 +9,20 @@ namespace Elmah
 
     class WebTemplateBase : RazorTemplateBase, IHttpHandler
     {
-        public HttpContextBase Context { get; set; }
+        private HttpContextBase _context;
+        private bool _isContextFrozen;
+
+        public HttpContextBase Context
+        {
+            get { return _context; }
+            set
+            {
+                if (_isContextFrozen)
+                    throw new InvalidOperationException("Context cannot be reset at this time.");
+                _context = value;
+            }
+        }
+
         public HttpApplicationStateBase Application { get { return Context.Application; } }
         public HttpResponseBase Response { get { return Context.Response; } }
         public HttpRequestBase Request { get { return Context.Request; } }
@@ -61,12 +74,14 @@ namespace Elmah
 
             try
             {
-                Context = new HttpContextWrapper(context);
+                _context = new HttpContextWrapper(context);
+                _isContextFrozen = true;
                 context.Response.Write(TransformText());
             }
             finally
             {
-                Context = oldContext;
+                _isContextFrozen = false;
+                _context = oldContext;
             }
         }
 
