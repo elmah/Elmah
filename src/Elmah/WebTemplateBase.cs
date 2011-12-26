@@ -74,16 +74,20 @@ namespace Elmah
 
             try
             {
-                var contextWrapper = new HttpContextWrapper(context);
-                _context = contextWrapper;
+                _context = new HttpContextWrapper(context);
                 _isContextFrozen = true;
-                contextWrapper.Response.Write(TransformText());
+                ProcessRequest();
             }
             finally
             {
                 _isContextFrozen = false;
                 _context = oldContext;
             }
+        }
+
+        protected virtual void ProcessRequest()
+        {
+            Response.Write(TransformText());
         }
 
         bool IHttpHandler.IsReusable
