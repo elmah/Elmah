@@ -1,0 +1,40 @@
+@* Generator: Template TypeVisibility: Internal *@
+@using System.Globalization
+@using Elmah
+@inherits WebTemplateBase
+@functions
+{
+    public string Title { get; set; }
+    public object Footnote { get; set; }
+}
+@{
+    var basePageName = Request.ServerVariables["URL"];
+    var now = DateTime.Now;
+    var tz = TimeZone.CurrentTimeZone;
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <title>@Title</title>
+        }
+        <link rel="stylesheet" type="text/css" href="@basePageName/stylesheet" />
+    </head>
+    <body>
+        @RenderBody()
+        <p id="Footer">
+            <span>Powered by <a href="http://elmah.googlecode.com/">ELMAH</a>, 
+                version @* TODO Version goes here *@ ?.?.?.?. 
+                Copyright (c) 2004, Atif Aziz. All rights reserved. 
+                Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
+            </span>
+            Server date is @now.ToString("D", CultureInfo.InvariantCulture). 
+            Server time is @now.ToString("T", CultureInfo.InvariantCulture). 
+            All dates and times displayed are in the 
+            @(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName) zone. 
+            @Footnote
+        </p>
+    </body>
+</html>

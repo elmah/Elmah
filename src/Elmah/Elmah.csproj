@@ -192,6 +192,11 @@
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
     </Compile>
+    <Compile Include="MasterPage.generated.cs">
+      <DependentUpon>MasterPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -372,6 +377,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="MasterPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>MasterPage.generated.cs</LastGenOutput>
+    </None>
     <None Include="ErrorLogPage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>

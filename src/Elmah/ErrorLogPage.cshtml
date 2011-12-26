@@ -42,41 +42,33 @@
         hostName.Length > 0
         ? "Error log for {0} on {2} (Page #{1})"
         : "Error log for {0} (Page #{1})",
-        log.ApplicationName, (pageIndex + 1).ToString("N0"), hostName);    
-}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-        <title>@title</title>
-        <link rel="stylesheet" type="text/css" href="@basePageName/stylesheet" />
-        <link rel="alternate" type="application/rss+xml" title="RSS" href="@basePageName/rss" />
-        @if (pageIndex == 0)
+        log.ApplicationName, (pageIndex + 1).ToString("N0"), hostName);
+
+    Layout = new Elmah.MasterPage
+    {
+        Context  = Context, /* TODO Consider not requiring this */
+        Title    = title,
+        Footnote = string.Format("This log is provided by the {0}.", log.Name),
+    };
+    
+    // If the application name matches the APPL_MD_PATH then its
+    // of the form /LM/W3SVC/.../<name>. In this case, use only the 
+    // <name> part to reduce the noise. The full application name is 
+    // still made available through a tooltip.
+
+    var simpleName = log.ApplicationName;
+
+    if (string.Compare(simpleName, Request.ServerVariables["APPL_MD_PATH"],
+        true, CultureInfo.InvariantCulture) == 0)
+    {
+        var lastSlashIndex = simpleName.LastIndexOf('/');
+
+        if (lastSlashIndex > 0)
         {
-            // If on the first page, then enable auto-refresh every minute
-            <meta http-equiv="refresh" content="60" />
+            simpleName = simpleName.Substring(lastSlashIndex + 1);
         }
-    </head>
-    <body>
-        @{
-            // If the application name matches the APPL_MD_PATH then its
-            // of the form /LM/W3SVC/.../<name>. In this case, use only the 
-            // <name> part to reduce the noise. The full application name is 
-            // still made available through a tooltip.
-
-            string simpleName = log.ApplicationName;
-
-            if (string.Compare(simpleName, Request.ServerVariables["APPL_MD_PATH"],
-                true, CultureInfo.InvariantCulture) == 0)
-            {
-                var lastSlashIndex = simpleName.LastIndexOf('/');
-
-                if (lastSlashIndex > 0)
-                {
-                    simpleName = simpleName.Substring(lastSlashIndex + 1);
-                }
-            }
-        }        
+    }
+}        
         <h1 id="PageTitle">
             Error Log for <span id="ApplicationName" title="@log.ApplicationName">@simpleName 
             @if (!string.IsNullOrEmpty(hostName))
@@ -218,25 +210,6 @@
             }
         }
 
-        @{ 
-            var now = DateTime.Now;
-            var tz = TimeZone.CurrentTimeZone;
-        }
-
-        <p id="Footer">
-            <span>Powered by <a href="http://elmah.googlecode.com/">ELMAH</a>, 
-                  version @* TODO Version goes here *@ ?.?.?.?. 
-                  Copyright (c) 2004, Atif Aziz. All rights reserved. 
-                  Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
-            </span>
-            Server date is @now.ToString("D", CultureInfo.InvariantCulture). 
-            Server time is @now.ToString("T", CultureInfo.InvariantCulture). 
-            All dates and times displayed are in the 
-            @(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName) zone. 
-            This log is provided by the @log.Name.
-        </p>
-    </body>
-</html>
 @functions
 {
     IHtmlString LinkHere(string basePageName, string type, string text, int pageIndex, int pageSize)
