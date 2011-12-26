@@ -5,7 +5,7 @@
 //
 //  Author(s):
 //
-//      James Driscoll, mailto:jamesdriscoll@btinternet.com
+//      Atif Aziz, http://www.raboof.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
