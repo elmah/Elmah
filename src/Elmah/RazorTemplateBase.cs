@@ -54,7 +54,7 @@ namespace Elmah
             WriteLiteral(value.ToString());
         }
 
-        public string RenderBody()
+        public virtual object RenderBody()
         {
             return _content;
         }

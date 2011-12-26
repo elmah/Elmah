@@ -43,6 +43,11 @@ namespace Elmah
             base.Write(html != null ? html.ToHtmlString() : Encode(value.ToString()));
         }
 
+        public override object RenderBody()
+        {
+            return new HtmlString(base.RenderBody().ToString());
+        }
+
         public override string TransformText()
         {
             if (Context == null)
