@@ -9,7 +9,7 @@ namespace Elmah
 
     class WebTemplateBase : RazorTemplateBase, IHttpHandler
     {
-        public HttpContextBase Context { get; private set; }
+        public HttpContextBase Context { get; set; }
         public HttpApplicationStateBase Application { get { return Context.Application; } }
         public HttpResponseBase Response { get { return Context.Response; } }
         public HttpRequestBase Request { get { return Context.Request; } }
@@ -43,11 +43,11 @@ namespace Elmah
             base.Write(html != null ? html.ToHtmlString() : Encode(value.ToString()));
         }
 
-        public override void Execute()
+        public override string TransformText()
         {
             if (Context == null)
                 throw new InvalidOperationException("The Context property has not been initialzed with an instance.");
-            base.Execute();
+            return base.TransformText();
         }
 
         void IHttpHandler.ProcessRequest(HttpContext context)

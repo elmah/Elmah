@@ -59,7 +59,7 @@ namespace Elmah
             return _content;
         }
 
-        public string TransformText()
+        public virtual string TransformText()
         {
             Execute();
             
