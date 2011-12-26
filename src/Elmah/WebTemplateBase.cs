@@ -63,14 +63,14 @@ namespace Elmah
 
         public override string TransformText()
         {
-            if (Context == null)
+            if (_context == null)
                 throw new InvalidOperationException("The Context property has not been initialzed with an instance.");
             return base.TransformText();
         }
 
         void IHttpHandler.ProcessRequest(HttpContext context)
         {
-            var oldContext = Context;
+            var oldContext = _context;
 
             try
             {
