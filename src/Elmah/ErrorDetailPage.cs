@@ -397,21 +397,25 @@ namespace Elmah
             | RegexOptions.IgnorePatternWhitespace
             | RegexOptions.Compiled);
 
-        private void MarkupStackTrace(string text, TextWriter writer)
+        private HelperResult MarkupStackTrace(string text)
         {
             Debug.Assert(text != null);
-            Debug.Assert(writer != null);
 
-            int anchor = 0;
-
-            foreach (Match match in _reStackTrace.Matches(text))
+            return new HelperResult(writer =>
             {
-                HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
-                MarkupStackFrame(text, match, writer);
-                anchor = match.Index + match.Length;
-            }
+                if (writer == null) throw new ArgumentNullException("writer");
 
-            HtmlEncode(text.Substring(anchor), writer);
+                var anchor = 0;
+
+                foreach (Match match in _reStackTrace.Matches(text))
+                {
+                    HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
+                    MarkupStackFrame(text, match, writer);
+                    anchor = match.Index + match.Length;
+                }
+
+                HtmlEncode(text.Substring(anchor), writer);
+            });
         }
 
         private void MarkupStackFrame(string text, Match match, TextWriter writer)

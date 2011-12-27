@@ -80,12 +80,7 @@
 
 @if (error.Detail.Length != 0)
 {
-    using (var sw = new StringWriter())
-    { 
-        MarkupStackTrace(error.Detail, sw);
-        sw.Flush();
-        <pre id="ErrorDetail">@Html(sw.ToString())</pre>
-    }
+    <pre id="ErrorDetail">@MarkupStackTrace(error.Detail)</pre>
 }
 
 @*
