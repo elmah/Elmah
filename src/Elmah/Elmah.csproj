@@ -128,9 +128,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="AboutPage.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -191,6 +189,11 @@
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
+    </Compile>
+    <Compile Include="AboutPage.generated.cs">
+      <DependentUpon>AboutPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="MasterPage.generated.cs">
       <DependentUpon>MasterPage.cshtml</DependentUpon>
@@ -377,6 +380,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="AboutPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
+    </None>
     <None Include="MasterPage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MasterPage.generated.cs</LastGenOutput>
