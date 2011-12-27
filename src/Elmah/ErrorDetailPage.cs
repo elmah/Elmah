@@ -43,8 +43,11 @@ namespace Elmah
     /// error log.
     /// </summary>
 
-    internal sealed class ErrorDetailPage : ErrorPageBase
+    sealed partial class ErrorDetailPage
     {
+        public ErrorLog ErrorLog { get; set; }
+
+        /*
         private ErrorLogEntry _errorEntry;
 
         protected override void OnLoad(EventArgs e)
@@ -371,6 +374,7 @@ namespace Elmah
             writer.RenderEndTag(); // </div>
             writer.WriteLine();
         }
+        */
 
         private static readonly Regex _reStackTrace = new Regex(@"
                 ^

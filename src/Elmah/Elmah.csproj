@@ -195,6 +195,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="ErrorDetailPage.generated.cs">
+      <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="MasterPage.generated.cs">
       <DependentUpon>MasterPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -209,9 +214,7 @@
     <Compile Include="Error.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorDetailPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="ErrorDetailPage.cs" />
     <Compile Include="ErrorDigestRssHandler.cs">
     </Compile>
     <Compile Include="ErrorDisplay.cs">
@@ -383,6 +386,10 @@
     <None Include="AboutPage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="ErrorDetailPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorDetailPage.generated.cs</LastGenOutput>
     </None>
     <None Include="MasterPage.cshtml">
       <Generator>RazorGenerator</Generator>
