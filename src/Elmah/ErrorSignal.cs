@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Web;
+    using Mannex.Collections.Generic;
 
     #endregion
 
