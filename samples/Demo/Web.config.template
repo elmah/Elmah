@@ -78,6 +78,18 @@
             </compiler>
         </compilers>
     </system.codedom>
+    <system.webServer>
+        <validation validateIntegratedModeConfiguration="false" />
+        <modules>
+            <add name="ErrorLog" type="Elmah.ErrorLogModule, Elmah" preCondition="managedHandler" />
+            <add name="ErrorFilter" type="Elmah.ErrorFilterModule, Elmah" preCondition="managedHandler" />
+            <add name="ErrorMail" type="Elmah.ErrorMailModule, Elmah" preCondition="managedHandler" />
+            <add name="ErrorTweet" type="Elmah.ErrorTweetModule, Elmah" preCondition="managedHandler" />
+        </modules>
+        <handlers>
+            <add name="Elmah" path="elmah.axd" verb="POST,GET,HEAD" type="Elmah.ErrorLogPageFactory, Elmah" preCondition="integratedMode" />
+        </handlers>
+    </system.webServer>
     <runtime>
         <assemblyBinding appliesTo="v2.0.50727" xmlns="urn:schemas-microsoft-com:asm.v1">
             <dependentAssembly>
