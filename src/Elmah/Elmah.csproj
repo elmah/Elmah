@@ -229,9 +229,7 @@
     <Compile Include="ErrorFilterSectionHandler.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorHtmlPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="ErrorHtmlPage.cs" />
     <Compile Include="ErrorJson.cs">
     </Compile>
     <Compile Include="ErrorJsonHandler.cs">
@@ -267,9 +265,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorMailSectionHandler.cs">
-    </Compile>
-    <Compile Include="ErrorPageBase.cs">
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ErrorRssHandler.cs">
       <SubType>Code</SubType>
