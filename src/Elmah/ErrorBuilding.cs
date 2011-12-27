@@ -29,10 +29,9 @@ namespace Elmah
 
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Collections.Specialized;
-    using System.Globalization;
     using System.Reflection;
-    using System.Security.Principal;
     using System.Threading;
     using System.Web;
     using System.Xml;
@@ -41,9 +40,7 @@ namespace Elmah
 
     public class ExtensionInvocationEventArgs : EventArgs
     {
-        private bool _isHandled;
         private readonly object _payload;
-        private object _result;
 
         public ExtensionInvocationEventArgs() : 
             this(null) {}
@@ -53,19 +50,9 @@ namespace Elmah
             _payload = payload;
         }
 
-        public bool IsHandled
-        {
-            get { return _isHandled; }
-            set { _isHandled = value; }
-        }
-
+        public bool IsHandled { get; set; }
         public object Payload { get { return _payload; } }
-
-        public object Result
-        {
-            get { return _result; }
-            set { _result = value; }
-        }
+        public object Result { get; set; }
     }
 
     public delegate void ExtensionInvocationEventHandler(object sender, ExtensionInvocationEventArgs args);
@@ -78,13 +65,13 @@ namespace Elmah
         {
             if (args.IsHandled) // Rare but possible
                 return;
-            ExtensionInvocationEventHandler handler = Invoked;
+            var handler = Invoked;
             if (handler == null) 
                 return;
             Invoke(handler.GetInvocationList(), sender, args);
         }
 
-        private static void Invoke(Delegate[] handlers, object sender, ExtensionInvocationEventArgs args)
+        private static void Invoke(IEnumerable<Delegate> handlers, object sender, ExtensionInvocationEventArgs args)
         {
             Debug.Assert(handlers != null);
             Debug.Assert(args != null);
@@ -109,7 +96,7 @@ namespace Elmah
 
         public ExtensionClass(string name)
         {
-            _name = name != null && name.Length > 0 
+            _name = !string.IsNullOrEmpty(name) 
                   ? name 
                   : Guid.NewGuid().ToString();
         }
@@ -162,9 +149,9 @@ namespace Elmah
 
         private static object _customizations = ArrayList.ReadOnly(new ExtensionConnectionHandler[]
         {
-            new ExtensionConnectionHandler(InitUserName), 
-            new ExtensionConnectionHandler(InitHostName), 
-            new ExtensionConnectionHandler(InitWebCollections), 
+            InitUserName, 
+            InitHostName, 
+            InitWebCollections, 
         });
 
         private static readonly ExtensionConnectionHandler[] _zeroCustomizations = new ExtensionConnectionHandler[0];
@@ -176,7 +163,7 @@ namespace Elmah
 
         public static ExtensionConnectionHandler[] LoadCustomizations()
         {
-            IDictionary config = (IDictionary)Configuration.GetSubsection("errorInitializers");
+            var config = (IDictionary) Configuration.GetSubsection("errorInitializers");
             return config != null ? LoadCustomizations(config) : _zeroCustomizations;
         }
 
@@ -184,12 +171,12 @@ namespace Elmah
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            ArrayList customizations = new ArrayList(config.Count);
+            var customizations = new List<ExtensionConnectionHandler>(config.Count);
 
-            IDictionaryEnumerator e = config.GetEnumerator();
+            var e = config.GetEnumerator();
             while (e.MoveNext())
             {
-                XmlQualifiedName xqn = (XmlQualifiedName)e.Key;
+                var xqn = (XmlQualifiedName)e.Key;
 
                 if (0 == string.CompareOrdinal(xqn.Namespace, "elmah"))
                     continue;
@@ -202,15 +189,15 @@ namespace Elmah
                     throw new Exception(string.Format("Error decoding CLR type namespace and assembly from the XML namespace '{0}'.", xqn.Namespace));
                 }
 
-                Assembly assembly = Assembly.Load(assemblyName);
-                Type type = assembly.GetType(ns + ".ErrorInitialization", /* throwOnError */ true);
-                ExtensionSetupHandler handler = (ExtensionSetupHandler)Delegate.CreateDelegate(typeof(ExtensionSetupHandler), type, xqn.Name, true, /* throwOnBindFailure */ false);
+                var assembly = Assembly.Load(assemblyName);
+                var type = assembly.GetType(ns + ".ErrorInitialization", /* throwOnError */ true);
+                var handler = (ExtensionSetupHandler)Delegate.CreateDelegate(typeof(ExtensionSetupHandler), type, xqn.Name, true, /* throwOnBindFailure */ false);
                 // TODO Null handler handling
-                NameValueCollection settings = (NameValueCollection)e.Value;
+                var settings = (NameValueCollection)e.Value;
                 customizations.Add(handler(settings));
             }
 
-            return (ExtensionConnectionHandler[])customizations.ToArray(typeof(ExtensionConnectionHandler));
+            return customizations.ToArray();
         }
 
         public static ICollection Customizations
@@ -255,9 +242,9 @@ namespace Elmah
         {
             get
             {
-                ICollection customizations = Customizations;
-                ExtensionContainer self = _dependency == customizations
-                                        ? _thread : null;
+                var customizations = Customizations;
+                var self = _dependency == customizations
+                         ? _thread : null;
                 if (self == null)
                 {
                     self = new ExtensionContainer();
@@ -273,14 +260,14 @@ namespace Elmah
         private void OnErrorInitializing(ErrorInitializationEventArgs args)
         {
             Debug.Assert(args != null);
-            Extension handler = this["ErrorInitializing"];
+            var handler = this["ErrorInitializing"];
             if (handler != null) handler.Invoke(this, new ExtensionInvocationEventArgs(args));
         }
 
         private void OnErrorInitialized(ErrorInitializationEventArgs args)
         {
             Debug.Assert(args != null);
-            Extension handler = this["ErrorInitialized"];
+            var handler = this["ErrorInitialized"];
             if (handler != null) handler.Invoke(this, new ExtensionInvocationEventArgs(args));
         }
 
@@ -294,17 +281,12 @@ namespace Elmah
 
         public static ExtensionConnectionHandler InitHostName(NameValueCollection settings)
         {
-            return new ExtensionConnectionHandler(InitHostName);
+            return InitHostName;
         }
 
         public static void InitHostName(ExtensionContainer container)
         {
-            container["ErrorInitializing"].Invoked += new ExtensionInvocationEventHandler(InitHostName);
-        }
-
-        private static void InitHostName(object sender, ExtensionInvocationEventArgs args)
-        {
-            InitHostName((ErrorInitializationEventArgs) args.Payload);
+            container["ErrorInitializing"].Invoked += (_, args) => InitHostName((ErrorInitializationEventArgs) args.Payload);
         }
 
         private static void InitHostName(ErrorInitializationEventArgs args)
@@ -315,35 +297,28 @@ namespace Elmah
 
         public static void InitUserName(ExtensionContainer container)
         {
-            container["ErrorInitializing"].Invoked += new ExtensionInvocationEventHandler(InitUserName);
-        }
-
-        private static void InitUserName(object sender, ExtensionInvocationEventArgs args)
-        {
-            ((ErrorInitializationEventArgs) args.Payload).Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
+            container["ErrorInitializing"].Invoked += (_, args) => 
+            {
+                ((ErrorInitializationEventArgs) args.Payload).Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
+            };
         }
 
         public static void InitWebCollections(ExtensionContainer container)
         {
-            container["ErrorInitializing"].Invoked += new ExtensionInvocationEventHandler(InitWebCollections);
-        }
-
-        public static void InitWebCollections(object sender, ExtensionInvocationEventArgs args)
-        {
-            InitWebCollections((ErrorInitializationEventArgs) args.Payload);
+            container["ErrorInitializing"].Invoked += (_, args) => InitWebCollections((ErrorInitializationEventArgs) args.Payload);
         }
 
         private static void InitWebCollections(ErrorInitializationEventArgs args)
         {
-            Error error = args.Error;
-            Exception e = error.Exception;
+            var error = args.Error;
+            var e = error.Exception;
 
             //
             // If this is an HTTP exception, then get the status code
             // and detailed HTML message provided by the host.
             //
 
-            HttpException httpException = e as HttpException;
+            var httpException = e as HttpException;
 
             if (httpException != null)
             {
@@ -358,20 +333,20 @@ namespace Elmah
 
             if (args.Context != null)
             {
-                IServiceProvider sp = args.Context as IServiceProvider;
+                var sp = args.Context as IServiceProvider;
                 if (sp != null)
                 {
-                    HttpContext hc = ((HttpApplication)sp.GetService(typeof(HttpApplication))).Context;
+                    var hc = ((HttpApplication)sp.GetService(typeof(HttpApplication))).Context;
                     if (hc != null)
                     {
-                        IPrincipal webUser = hc.User;
+                        var webUser = hc.User;
                         if (webUser != null
                             && (webUser.Identity.Name ?? string.Empty).Length > 0)
                         {
                             error.User = webUser.Identity.Name;
                         }
 
-                        HttpRequest request = hc.Request;
+                        var request = hc.Request;
 
                         error.ServerVariables.Add(request.ServerVariables);
                         error.QueryString.Add(request.QueryString);
@@ -387,11 +362,11 @@ namespace Elmah
             if (cookies == null || cookies.Count == 0)
                 return null;
 
-            NameValueCollection copy = new NameValueCollection(cookies.Count);
+            var copy = new NameValueCollection(cookies.Count);
 
-            for (int i = 0; i < cookies.Count; i++)
+            for (var i = 0; i < cookies.Count; i++)
             {
-                HttpCookie cookie = cookies[i];
+                var cookie = cookies[i];
 
                 //
                 // NOTE: We drop the Path and Domain properties of the 
@@ -431,14 +406,14 @@ namespace Elmah
 
     public sealed class ErrorInitialization
     {
-        public event ErrorInitializationEventHandler ErrorInitializing = new ErrorInitializationEventHandler(OnErrorNopInit);
-        public event ErrorInitializationEventHandler ErrorInitialized = new ErrorInitializationEventHandler(OnErrorNopInit);
+        public event ErrorInitializationEventHandler ErrorInitializing = OnErrorNopInit;
+        public event ErrorInitializationEventHandler ErrorInitialized = OnErrorNopInit;
 
         private static object _customizations = ArrayList.ReadOnly(new ErrorInitializationSetupHandler[]
         {
-            new ErrorInitializationSetupHandler(InitUserName), 
-            new ErrorInitializationSetupHandler(InitHostName), 
-            new ErrorInitializationSetupHandler(InitWebCollections), 
+            InitUserName, 
+            InitHostName, 
+            InitWebCollections, 
         });
 
         private static readonly ErrorInitializationSetupHandler[] _zeroCustomizations = new ErrorInitializationSetupHandler[0];
@@ -450,7 +425,7 @@ namespace Elmah
 
         public static ErrorInitializationSetupHandler[] LoadCustomizations()
         {
-            IDictionary config = (IDictionary) Configuration.GetSubsection("errorInitializers");
+            var config = (IDictionary) Configuration.GetSubsection("errorInitializers");
             return config != null ? LoadCustomizations(config) : _zeroCustomizations;
         }
 
@@ -458,12 +433,12 @@ namespace Elmah
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            ArrayList customizations = new ArrayList(config.Count);
+            var customizations = new ArrayList(config.Count);
 
-            IDictionaryEnumerator e = config.GetEnumerator();
+            var e = config.GetEnumerator();
             while (e.MoveNext())
             {
-                XmlQualifiedName xqn = (XmlQualifiedName) e.Key;
+                var xqn = (XmlQualifiedName) e.Key;
 
                 if (0 == string.CompareOrdinal(xqn.Namespace, "elmah"))
                     continue;
@@ -476,11 +451,11 @@ namespace Elmah
                     throw new Exception(string.Format("Error decoding CLR type namespace and assembly from the XML namespace '{0}'.", xqn.Namespace));
                 }
 
-                Assembly assembly = Assembly.Load(assemblyName);
-                Type type = assembly.GetType(ns + ".ErrorInitialization", /* throwOnError */ true);
-                ErrorInitializationSetupHandlerFactory handler = (ErrorInitializationSetupHandlerFactory)Delegate.CreateDelegate(typeof(ErrorInitializationSetupHandlerFactory), type, xqn.Name, true, /* throwOnBindFailure */ false);
+                var assembly = Assembly.Load(assemblyName);
+                var type = assembly.GetType(ns + ".ErrorInitialization", /* throwOnError */ true);
+                var handler = (ErrorInitializationSetupHandlerFactory)Delegate.CreateDelegate(typeof(ErrorInitializationSetupHandlerFactory), type, xqn.Name, true, /* throwOnBindFailure */ false);
                 // TODO Null handler handling
-                NameValueCollection settings = (NameValueCollection) e.Value;
+                var settings = (NameValueCollection) e.Value;
                 customizations.Add(handler(settings));
             }
 
@@ -512,7 +487,7 @@ namespace Elmah
             do
             {
                 current = (ICollection) _customizations;
-                int currentCount = append ? current.Count : 0;
+                var currentCount = append ? current.Count : 0;
                 updated = new ErrorInitializationSetupHandler[currentCount + customizations.Length];
                 if (append)
                     current.CopyTo(updated, 0);
@@ -529,9 +504,9 @@ namespace Elmah
         {
             get
             {
-                ICollection customizations = Customizations;
-                ErrorInitialization self = _dependency == customizations
-                                         ? _thread : null;
+                var customizations = Customizations;
+                var self = _dependency == customizations
+                         ? _thread : null;
                 if (self == null)
                 {
                     self = new ErrorInitialization();
@@ -547,7 +522,7 @@ namespace Elmah
         private void OnErrorInitializing(ErrorInitializationEventArgs args)
         {
             Debug.Assert(args != null);
-            ErrorInitializationEventHandler handler = ErrorInitializing;
+            var handler = ErrorInitializing;
             if (handler != null) handler(this, args);
         }
 
@@ -568,82 +543,76 @@ namespace Elmah
 
         public static ErrorInitializationSetupHandler InitHostName(NameValueCollection settings)
         {
-            return new ErrorInitializationSetupHandler(InitHostName);
+            return InitHostName;
         }
 
         public static void InitHostName(ErrorInitialization initialization)
         {
-            initialization.ErrorInitializing += new ErrorInitializationEventHandler(InitHostName);
-        }
-
-        private static void InitHostName(object sender, ErrorInitializationEventArgs args)
-        {
-            var context = args.Context as HttpContext;
-            args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
+            initialization.ErrorInitializing += (_, args) =>
+            {
+                var context = args.Context as HttpContext;
+                args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
+            };
         }
 
         public static void InitUserName(ErrorInitialization initialization)
         {
-            initialization.ErrorInitializing += new ErrorInitializationEventHandler(InitUserName);
-        }
-
-        private static void InitUserName(object sender, ErrorInitializationEventArgs args)
-        {
-            args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
+            initialization.ErrorInitializing += (_, args) => 
+            {
+                args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
+            };
         }
 
         public static void InitWebCollections(ErrorInitialization initialization)
         {
-            initialization.ErrorInitializing += new ErrorInitializationEventHandler(InitWebCollections);
-        }
-
-        public static void InitWebCollections(object sender, ErrorInitializationEventArgs args)
-        {
-            Error error = args.Error;
-            Exception e = error.Exception;
-
-            //
-            // If this is an HTTP exception, then get the status code
-            // and detailed HTML message provided by the host.
-            //
-
-            HttpException httpException = e as HttpException;
-
-            if (httpException != null)
+            initialization.ErrorInitializing += (_, args) =>
             {
-                error.StatusCode = httpException.GetHttpCode();
-                error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
-            }
+                var error = args.Error;
+                var e = error.Exception;
 
-            //
-            // If the HTTP context is available, then capture the
-            // collections that represent the state request.
-            //
+                //
+                // If this is an HTTP exception, then get the status code
+                // and detailed HTML message provided by the host.
+                //
 
-            if (args.Context != null)
-            {
-                IServiceProvider sp = args.Context as IServiceProvider;
-                if (sp != null)
+                var httpException = e as HttpException;
+
+                if (httpException != null)
                 {
-                    HttpContext hc = ((HttpApplication) sp.GetService(typeof(HttpApplication))).Context;
-                    if (hc != null)
+                    error.StatusCode = httpException.GetHttpCode();
+                    error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
+                }
+
+                //
+                // If the HTTP context is available, then capture the
+                // collections that represent the state request.
+                //
+
+                if (args.Context != null)
+                {
+                    var sp = args.Context as IServiceProvider;
+                    if (sp != null)
                     {
-                        IPrincipal webUser = hc.User;
-                        if (webUser != null
-                            && (webUser.Identity.Name ?? string.Empty).Length > 0)
+                        var hc = ((HttpApplication) sp.GetService(typeof(HttpApplication))).Context;
+                        if (hc != null)
                         {
-                            error.User = webUser.Identity.Name;
+                            var webUser = hc.User;
+                            if (webUser != null
+                                && (webUser.Identity.Name ?? string.Empty).Length > 0)
+                            {
+                                error.User = webUser.Identity.Name;
+                            }
+
+                            var request = hc.Request;
+
+                            error.ServerVariables.Add(request.ServerVariables);
+                            error.QueryString.Add(request.QueryString);
+                            error.Form.Add(request.Form);
+                            error.Cookies.Add(CopyCollection(request.Cookies));
                         }
-
-                        HttpRequest request = hc.Request;
-
-                        error.ServerVariables.Add(request.ServerVariables);
-                        error.QueryString.Add(request.QueryString);
-                        error.Form.Add(request.Form);
-                        error.Cookies.Add(CopyCollection(request.Cookies));
                     }
                 }
-            }
+            };
         }
 
         private static NameValueCollection CopyCollection(HttpCookieCollection cookies)
@@ -651,11 +620,11 @@ namespace Elmah
             if (cookies == null || cookies.Count == 0)
                 return null;
 
-            NameValueCollection copy = new NameValueCollection(cookies.Count);
+            var copy = new NameValueCollection(cookies.Count);
 
-            for (int i = 0; i < cookies.Count; i++)
+            for (var i = 0; i < cookies.Count; i++)
             {
-                HttpCookie cookie = cookies[i];
+                var cookie = cookies[i];
 
                 //
                 // NOTE: We drop the Path and Domain properties of the 
@@ -733,16 +702,16 @@ namespace Elmah
                  : NameValueCollection.Empty;
         }*/
 
-        private static readonly char[] _separator = new char[] { ':' };
+        private static readonly char[] _separator = new[] { ':' };
 
         protected override IDictionary CreateDictionary(object parent)
         {
-            return base.CreateDictionary(parent != null ? parent : CreateDefaultDictionary());
+            return base.CreateDictionary(parent ?? CreateDefaultDictionary());
         }
 
         private IDictionary CreateDefaultDictionary()
         {
-            IDictionary dictionary = base.CreateDictionary(null);
+            var dictionary = base.CreateDictionary(null);
             foreach (ErrorInitializationSetupHandler handler in ErrorInitialization.Customizations)
                 dictionary.Add(new XmlQualifiedName(handler.Method.Name), "elmah");
             return dictionary;
@@ -750,11 +719,11 @@ namespace Elmah
 
         protected override object GetKey(XmlNode node)
         {
-            string key = (string) base.GetKey(node);
-            string[] pair = key.Split(_separator, 2);
-            string prefix = pair.Length > 1 ? pair[0] : string.Empty;
-            string localName = pair[pair.Length > 1 ? 1 : 0];
-            string ns = prefix.Length > 0 ? node.GetNamespaceOfPrefix(prefix) : null;
+            var key = (string) base.GetKey(node);
+            var pair = key.Split(_separator, 2);
+            var prefix = pair.Length > 1 ? pair[0] : string.Empty;
+            var localName = pair[pair.Length > 1 ? 1 : 0];
+            var ns = prefix.Length > 0 ? node.GetNamespaceOfPrefix(prefix) : null;
             return new XmlQualifiedName(localName, ns);
         }
 
