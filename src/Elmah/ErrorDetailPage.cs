@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.IO;
     using System.Text.RegularExpressions;
+    using System.Web;
 
     #endregion
 
@@ -63,7 +64,7 @@ namespace Elmah
             | RegexOptions.IgnorePatternWhitespace
             | RegexOptions.Compiled);
 
-        private HelperResult MarkupStackTrace(string text)
+        private static HelperResult MarkupStackTrace(string text)
         {
             Debug.Assert(text != null);
 
@@ -75,16 +76,18 @@ namespace Elmah
 
                 foreach (Match match in _reStackTrace.Matches(text))
                 {
-                    HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
+                    Debug.Assert(writer != null);
+                    HttpUtility.HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
                     MarkupStackFrame(text, match, writer);
                     anchor = match.Index + match.Length;
                 }
 
-                HtmlEncode(text.Substring(anchor), writer);
+                Debug.Assert(writer != null);
+                HttpUtility.HtmlEncode(text.Substring(anchor), writer);
             });
         }
 
-        private void MarkupStackFrame(string text, Match match, TextWriter writer)
+        private static void MarkupStackFrame(string text, Match match, TextWriter writer)
         {
             Debug.Assert(text != null);
             Debug.Assert(match != null);
@@ -98,7 +101,8 @@ namespace Elmah
             //
 
             Group type = groups["type"];
-            HtmlEncode(text.Substring(anchor, type.Index - anchor), writer);
+            Debug.Assert(writer != null);
+            HttpUtility.HtmlEncode(text.Substring(anchor, type.Index - anchor), writer);
             anchor = type.Index;
             writer.Write("<span class='st-frame'>");
             anchor = StackFrameSpan(text, anchor, "st-type", type, writer);
@@ -109,7 +113,8 @@ namespace Elmah
             //
 
             Group parameters = groups["params"];
-            HtmlEncode(text.Substring(anchor, parameters.Index - anchor), writer);
+            Debug.Assert(writer != null);
+            HttpUtility.HtmlEncode(text.Substring(anchor, parameters.Index - anchor), writer);
             writer.Write("<span class='st-params'>(");
             int position = 0;
             foreach (string parameter in parameters.Captures[0].Value.Split(','))
@@ -147,10 +152,11 @@ namespace Elmah
             //
 
             int end = match.Index + match.Length;
-            HtmlEncode(text.Substring(anchor, end - anchor), writer);
+            Debug.Assert(writer != null);
+            HttpUtility.HtmlEncode(text.Substring(anchor, end - anchor), writer);
         }
 
-        private int StackFrameSpan(string text, int anchor, string klass, Group group, TextWriter writer)
+        private static int StackFrameSpan(string text, int anchor, string klass, Group group, TextWriter writer)
         {
             Debug.Assert(text != null);
             Debug.Assert(group != null);
@@ -161,31 +167,27 @@ namespace Elmah
                  : anchor;
         }
 
-        private int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length, TextWriter writer)
+        private static int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length, TextWriter writer)
         {
             Debug.Assert(text != null);
             Debug.Assert(writer != null);
 
-            HtmlEncode(text.Substring(anchor, index - anchor), writer);
+            Debug.Assert(writer != null);
+            HttpUtility.HtmlEncode(text.Substring(anchor, index - anchor), writer);
             Span(writer, klass, value);
             return index + length;
         }
 
-        private void Span(TextWriter writer, string klass, string value)
+        private static void Span(TextWriter writer, string klass, string value)
         {
             Debug.Assert(writer != null);
 
             writer.Write("<span class='"); 
             writer.Write(klass);  
             writer.Write("'>");
-            HtmlEncode(value, writer);
-            writer.Write("</span>");
-        }
-
-        private void HtmlEncode(string text, TextWriter writer)
-        {
             Debug.Assert(writer != null);
-            Server.HtmlEncode(text, writer);
+            HttpUtility.HtmlEncode(value, writer);
+            writer.Write("</span>");
         }
     }
 }
