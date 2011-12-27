@@ -28,12 +28,18 @@ namespace Elmah
     #line hidden
     using System.Text;
     
+    #line 4 "..\..\AboutPage.cshtml"
+    using Elmah;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.2.0.0")]
     internal partial class AboutPage : WebTemplateBase
     {
 #line hidden
 
-        #line 82 "..\..\AboutPage.cshtml"
+        #line 81 "..\..\AboutPage.cshtml"
 
     private Version GetVersion()
     {
@@ -59,8 +65,9 @@ WriteLiteral("\r\n");
 
 
 
+
             
-            #line 5 "..\..\AboutPage.cshtml"
+            #line 6 "..\..\AboutPage.cshtml"
   
     var basePageName = Request.ServerVariables["URL"];
 
@@ -98,7 +105,7 @@ WriteLiteral(@"
 
 
             
-            #line 34 "..\..\AboutPage.cshtml"
+            #line 35 "..\..\AboutPage.cshtml"
                  Write(GetVersion());
 
             
@@ -108,7 +115,7 @@ WriteLiteral("\',\r\n            fileVersion: \'");
 
 
             
-            #line 35 "..\..\AboutPage.cshtml"
+            #line 36 "..\..\AboutPage.cshtml"
                      Write(GetFileVersion());
 
             
@@ -118,7 +125,7 @@ WriteLiteral("\',\r\n            type: \'");
 
 
             
-            #line 36 "..\..\AboutPage.cshtml"
+            #line 37 "..\..\AboutPage.cshtml"
               Write(Build.TypeLowercase);
 
             
@@ -128,7 +135,7 @@ WriteLiteral("\',\r\n            status: \'");
 
 
             
-            #line 37 "..\..\AboutPage.cshtml"
+            #line 38 "..\..\AboutPage.cshtml"
                 Write(Build.Status);
 
             
@@ -138,7 +145,7 @@ WriteLiteral("\',\r\n            framework: \'");
 
 
             
-            #line 38 "..\..\AboutPage.cshtml"
+            #line 39 "..\..\AboutPage.cshtml"
                    Write(Build.Framework);
 
             
@@ -148,7 +155,7 @@ WriteLiteral("\',\r\n            imageRuntime: \'");
 
 
             
-            #line 39 "..\..\AboutPage.cshtml"
+            #line 40 "..\..\AboutPage.cshtml"
                       Write(Build.ImageRuntimeVersion);
 
             
@@ -158,7 +165,7 @@ WriteLiteral("\'\r\n        }\r\n    };\r\n</script>\r\n\r\n<h1 id=\"PageTitle\"
 
 
             
-            #line 44 "..\..\AboutPage.cshtml"
+            #line 45 "..\..\AboutPage.cshtml"
               Write(title);
 
             
@@ -168,16 +175,14 @@ WriteLiteral("</h1>\r\n\r\n");
 
 
             
-            #line 46 "..\..\AboutPage.cshtml"
+            #line 47 "..\..\AboutPage.cshtml"
   
     using (var sw = new StringWriter())
     {
         using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
         {
             SpeedBar.Render(writer,
-                SpeedBar.RssFeed.Format(basePageName),
-                SpeedBar.RssDigestFeed.Format(basePageName),
-                SpeedBar.DownloadLog.Format(basePageName),
+                SpeedBar.Home.Format(basePageName),
                 SpeedBar.Help,
                 SpeedBar.About.Format(basePageName));
             writer.Flush();
@@ -195,7 +200,7 @@ WriteLiteral("\r\n<p>\r\n    <button \r\n        onclick=\"return onCheckForUpda
 
 
             
-            #line 70 "..\..\AboutPage.cshtml"
+            #line 69 "..\..\AboutPage.cshtml"
             Write(Build.TypeLowercase);
 
             
@@ -205,7 +210,7 @@ WriteLiteral("</strong>\r\n    ");
 
 
             
-            #line 71 "..\..\AboutPage.cshtml"
+            #line 70 "..\..\AboutPage.cshtml"
 Write(stamps.Any() ? "(SCC #" + stamps.First().Revision.ToString("N0") + ")" : null);
 
             
@@ -215,7 +220,7 @@ WriteLiteral("\r\n    build was compiled from the following sources for CLR ");
 
 
             
-            #line 72 "..\..\AboutPage.cshtml"
+            #line 71 "..\..\AboutPage.cshtml"
                                                      Write(Build.ImageRuntimeVersion);
 
             
@@ -225,7 +230,7 @@ WriteLiteral(":\r\n</p>\r\n\r\n<ul>\r\n");
 
 
             
-            #line 76 "..\..\AboutPage.cshtml"
+            #line 75 "..\..\AboutPage.cshtml"
      foreach (var stamp in stamps)
     {
 
@@ -236,7 +241,7 @@ WriteLiteral("        <li><code>");
 
 
             
-            #line 78 "..\..\AboutPage.cshtml"
+            #line 77 "..\..\AboutPage.cshtml"
              Write(stamp.Id);
 
             
@@ -246,7 +251,7 @@ WriteLiteral("</code></li>        \r\n");
 
 
             
-            #line 79 "..\..\AboutPage.cshtml"
+            #line 78 "..\..\AboutPage.cshtml"
     }
 
             

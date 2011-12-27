@@ -1,6 +1,7 @@
 @* Generator: Template TypeVisibility: Internal *@
 @using System.IO
 @using System.Reflection
+@using Elmah
 @inherits WebTemplateBase
 @{
     var basePageName = Request.ServerVariables["URL"];
@@ -49,9 +50,7 @@
         using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
         {
             SpeedBar.Render(writer,
-                SpeedBar.RssFeed.Format(basePageName),
-                SpeedBar.RssDigestFeed.Format(basePageName),
-                SpeedBar.DownloadLog.Format(basePageName),
+                SpeedBar.Home.Format(basePageName),
                 SpeedBar.Help,
                 SpeedBar.About.Format(basePageName));
             writer.Flush();
