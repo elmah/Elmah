@@ -83,64 +83,38 @@ namespace Elmah
         /// context during the exception.
         /// </summary>
 
-        public Error(Exception e, HttpContextBase context)
+        public Error(Exception e, HttpContextBase context) :
+            this(e, context, ErrorInitialization.Default) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Error"/> class
+        /// from a given <see cref="Exception"/> instance and an
+        /// object representing the context during the exception.
+        /// </summary>
+
+        public Error(Exception e, object context, ErrorInitialization initialization)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
 
             _exception = e;
-            Exception baseException = e.GetBaseException();
+            var baseException = e.GetBaseException();
 
             //
             // Load the basic information.
             //
 
-            _hostName = Environment.TryGetMachineName(context);
             _typeName = baseException.GetType().FullName;
             _message = baseException.Message;
             _source = baseException.Source;
             _detail = e.ToString();
-            _user = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
             _time = DateTime.Now;
 
-            //
-            // If this is an HTTP exception, then get the status code
-            // and detailed HTML message provided by the host.
-            //
-
-            HttpException httpException = e as HttpException;
-
-            if (httpException != null)
-            {
-                _statusCode = httpException.GetHttpCode();
-                _webHostHtmlMessage = TryGetHtmlErrorMessage(httpException) ?? string.Empty;
-            }
-
-            //
-            // If the HTTP context is available, then capture the
-            // collections that represent the state request as well as
-            // the user.
-            //
-
-            if (context != null)
-            {
-                IPrincipal webUser = context.User;
-                if (webUser != null 
-                    && (webUser.Identity.Name ?? string.Empty).Length > 0)
-                {
-                    _user = webUser.Identity.Name;
-                }
-
-                var request = context.Request;
-
-                _serverVariables = CopyCollection(request.ServerVariables);
-                _queryString = CopyCollection(request.QueryString);
-                _form = CopyCollection(request.Form);
-                _cookies = CopyCollection(request.Cookies);
-            }
+            if (initialization != null)
+                initialization.Initialize(this, context);
         }
 
-        private static string TryGetHtmlErrorMessage(HttpException e)
+        internal static string TryGetHtmlErrorMessage(HttpException e)
         {
             Debug.Assert(e != null);
 

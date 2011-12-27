@@ -323,7 +323,7 @@ namespace Elmah
             if (httpException != null)
             {
                 error.StatusCode = httpException.GetHttpCode();
-                error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
+                error.WebHostHtmlMessage = Error.TryGetHtmlErrorMessage(httpException) ?? string.Empty;
             }
 
             //
@@ -580,7 +580,7 @@ namespace Elmah
                 if (httpException != null)
                 {
                     error.StatusCode = httpException.GetHttpCode();
-                    error.WebHostHtmlMessage = httpException.GetHtmlErrorMessage() ?? string.Empty;
+                    error.WebHostHtmlMessage = Error.TryGetHtmlErrorMessage(httpException) ?? string.Empty;
                 }
 
                 //
