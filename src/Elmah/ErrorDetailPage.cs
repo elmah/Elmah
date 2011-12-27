@@ -182,11 +182,6 @@ namespace Elmah
             writer.Write("</span>");
         }
 
-        private string HtmlEncode(string text)
-        {
-            return Server.HtmlEncode(text);
-        }
-
         private void HtmlEncode(string text, TextWriter writer)
         {
             Debug.Assert(writer != null);
