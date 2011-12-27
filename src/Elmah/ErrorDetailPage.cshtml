@@ -52,18 +52,10 @@
 
 <h1 id="PageTitle">@error.Message</h1>
 
-@using (var sw = new StringWriter())
-{
-    using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
-    {
-        SpeedBar.Render(writer,
-            SpeedBar.Home.Format(basePageName),
-            SpeedBar.Help,
-            SpeedBar.About.Format(basePageName));
-        writer.Flush();
-        Write(Html(sw.ToString()));
-    }
-}
+@SpeedBar.Render(Request.Browser,
+                 SpeedBar.Home.Format(basePageName),
+                 SpeedBar.Help,
+                 SpeedBar.About.Format(basePageName))
 
 <p id="ErrorTitle">@*
     *@<span id="ErrorType">@error.Type</span>@*

@@ -39,7 +39,7 @@ namespace Elmah
     {
 #line hidden
 
-        #line 81 "..\..\AboutPage.cshtml"
+        #line 71 "..\..\AboutPage.cshtml"
 
     private Version GetVersion()
     {
@@ -176,31 +176,21 @@ WriteLiteral("</h1>\r\n\r\n");
 
             
             #line 47 "..\..\AboutPage.cshtml"
-  
-    using (var sw = new StringWriter())
-    {
-        using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
-        {
-            SpeedBar.Render(writer,
-                SpeedBar.Home.Format(basePageName),
-                SpeedBar.Help,
-                SpeedBar.About.Format(basePageName));
-            writer.Flush();
-            Write(Html(sw.ToString()));
-        }
-    }
-
+Write(SpeedBar.Render(Request.Browser,
+                 SpeedBar.Home.Format(basePageName),
+                 SpeedBar.Help,
+                 SpeedBar.About.Format(basePageName)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n<p>\r\n    <button \r\n        onclick=\"return onCheckForUpdate(this)\"\r\n        tit" +
-"le=\"Checks if your ELMAH version is up to date (requires Internet connection)\">C" +
-"heck for Update</button>\r\n</p>\r\n\r\n<p>\r\n    This <strong>");
+WriteLiteral("\r\n\r\n<p>\r\n    <button \r\n        onclick=\"return onCheckForUpdate(this)\"\r\n        t" +
+"itle=\"Checks if your ELMAH version is up to date (requires Internet connection)\"" +
+">Check for Update</button>\r\n</p>\r\n\r\n<p>\r\n    This <strong>");
 
 
             
-            #line 69 "..\..\AboutPage.cshtml"
+            #line 59 "..\..\AboutPage.cshtml"
             Write(Build.TypeLowercase);
 
             
@@ -210,7 +200,7 @@ WriteLiteral("</strong>\r\n    ");
 
 
             
-            #line 70 "..\..\AboutPage.cshtml"
+            #line 60 "..\..\AboutPage.cshtml"
 Write(stamps.Any() ? "(SCC #" + stamps.First().Revision.ToString("N0") + ")" : null);
 
             
@@ -220,7 +210,7 @@ WriteLiteral("\r\n    build was compiled from the following sources for CLR ");
 
 
             
-            #line 71 "..\..\AboutPage.cshtml"
+            #line 61 "..\..\AboutPage.cshtml"
                                                      Write(Build.ImageRuntimeVersion);
 
             
@@ -230,7 +220,7 @@ WriteLiteral(":\r\n</p>\r\n\r\n<ul>\r\n");
 
 
             
-            #line 75 "..\..\AboutPage.cshtml"
+            #line 65 "..\..\AboutPage.cshtml"
      foreach (var stamp in stamps)
     {
 
@@ -241,7 +231,7 @@ WriteLiteral("        <li><code>");
 
 
             
-            #line 77 "..\..\AboutPage.cshtml"
+            #line 67 "..\..\AboutPage.cshtml"
              Write(stamp.Id);
 
             
@@ -251,7 +241,7 @@ WriteLiteral("</code></li>        \r\n");
 
 
             
-            #line 78 "..\..\AboutPage.cshtml"
+            #line 68 "..\..\AboutPage.cshtml"
     }
 
             

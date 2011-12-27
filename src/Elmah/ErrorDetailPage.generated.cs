@@ -131,23 +131,15 @@ WriteLiteral("</h1>\r\n\r\n");
 
             
             #line 55 "..\..\ErrorDetailPage.cshtml"
- using (var sw = new StringWriter())
-{
-    using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
-    {
-        SpeedBar.Render(writer,
-            SpeedBar.Home.Format(basePageName),
-            SpeedBar.Help,
-            SpeedBar.About.Format(basePageName));
-        writer.Flush();
-        Write(Html(sw.ToString()));
-    }
-}
+Write(SpeedBar.Render(Request.Browser,
+                 SpeedBar.Home.Format(basePageName),
+                 SpeedBar.Help,
+                 SpeedBar.About.Format(basePageName)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n<p id=\"ErrorTitle\">");
+WriteLiteral("\r\n\r\n<p id=\"ErrorTitle\">");
 
 
 
@@ -155,7 +147,7 @@ WriteLiteral("<span id=\"ErrorType\">");
 
 
             
-            #line 69 "..\..\ErrorDetailPage.cshtml"
+            #line 61 "..\..\ErrorDetailPage.cshtml"
                       Write(error.Type);
 
             
@@ -173,7 +165,7 @@ WriteLiteral("<span id=\"ErrorMessage\">");
 
 
             
-            #line 71 "..\..\ErrorDetailPage.cshtml"
+            #line 63 "..\..\ErrorDetailPage.cshtml"
                          Write(error.Message);
 
             
@@ -187,7 +179,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 81 "..\..\ErrorDetailPage.cshtml"
+            #line 73 "..\..\ErrorDetailPage.cshtml"
  if (error.Detail.Length != 0)
 {
 
@@ -198,7 +190,7 @@ WriteLiteral("    <pre id=\"ErrorDetail\">");
 
 
             
-            #line 83 "..\..\ErrorDetailPage.cshtml"
+            #line 75 "..\..\ErrorDetailPage.cshtml"
                      Write(MarkupStackTrace(error.Detail));
 
             
@@ -208,7 +200,7 @@ WriteLiteral("</pre>\r\n");
 
 
             
-            #line 84 "..\..\ErrorDetailPage.cshtml"
+            #line 76 "..\..\ErrorDetailPage.cshtml"
 }
 
 
@@ -217,7 +209,7 @@ WriteLiteral("</pre>\r\n");
             #line hidden
 
             
-            #line 90 "..\..\ErrorDetailPage.cshtml"
+            #line 82 "..\..\ErrorDetailPage.cshtml"
   
 
             
@@ -227,7 +219,7 @@ WriteLiteral("\r\n<p id=\"ErrorLogTime\">");
 
 
             
-            #line 92 "..\..\ErrorDetailPage.cshtml"
+            #line 84 "..\..\ErrorDetailPage.cshtml"
                 Write(string.Format(
     @"Logged on {0} at {1}",
     error.Time.ToLongDateString(),
@@ -248,7 +240,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 112 "..\..\ErrorDetailPage.cshtml"
+            #line 104 "..\..\ErrorDetailPage.cshtml"
      if (error.WebHostHtmlMessage.Length != 0)
     {
         var htmlUrl = basePageName + "/html?id=" + Uri.EscapeDataString(errorEntry.Id);
@@ -260,7 +252,7 @@ WriteLiteral("        <li><a href=\"");
 
 
             
-            #line 115 "..\..\ErrorDetailPage.cshtml"
+            #line 107 "..\..\ErrorDetailPage.cshtml"
                 Write(basePageName);
 
             
@@ -270,7 +262,7 @@ WriteLiteral("/html?id=");
 
 
             
-            #line 115 "..\..\ErrorDetailPage.cshtml"
+            #line 107 "..\..\ErrorDetailPage.cshtml"
                                       Write(Uri.EscapeDataString(errorEntry.Id));
 
             
@@ -280,7 +272,7 @@ WriteLiteral("\">Original ASP.NET error page</a></li>\r\n");
 
 
             
-            #line 116 "..\..\ErrorDetailPage.cshtml"
+            #line 108 "..\..\ErrorDetailPage.cshtml"
     }
 
 
@@ -289,7 +281,7 @@ WriteLiteral("\">Original ASP.NET error page</a></li>\r\n");
             #line hidden
 
             
-            #line 120 "..\..\ErrorDetailPage.cshtml"
+            #line 112 "..\..\ErrorDetailPage.cshtml"
   
 
             
@@ -299,7 +291,7 @@ WriteLiteral("\r\n    <li>Raw/Source data in \r\n        <a rel=\"");
 
 
             
-            #line 123 "..\..\ErrorDetailPage.cshtml"
+            #line 115 "..\..\ErrorDetailPage.cshtml"
            Write(HtmlLinkType.Alternate);
 
             
@@ -309,7 +301,7 @@ WriteLiteral("\" \r\n           type=\"application/xml\" \r\n           href=\"x
 
 
             
-            #line 125 "..\..\ErrorDetailPage.cshtml"
+            #line 117 "..\..\ErrorDetailPage.cshtml"
                 Write(Request.Url.Query);
 
             
@@ -319,7 +311,7 @@ WriteLiteral("\">XML</a>\r\n        or in\r\n        <a rel=\"");
 
 
             
-            #line 127 "..\..\ErrorDetailPage.cshtml"
+            #line 119 "..\..\ErrorDetailPage.cshtml"
            Write(HtmlLinkType.Alternate);
 
             
@@ -329,7 +321,7 @@ WriteLiteral("\" \r\n           type=\"application/json\" \r\n           href=\"
 
 
             
-            #line 129 "..\..\ErrorDetailPage.cshtml"
+            #line 121 "..\..\ErrorDetailPage.cshtml"
                  Write(Request.Url.Query);
 
             
@@ -343,7 +335,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 147 "..\..\ErrorDetailPage.cshtml"
+            #line 139 "..\..\ErrorDetailPage.cshtml"
   
     var collection = new
     {
@@ -377,7 +369,7 @@ WriteLiteral("        <div id=\"");
 
 
             
-            #line 172 "..\..\ErrorDetailPage.cshtml"
+            #line 164 "..\..\ErrorDetailPage.cshtml"
             Write(collection.Id);
 
             
@@ -387,7 +379,7 @@ WriteLiteral("\">\r\n            <p class=\"table-caption\">");
 
 
             
-            #line 173 "..\..\ErrorDetailPage.cshtml"
+            #line 165 "..\..\ErrorDetailPage.cshtml"
                                 Write(collection.Title);
 
             
@@ -411,7 +403,7 @@ WriteLiteral(@"
 
 
             
-            #line 190 "..\..\ErrorDetailPage.cshtml"
+            #line 182 "..\..\ErrorDetailPage.cshtml"
                      foreach (var item in items)
                     {
 
@@ -422,7 +414,7 @@ WriteLiteral("                        <tr class=\"");
 
 
             
-            #line 192 "..\..\ErrorDetailPage.cshtml"
+            #line 184 "..\..\ErrorDetailPage.cshtml"
                                Write(item.Index % 2 == 0 ? "even-row" : "odd-row");
 
             
@@ -432,7 +424,7 @@ WriteLiteral("\">\r\n                            <td class=\"key-col\">");
 
 
             
-            #line 193 "..\..\ErrorDetailPage.cshtml"
+            #line 185 "..\..\ErrorDetailPage.cshtml"
                                            Write(item.Key);
 
             
@@ -442,7 +434,7 @@ WriteLiteral("</td>\r\n                            <td class=\"value-col\">");
 
 
             
-            #line 194 "..\..\ErrorDetailPage.cshtml"
+            #line 186 "..\..\ErrorDetailPage.cshtml"
                                              Write(item.Value);
 
             
@@ -452,7 +444,7 @@ WriteLiteral("</td>\r\n                        </tr>\r\n");
 
 
             
-            #line 196 "..\..\ErrorDetailPage.cshtml"
+            #line 188 "..\..\ErrorDetailPage.cshtml"
                     }
 
             
@@ -462,7 +454,7 @@ WriteLiteral("\r\n                </table>\r\n            </div>\r\n        </di
 
 
             
-            #line 201 "..\..\ErrorDetailPage.cshtml"
+            #line 193 "..\..\ErrorDetailPage.cshtml"
     }
 
 

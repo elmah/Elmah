@@ -44,20 +44,10 @@
 
 <h1 id="PageTitle">@title</h1>
 
-@{
-    using (var sw = new StringWriter())
-    {
-        using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
-        {
-            SpeedBar.Render(writer,
-                SpeedBar.Home.Format(basePageName),
-                SpeedBar.Help,
-                SpeedBar.About.Format(basePageName));
-            writer.Flush();
-            Write(Html(sw.ToString()));
-        }
-    }
-}
+@SpeedBar.Render(Request.Browser,
+                 SpeedBar.Home.Format(basePageName),
+                 SpeedBar.Help,
+                 SpeedBar.About.Format(basePageName))
 
 <p>
     <button 

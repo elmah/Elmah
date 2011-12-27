@@ -78,24 +78,12 @@
             </span>
         </h1>
         
-        @{
-            IHtmlString navbar;
-            using (var sw = new StringWriter())
-            {
-                using (var writer = Request.Browser.CreateHtmlTextWriter(sw))
-                {
-                    SpeedBar.Render(writer,
+        @SpeedBar.Render(Request.Browser,
                         SpeedBar.RssFeed.Format(basePageName),
                         SpeedBar.RssDigestFeed.Format(basePageName),
                         SpeedBar.DownloadLog.Format(basePageName),
                         SpeedBar.Help,
-                        SpeedBar.About.Format(basePageName));
-                    writer.Flush();
-                    navbar = Html(sw.ToString());
-                }
-            }
-        }
-        @navbar
+                        SpeedBar.About.Format(basePageName))
 
         @if (errorEntryList.Count > 0)
         {
