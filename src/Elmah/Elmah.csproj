@@ -294,6 +294,7 @@
     </Compile>
     <Compile Include="ManifestResourceHelper.cs">
     </Compile>
+    <Compile Include="Mannex.cs" />
     <Compile Include="Mask.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -385,6 +386,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
