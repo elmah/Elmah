@@ -62,3 +62,25 @@ namespace Mannex.Collections.Generic
         }
     }
 }
+
+namespace Mannex.Collections.Generic
+{
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// Extension methods for pairing keys and values as 
+    /// <see cref="KeyValuePair{TKey,TValue}"/>.
+    /// </summary>
+
+    static partial class PairingExtensions
+    {
+        /// <summary>
+        /// Pairs a value with a key.
+        /// </summary>
+
+        public static KeyValuePair<TKey, TValue> AsKeyTo<TKey, TValue>(this TKey key, TValue value)
+        {
+            return new KeyValuePair<TKey, TValue>(key, value);
+        }
+    }
+}
