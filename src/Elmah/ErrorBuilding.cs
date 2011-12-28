@@ -31,10 +31,13 @@ namespace Elmah
     using System.Collections;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Web;
     using System.Xml;
+    using Mannex.Collections.Generic;
+    using Mannex.Collections.Specialized;
 
     #endregion
 
@@ -351,32 +354,13 @@ namespace Elmah
                         error.ServerVariables.Add(request.ServerVariables);
                         error.QueryString.Add(request.QueryString);
                         error.Form.Add(request.Form);
-                        error.Cookies.Add(CopyCollection(request.Cookies));
+                        var cookies = request.Cookies;
+                        error.Cookies.Add(from i in Enumerable.Range(0, cookies.Count)
+                                          let cookie = cookies[i]
+                                          select cookie.Name.AsKeyTo(cookie.Value));
                     }
                 }
             }
-        }
-
-        private static NameValueCollection CopyCollection(HttpCookieCollection cookies)
-        {
-            if (cookies == null || cookies.Count == 0)
-                return null;
-
-            var copy = new NameValueCollection(cookies.Count);
-
-            for (var i = 0; i < cookies.Count; i++)
-            {
-                var cookie = cookies[i];
-
-                //
-                // NOTE: We drop the Path and Domain properties of the 
-                // cookie for sake of simplicity.
-                //
-
-                copy.Add(cookie.Name, cookie.Value);
-            }
-
-            return copy;
         }
     }
 
