@@ -146,7 +146,7 @@ namespace Elmah
         {
             get
             {
-                return (Extension) _extensions[key];
+                return (Extension)(_extensions[key] ?? (_extensions[key] = new Extension()));
             }
         }
 
