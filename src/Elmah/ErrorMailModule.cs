@@ -510,7 +510,7 @@ namespace Elmah
             }
         }
 
-        private static MailAttachment CreateHtmlAttachment(string name, string html)
+        internal static MailAttachment CreateHtmlAttachment(string name, string html)
         {
             Debug.AssertStringNotEmpty(name);
             Debug.AssertStringNotEmpty(html);
@@ -624,12 +624,12 @@ namespace Elmah
             return Configuration.GetSubsection("errorMail");
         }
 
-        private static string GetSetting(IDictionary config, string name)
+        internal static string GetSetting(IDictionary config, string name)
         {
             return GetSetting(config, name, null);
         }
 
-        private static string GetSetting(IDictionary config, string name, string defaultValue)
+        internal static string GetSetting(IDictionary config, string name, string defaultValue)
         {
             Debug.Assert(config != null);
             Debug.AssertStringNotEmpty(name);
