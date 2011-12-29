@@ -28,7 +28,6 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Linq;
@@ -38,6 +37,7 @@ namespace Elmah
     using System.Xml;
     using Mannex.Collections.Generic;
     using Mannex.Collections.Specialized;
+    using IDictionary = System.Collections.IDictionary;
 
     #endregion
 
@@ -140,17 +140,17 @@ namespace Elmah
 
     public sealed class ExtensionContainer
     {
-        private readonly Hashtable _extensions = new Hashtable();
+        private readonly Dictionary<object, Extension> _extensions = new Dictionary<object, Extension>();
 
         public Extension this[object key]
         {
             get
             {
-                return (Extension)(_extensions[key] ?? (_extensions[key] = new Extension()));
+                return _extensions.Find(key) ?? (_extensions[key] = new Extension());
             }
         }
 
-        private static object _customizations = ArrayList.ReadOnly(new ExtensionConnectionHandler[]
+        private static ICollection<ExtensionConnectionHandler> _customizations = Array.AsReadOnly(new ExtensionConnectionHandler[]
         {
             InitUserName, 
             InitHostName, 
@@ -203,9 +203,9 @@ namespace Elmah
             return customizations.ToArray();
         }
 
-        public static ICollection Customizations
+        public static ICollection<ExtensionConnectionHandler> Customizations
         {
-            get { return (ICollection)_customizations; }
+            get { return _customizations; }
         }
 
         public static void AppendCustomizations(params ExtensionConnectionHandler[] customizations)
@@ -223,11 +223,11 @@ namespace Elmah
             if (customizations == null)
                 return;
 
-            ICollection current;
+            ICollection<ExtensionConnectionHandler> current;
             ExtensionConnectionHandler[] updated;
             do
             {
-                current = (ICollection)_customizations;
+                current = _customizations;
                 int currentCount = append ? current.Count : 0;
                 updated = new ExtensionConnectionHandler[currentCount + customizations.Length];
                 if (append)
@@ -235,7 +235,7 @@ namespace Elmah
                 Array.Copy(customizations, 0, updated, currentCount, customizations.Length);
                 // TODO handle duplicates
             }
-            while (current != Interlocked.CompareExchange(ref _customizations, ArrayList.ReadOnly(updated), current));
+            while (current != Interlocked.CompareExchange(ref _customizations, Array.AsReadOnly(updated), current));
         }
 
         [ThreadStatic] static ExtensionContainer _thread;
