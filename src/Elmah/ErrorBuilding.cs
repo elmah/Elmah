@@ -77,7 +77,7 @@ namespace Elmah
         {
             return es =>
             {
-                es.Get<ErrorEvent>().Fired += (_, args) =>
+                es.Get<ErrorEvent>().Firing += (_, args) =>
                 {
                     ErrorLog.GetDefault(null).Log(args.Payload.Error);
                 };
@@ -126,7 +126,7 @@ namespace Elmah
 
             return es =>
             {
-                es.Get<ErrorEvent>().Fired += (_, args) =>
+                es.Get<ErrorEvent>().Firing += (_, args) =>
                 {
                     var error = args.Payload.Error;
                     if (options.ReportAsynchronously)
@@ -261,13 +261,13 @@ namespace Elmah
                 // using event.
                 //
 
-                es.Get<ErrorMailEvents.Mailing>().Invoke(null, args);
+                es.Get<ErrorMailEvents.Mailing>().Fire(null, args);
                 SendMail(mail, options);
-                es.Get<ErrorMailEvents.Mailed>().Invoke(null, args);
+                es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
             }
             finally
             {
-                es.Get<ErrorMailEvents.Mailed>().Invoke(null, args);
+                es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
                 mail.Dispose();
             }
         }
@@ -329,7 +329,7 @@ namespace Elmah
                 return;
 
             var args = EventFiringEventArgs.Create(new Context(error, exception));
-            handler.Invoke(sender, args);
+            handler.Fire(sender, args);
         }
 
         public sealed class Context
@@ -386,19 +386,19 @@ namespace Elmah
 
     public class Event<T>
     {
-        public event EventFiringHandler<T> Fired;
+        public event EventFiringHandler<T> Firing;
 
-        public virtual void Invoke(object sender, EventFiringEventArgs<T> args)
+        public virtual void Fire(object sender, EventFiringEventArgs<T> args)
         {
             if (args.IsHandled) // Rare but possible
                 return;
-            var handler = Fired;
+            var handler = Firing;
             if (handler == null) 
                 return;
-            Invoke(handler.GetInvocationList(), sender, args);
+            Fire(handler.GetInvocationList(), sender, args);
         }
 
-        private static void Invoke(IEnumerable<Delegate> handlers, object sender, EventFiringEventArgs<T> args)
+        private static void Fire(IEnumerable<Delegate> handlers, object sender, EventFiringEventArgs<T> args)
         {
             Debug.Assert(handlers != null);
             Debug.Assert(args != null);
@@ -569,14 +569,14 @@ namespace Elmah
         {
             Debug.Assert(args != null);
             var handler = extensions.Find<Initializing>();
-            if (handler != null) handler.Invoke(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
+            if (handler != null) handler.Fire(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
         }
 
         private static void OnErrorInitialized(EventStation extensions, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
             var handler = extensions.Find<Initialized>();
-            if (handler != null) handler.Invoke(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
+            if (handler != null) handler.Fire(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
         }
 
         public static void Initialize(EventStation extensions, ErrorInitializationContext args)
@@ -592,7 +592,7 @@ namespace Elmah
 
         public static void InitHostName(EventStation container)
         {
-            container.Get<Initializing>().Fired += (_, args) => InitHostName(args.Payload);
+            container.Get<Initializing>().Firing += (_, args) => InitHostName(args.Payload);
         }
 
         private static void InitHostName(ErrorInitializationContext args)
@@ -603,7 +603,7 @@ namespace Elmah
 
         public static void InitUserName(EventStation container)
         {
-            container.Get<Initializing>().Fired += (_, args) =>
+            container.Get<Initializing>().Firing += (_, args) =>
             {
                 args.Payload.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty;
             };
@@ -611,7 +611,7 @@ namespace Elmah
 
         public static void InitWebCollections(EventStation container)
         {
-            container.Get<Initializing>().Fired += (_, args) => InitWebCollections(args.Payload);
+            container.Get<Initializing>().Firing += (_, args) => InitWebCollections(args.Payload);
         }
 
         private static void InitWebCollections(ErrorInitializationContext args)
