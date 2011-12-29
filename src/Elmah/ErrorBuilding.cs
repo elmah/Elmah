@@ -41,6 +41,90 @@ namespace Elmah
 
     #endregion
 
+    /// <summary>
+    /// HTTP module implementation that logs unhandled exceptions in an
+    /// ASP.NET Web application to an error log.
+    /// </summary>
+
+    public sealed class ErrorModule : HttpModuleBase
+    {
+        /// <summary>
+        /// Initializes the module and prepares it to handle requests.
+        /// </summary>
+
+        protected override void OnInit(HttpApplication application)
+        {
+            if (application == null) throw new ArgumentNullException("application");
+
+            application.Error += (sender, _) =>
+            {
+                var app = (HttpApplication) sender;
+                var exception = app.Server.GetLastError();
+                var context = new HttpContextWrapper(app.Context);
+                ErrorEvent.Fire(this, exception, context);
+            };
+        }
+    }
+
+    public static class Extensions
+    {
+        public static EventConnectionHandler Log(NameValueCollection settings)
+        {
+            return es =>
+            {
+                es.Get<ErrorEvent>().Fired += (_, args) =>
+                {
+                    ErrorLog.GetDefault(null).Log(args.Payload.Error);
+                };
+            };
+        }
+    }
+
+    public sealed class ErrorEvent : Event<ErrorEvent.Context>
+    {
+        public static void Fire(object sender, Exception exception, object context)
+        {
+            Fire(sender, exception, context, EventStation.Default);
+        }
+
+        public static void Fire(object sender, Exception exception, object context, EventStation station)
+        {
+            var error = new Error(exception, context, station);
+
+            var handler = station.Find<ErrorEvent>();
+            if (handler == null)
+                return;
+
+            var args = EventFiringEventArgs.Create(new Context(error, exception));
+            handler.Invoke(sender, args);
+        }
+
+        public sealed class Context
+        {
+            public Error Error { get; private set; }
+            public Exception Exception { get; private set; }
+
+            public Context(Error error) : 
+                this(error, null) {}
+
+            public Context(Error error, Exception exception)
+            {
+                if (exception == null) throw new ArgumentNullException("exception");
+
+                Exception = exception;
+                Error = error;
+            }
+        }
+    }
+
+    public static class EventFiringEventArgs
+    {
+        public static EventFiringEventArgs<T> Create<T>(T payload)
+        {
+            return new EventFiringEventArgs<T>(payload);
+        }
+    }
+
     public class EventFiringEventArgs<T> : EventArgs
     {
         private readonly T _payload;
