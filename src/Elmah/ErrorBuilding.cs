@@ -93,7 +93,7 @@ namespace Elmah
             public MailPriority MailPriority { get; set; }
             public bool ReportAsynchronously { get; set; }
             public string SmtpServer { get; set; }
-            public ushort SmtpPort { get; set; }
+            public int SmtpPort { get; set; }
             public string AuthUserName { get; set; }
             public string AuthPassword { get; set; }
             public bool DontSendYsod { get; set; }
