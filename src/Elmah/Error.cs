@@ -84,7 +84,7 @@ namespace Elmah
         /// </summary>
 
         public Error(Exception e, HttpContextBase context) :
-            this(e, context, ExtensionContainer.Default) { }
+            this(e, context, EventStation.Default) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Error"/> class
@@ -92,7 +92,7 @@ namespace Elmah
         /// object representing the context during the exception.
         /// </summary>
 
-        public Error(Exception e, object context, ExtensionContainer extensions)
+        public Error(Exception e, object context, EventStation station)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
@@ -110,8 +110,8 @@ namespace Elmah
             _detail = e.ToString();
             _time = DateTime.Now;
 
-            if (extensions != null)
-                extensions.Initialize(this, context);
+            if (station != null)
+                ErrorInitialization.Initialize(station, new ErrorInitializationContext(this, context));
         }
 
         internal static string TryGetHtmlErrorMessage(HttpException e)

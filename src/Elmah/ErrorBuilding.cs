@@ -41,46 +41,46 @@ namespace Elmah
 
     #endregion
 
-    public class ExtensionInvocationEventArgs : EventArgs
+    public class EventFiringEventArgs<T> : EventArgs
     {
-        private readonly object _payload;
+        private readonly T _payload;
 
-        public ExtensionInvocationEventArgs() : 
-            this(null) {}
+        public EventFiringEventArgs() : 
+            this(default(T)) {}
 
-        public ExtensionInvocationEventArgs(object payload)
+        public EventFiringEventArgs(T payload)
         {
             _payload = payload;
         }
 
         public bool IsHandled { get; set; }
-        public object Payload { get { return _payload; } }
+        public T Payload { get { return _payload; } }
         public object Result { get; set; }
     }
 
-    public delegate void ExtensionInvocationEventHandler(object sender, ExtensionInvocationEventArgs args);
+    public delegate void EventFiringHandler<T>(object sender, EventFiringEventArgs<T> args);
 
-    public class Extension
+    public class Event<T>
     {
-        public event ExtensionInvocationEventHandler Invoked;
+        public event EventFiringHandler<T> Fired;
 
-        public virtual void Invoke(object sender, ExtensionInvocationEventArgs args)
+        public virtual void Invoke(object sender, EventFiringEventArgs<T> args)
         {
             if (args.IsHandled) // Rare but possible
                 return;
-            var handler = Invoked;
+            var handler = Fired;
             if (handler == null) 
                 return;
             Invoke(handler.GetInvocationList(), sender, args);
         }
 
-        private static void Invoke(IEnumerable<Delegate> handlers, object sender, ExtensionInvocationEventArgs args)
+        private static void Invoke(IEnumerable<Delegate> handlers, object sender, EventFiringEventArgs<T> args)
         {
             Debug.Assert(handlers != null);
             Debug.Assert(args != null);
             Debug.Assert(!args.IsHandled);
 
-            foreach (ExtensionInvocationEventHandler handler in handlers)
+            foreach (EventFiringHandler<T> handler in handlers)
             {
                 handler(sender, args);
                 if (args.IsHandled)
@@ -89,92 +89,48 @@ namespace Elmah
         }
     }
 
-    [ Serializable ]
-    public sealed class ExtensionClass
+    public delegate void EventConnectionHandler(EventStation container);
+    public delegate EventConnectionHandler ExtensionSetupHandler(NameValueCollection settings);
+
+    public sealed class EventStation
     {
-        private readonly string _name;
+        private readonly Dictionary<Type, object> _events = new Dictionary<Type, object>();
 
-        public ExtensionClass() : 
-            this(null) {}
-
-        public ExtensionClass(string name)
+        public T Get<T>() where T : class, new()
         {
-            _name = !string.IsNullOrEmpty(name) 
-                  ? name 
-                  : Guid.NewGuid().ToString();
+            return (Find<T>() ?? (T) (_events[typeof(T)] = new T()));
         }
 
-        public string Name { get { return _name; } }
-
-        public bool Equals(ExtensionClass other)
+        public T Find<T>() where T : class
         {
-            if (other == null) return false;
-            return other == this || 0 == string.CompareOrdinal(other.Name, Name);
+            return (T) _events.Find(typeof(T));
         }
 
-        public override bool Equals(object obj)
+        private static ICollection<EventConnectionHandler> _modules = Array.AsReadOnly(new EventConnectionHandler[]
         {
-            return Equals(obj as ExtensionClass);
-        }
-
-        public override int GetHashCode() { return Name.GetHashCode(); }
-
-        public static bool operator ==(ExtensionClass left, ExtensionClass right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(ExtensionClass left, ExtensionClass right)
-        {
-            return !Equals(left, right);
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
-    public delegate void ExtensionConnectionHandler(ExtensionContainer container);
-    public delegate ExtensionConnectionHandler ExtensionSetupHandler(NameValueCollection settings);
-
-    public sealed class ExtensionContainer
-    {
-        private readonly Dictionary<object, Extension> _extensions = new Dictionary<object, Extension>();
-
-        public Extension this[object key]
-        {
-            get
-            {
-                return _extensions.Find(key) ?? (_extensions[key] = new Extension());
-            }
-        }
-
-        private static ICollection<ExtensionConnectionHandler> _customizations = Array.AsReadOnly(new ExtensionConnectionHandler[]
-        {
-            InitUserName, 
-            InitHostName, 
-            InitWebCollections, 
+            ErrorInitialization.InitUserName, 
+            ErrorInitialization.InitHostName, 
+            ErrorInitialization.InitWebCollections, 
         });
 
-        private static readonly ExtensionConnectionHandler[] _zeroCustomizations = new ExtensionConnectionHandler[0];
+        private static readonly EventConnectionHandler[] _zeroModules = new EventConnectionHandler[0];
 
-        static ExtensionContainer()
+        static EventStation()
         {
-            AppendCustomizations(LoadCustomizations());
+            AppendModules(LoadModules());
         }
 
-        public static ExtensionConnectionHandler[] LoadCustomizations()
+        public static EventConnectionHandler[] LoadModules()
         {
             var config = (IDictionary) Configuration.GetSubsection("errorInitializers");
-            return config != null ? LoadCustomizations(config) : _zeroCustomizations;
+            return config != null ? LoadModules(config) : _zeroModules;
         }
 
-        public static ExtensionConnectionHandler[] LoadCustomizations(IDictionary config)
+        public static EventConnectionHandler[] LoadModules(IDictionary config)
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            var customizations = new List<ExtensionConnectionHandler>(config.Count);
+            var customizations = new List<EventConnectionHandler>(config.Count);
 
             var e = config.GetEnumerator();
             while (e.MoveNext())
@@ -203,115 +159,138 @@ namespace Elmah
             return customizations.ToArray();
         }
 
-        public static ICollection<ExtensionConnectionHandler> Customizations
+        public static ICollection<EventConnectionHandler> Modules
         {
-            get { return _customizations; }
+            get { return _modules; }
         }
 
-        public static void AppendCustomizations(params ExtensionConnectionHandler[] customizations)
+        public static void AppendModules(params EventConnectionHandler[] modules)
         {
-            SetCustomizations(customizations, true);
+            SetModules(modules, true);
         }
 
-        public static void ResetCustomizations(params ExtensionConnectionHandler[] customizations)
+        public static void ResetModules(params EventConnectionHandler[] modules)
         {
-            SetCustomizations(customizations, false);
+            SetModules(modules, false);
         }
 
-        public static void SetCustomizations(ExtensionConnectionHandler[] customizations, bool append)
+        public static void SetModules(EventConnectionHandler[] modules, bool append)
         {
-            if (customizations == null)
+            if (modules == null)
                 return;
 
-            ICollection<ExtensionConnectionHandler> current;
-            ExtensionConnectionHandler[] updated;
+            ICollection<EventConnectionHandler> current;
+            EventConnectionHandler[] updated;
             do
             {
-                current = _customizations;
+                current = _modules;
                 int currentCount = append ? current.Count : 0;
-                updated = new ExtensionConnectionHandler[currentCount + customizations.Length];
+                updated = new EventConnectionHandler[currentCount + modules.Length];
                 if (append)
                     current.CopyTo(updated, 0);
-                Array.Copy(customizations, 0, updated, currentCount, customizations.Length);
+                Array.Copy(modules, 0, updated, currentCount, modules.Length);
                 // TODO handle duplicates
             }
-            while (current != Interlocked.CompareExchange(ref _customizations, Array.AsReadOnly(updated), current));
+            while (current != Interlocked.CompareExchange(ref _modules, Array.AsReadOnly(updated), current));
         }
 
-        [ThreadStatic] static ExtensionContainer _thread;
+        [ThreadStatic] static EventStation _thread;
         [ThreadStatic] static object _dependency;
 
-        public static ExtensionContainer Default
+        public static EventStation Default
         {
             get
             {
-                var customizations = Customizations;
-                var self = _dependency == customizations
+                var modules = Modules;
+                var self = _dependency == modules
                          ? _thread : null;
                 if (self == null)
                 {
-                    self = new ExtensionContainer();
-                    _dependency = customizations;
-                    foreach (ExtensionConnectionHandler customization in customizations)
-                        customization(self);
+                    self = new EventStation();
+                    _dependency = modules;
+                    foreach (var module in modules)
+                        module(self);
                     _thread = self;
                 }
                 return self;
             }
         }
+    }
 
-        private void OnErrorInitializing(ErrorInitializationEventArgs args)
+    public class ErrorInitializationContext
+    {
+        private readonly Error _error;
+        private readonly object _context;
+
+        public ErrorInitializationContext(Error error) : 
+            this(error, null) {}
+
+        public ErrorInitializationContext(Error error, object context)
+        {
+            if (error == null) throw new ArgumentNullException("error");
+            _error = error;
+            _context = context;
+        }
+
+        public Error Error { get { return _error; } }
+        public object Context { get { return _context; } }
+    }
+
+    public static class ErrorInitialization
+    {
+        public sealed class Initializing : Event<ErrorInitializationContext> { }
+        public sealed class Initialized : Event<ErrorInitializationContext> { }
+
+        private static void OnErrorInitializing(EventStation extensions, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
-            var handler = this["ErrorInitializing"];
-            if (handler != null) handler.Invoke(this, new ExtensionInvocationEventArgs(args));
+            var handler = extensions.Find<Initializing>();
+            if (handler != null) handler.Invoke(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
         }
 
-        private void OnErrorInitialized(ErrorInitializationEventArgs args)
+        private static void OnErrorInitialized(EventStation extensions, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
-            var handler = this["ErrorInitialized"];
-            if (handler != null) handler.Invoke(this, new ExtensionInvocationEventArgs(args));
+            var handler = extensions.Find<Initialized>();
+            if (handler != null) handler.Invoke(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
         }
 
-        public void Initialize(Error error, object context)
+        public static void Initialize(EventStation extensions, ErrorInitializationContext args)
         {
-            OnErrorInitializing(new ErrorInitializationEventArgs(error, context));
-            OnErrorInitialized(new ErrorInitializationEventArgs(error, context));
+            OnErrorInitializing(extensions, args);
+            OnErrorInitialized(extensions, args);
         }
 
-        internal static void OnErrorNopInit(object sender, ErrorInitializationEventArgs e) { /* NOP */ }
-
-        public static ExtensionConnectionHandler InitHostName(NameValueCollection settings)
+        public static EventConnectionHandler InitHostName(NameValueCollection settings)
         {
             return InitHostName;
         }
 
-        public static void InitHostName(ExtensionContainer container)
+        public static void InitHostName(EventStation container)
         {
-            container["ErrorInitializing"].Invoked += (_, args) => InitHostName((ErrorInitializationEventArgs) args.Payload);
+            container.Get<Initializing>().Fired += (_, args) => InitHostName(args.Payload);
         }
 
-        private static void InitHostName(ErrorInitializationEventArgs args)
+        private static void InitHostName(ErrorInitializationContext args)
         {
             var context = args.Context as HttpContext;
             args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
         }
 
-        public static void InitUserName(ExtensionContainer container)
+        public static void InitUserName(EventStation container)
         {
-            container["ErrorInitializing"].Invoked += (_, args) => 
+            container.Get<Initializing>().Fired += (_, args) =>
             {
-                ((ErrorInitializationEventArgs) args.Payload).Error.User = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
+                args.Payload.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty;
             };
         }
 
-        public static void InitWebCollections(ExtensionContainer container)
+        public static void InitWebCollections(EventStation container)
         {
-            container["ErrorInitializing"].Invoked += (_, args) => InitWebCollections((ErrorInitializationEventArgs) args.Payload);
+            container.Get<Initializing>().Fired += (_, args) => InitWebCollections(args.Payload);
         }
 
-        private static void InitWebCollections(ErrorInitializationEventArgs args)
+        private static void InitWebCollections(ErrorInitializationContext args)
         {
             var error = args.Error;
             var e = error.Exception;
@@ -326,7 +305,7 @@ namespace Elmah
             if (httpException != null)
             {
                 error.StatusCode = httpException.GetHttpCode();
-                error.WebHostHtmlMessage = Error.TryGetHtmlErrorMessage(httpException) ?? string.Empty;
+                error.WebHostHtmlMessage = Error.TryGetHtmlErrorMessage(httpException) ?? String.Empty;
             }
 
             //
@@ -344,7 +323,7 @@ namespace Elmah
                     {
                         var webUser = hc.User;
                         if (webUser != null
-                            && (webUser.Identity.Name ?? string.Empty).Length > 0)
+                            && (webUser.Identity.Name ?? String.Empty).Length > 0)
                         {
                             error.User = webUser.Identity.Name;
                         }
@@ -362,24 +341,5 @@ namespace Elmah
                 }
             }
         }
-    }
-
-    public class ErrorInitializationEventArgs : EventArgs
-    {
-        private readonly Error _error;
-        private readonly object _context;
-
-        public ErrorInitializationEventArgs(Error error) : 
-            this(error, null) {}
-
-        public ErrorInitializationEventArgs(Error error, object context)
-        {
-            if (error == null) throw new ArgumentNullException("error");
-            _error = error;
-            _context = context;
-        }
-
-        public Error Error { get { return _error; } }
-        public object Context { get { return _context; } }
     }
 }
