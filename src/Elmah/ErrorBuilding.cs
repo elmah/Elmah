@@ -71,15 +71,74 @@ namespace Elmah
         }
     }
 
+    public sealed class ExceptionFilterEvent : Event<ExceptionFilterEventArgs>
+    {
+        public static bool Fire(EventStation es, object sender, Exception exception, object context)
+        {
+            var handler = es.Find<ExceptionFilterEvent>();
+            if (handler == null) 
+                return false;
+            var args = new ExceptionFilterEventArgs(exception, context);
+            handler.Fire(sender, EventFiringEventArgs.Create(args));
+            return args.Dismissed;
+        }
+    }
+
+    public sealed class ErrorLogEvent : Event<ErrorLoggedEventArgs> { }
+
     public static class Extensions
     {
+        public static EventConnectionHandler Filter(NameValueCollection settings)
+        {
+            var config = (ErrorFilterConfiguration)Configuration.GetSubsection("errorFilter");
+
+            if (config == null)
+                return delegate { };
+
+            var assertion = config.Assertion;
+
+            return Filter(assertion.Test);
+        }
+
+        public static EventConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
+        {
+            return es =>
+            {
+                es.Get<ExceptionFilterEvent>().Firing += (sender, args) =>
+                {
+                    try
+                    {
+                        if (predicate(new ErrorFilterModule.AssertionHelperContext(/* TODO source */ sender, args.Payload.Exception, args.Payload.Context)))
+                            args.Payload.Dismiss();
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.WriteLine(e);
+                        throw; // TODO PrepareToRethrow()?
+                    }
+                };
+            };
+        }
+
         public static EventConnectionHandler Log(NameValueCollection settings)
         {
             return es =>
             {
                 es.Get<ErrorEvent>().Firing += (_, args) =>
                 {
-                    ErrorLog.GetDefault(null).Log(args.Payload.Error);
+                    var payload = args.Payload;
+                    var exception = payload.Exception;
+                    if (exception != null
+                        && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ErrorContext))
+                            return;
+
+                    var log = ErrorLog.GetDefault(null);
+                    var error = payload.Error;
+                    var id = log.Log(error);
+                    
+                    var handler = es.Find<ErrorLogEvent>();
+                    if (handler != null)
+                        handler.Fire(null, EventFiringEventArgs.Create(new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error))));
                 };
             };
         }
@@ -328,7 +387,7 @@ namespace Elmah
             if (handler == null)
                 return;
 
-            var args = EventFiringEventArgs.Create(new Context(error, exception));
+            var args = EventFiringEventArgs.Create(new Context(error, exception, context));
             handler.Fire(sender, args);
         }
 
@@ -336,15 +395,20 @@ namespace Elmah
         {
             public Error Error { get; private set; }
             public Exception Exception { get; private set; }
+            public object ErrorContext { get; private set; }
 
             public Context(Error error) : 
                 this(error, null) {}
 
-            public Context(Error error, Exception exception)
+            public Context(Error error, Exception exception) : 
+                this(error, exception, null) {}
+
+            public Context(Error error, Exception exception, object context)
             {
                 if (exception == null) throw new ArgumentNullException("exception");
 
                 Exception = exception;
+                ErrorContext = context;
                 Error = error;
             }
         }
