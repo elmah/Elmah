@@ -66,7 +66,7 @@ namespace Elmah
                 var app = (HttpApplication) sender;
                 var exception = app.Server.GetLastError();
                 var context = new HttpContextWrapper(app.Context);
-                ErrorEvent.Fire(this, exception, context);
+                ExceptionEvent.Fire(this, exception, context);
             };
         }
     }
@@ -124,16 +124,16 @@ namespace Elmah
         {
             return es =>
             {
-                es.Get<ErrorEvent>().Firing += (_, args) =>
+                es.Get<ExceptionEvent>().Firing += (_, args) =>
                 {
                     var payload = args.Payload;
                     var exception = payload.Exception;
                     if (exception != null
-                        && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ErrorContext))
+                        && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ExceptionContext))
                             return;
 
                     var log = ErrorLog.GetDefault(null);
-                    var error = payload.Error;
+                    var error = payload.CreateError(es);
                     var id = log.Log(error);
                     
                     var handler = es.Find<ErrorLogEvent>();
@@ -185,9 +185,10 @@ namespace Elmah
 
             return es =>
             {
-                es.Get<ErrorEvent>().Firing += (_, args) =>
+                es.Get<ExceptionEvent>().Firing += (_, args) =>
                 {
-                    var error = args.Payload.Error;
+                    var error = args.Payload.CreateError(es);
+
                     if (options.ReportAsynchronously)
                     {
                         //
@@ -372,7 +373,7 @@ namespace Elmah
         }
     }
 
-    public sealed class ErrorEvent : Event<ErrorEvent.Context>
+    public sealed class ExceptionEvent : Event<ExceptionEvent.Context>
     {
         public static void Fire(object sender, Exception exception, object context)
         {
@@ -381,35 +382,33 @@ namespace Elmah
 
         public static void Fire(object sender, Exception exception, object context, EventStation station)
         {
-            var error = new Error(exception, context, station);
-
-            var handler = station.Find<ErrorEvent>();
+            var handler = station.Find<ExceptionEvent>();
             if (handler == null)
                 return;
 
-            var args = EventFiringEventArgs.Create(new Context(error, exception, context));
+            var args = EventFiringEventArgs.Create(new Context(exception, context));
             handler.Fire(sender, args);
         }
 
         public sealed class Context
         {
-            public Error Error { get; private set; }
             public Exception Exception { get; private set; }
-            public object ErrorContext { get; private set; }
+            public object ExceptionContext { get; private set; }
 
-            public Context(Error error) : 
-                this(error, null) {}
+            public Context(Exception exception) : 
+                this(exception, null) {}
 
-            public Context(Error error, Exception exception) : 
-                this(error, exception, null) {}
-
-            public Context(Error error, Exception exception, object context)
+            public Context(Exception exception, object context)
             {
                 if (exception == null) throw new ArgumentNullException("exception");
 
                 Exception = exception;
-                ErrorContext = context;
-                Error = error;
+                ExceptionContext = context;
+            }
+
+            public Error CreateError(EventStation es)
+            {
+                return new Error(Exception, ExceptionContext, es);
             }
         }
     }
