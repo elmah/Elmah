@@ -79,7 +79,7 @@ namespace Elmah
             if (handler == null) 
                 return false;
             var args = new ExceptionFilterEventArgs(exception, context);
-            handler.Fire(sender, EventFiringEventArgs.Create(args));
+            handler.Fire(sender, args);
             return args.Dismissed;
         }
     }
@@ -138,7 +138,7 @@ namespace Elmah
                     
                     var handler = es.Find<ErrorLogEvent>();
                     if (handler != null)
-                        handler.Fire(null, EventFiringEventArgs.Create(new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error))));
+                        handler.Fire(null, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
                 };
             };
         }
@@ -299,7 +299,7 @@ namespace Elmah
                 }
             }
 
-            var args = EventFiringEventArgs.Create(new ErrorMailEventArgs(error, mail));
+            var args = new ErrorMailEventArgs(error, mail);
             var es = EventStation.Default;
 
             try
@@ -386,8 +386,7 @@ namespace Elmah
             if (handler == null)
                 return;
 
-            var args = EventFiringEventArgs.Create(new Context(exception, context));
-            handler.Fire(sender, args);
+            handler.Fire(sender, new Context(exception, context));
         }
 
         public sealed class Context
@@ -450,6 +449,11 @@ namespace Elmah
     public class Event<T>
     {
         public event EventFiringHandler<T> Firing;
+
+        public void Fire(object sender, T payload)
+        {
+            Fire(sender, new EventFiringEventArgs<T>(payload));
+        }
 
         public virtual void Fire(object sender, EventFiringEventArgs<T> args)
         {
@@ -632,14 +636,14 @@ namespace Elmah
         {
             Debug.Assert(args != null);
             var handler = extensions.Find<Initializing>();
-            if (handler != null) handler.Fire(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
+            if (handler != null) handler.Fire(/* TODO sender */ null, args);
         }
 
         private static void OnErrorInitialized(EventStation extensions, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
             var handler = extensions.Find<Initialized>();
-            if (handler != null) handler.Fire(/* TODO sender */ null, new EventFiringEventArgs<ErrorInitializationContext>(args));
+            if (handler != null) handler.Fire(/* TODO sender */ null, args);
         }
 
         public static void Initialize(EventStation extensions, ErrorInitializationContext args)
