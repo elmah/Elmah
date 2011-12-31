@@ -9,44 +9,44 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using System.Threading;
-
-namespace Samples.AsynchronousProgrammingModel
+namespace Elmah
 {
-    internal partial class AsyncResultNoResult : IAsyncResult
+    #region Imports
+
+    using System;
+    using System.Threading;
+
+    #endregion
+
+    class AsyncResultNoResult : IAsyncResult
     {
         // Fields set at construction which never change while 
         // operation is pending
-        private readonly AsyncCallback m_AsyncCallback;
-        private readonly Object m_AsyncState;
+        private readonly AsyncCallback _asyncCallback;
+        private readonly object _asyncState;
 
         // Fields set at construction which do change after 
         // operation completes
-        private const Int32 c_StatePending = 0;
-        private const Int32 c_StateCompletedSynchronously = 1;
-        private const Int32 c_StateCompletedAsynchronously = 2;
-        private Int32 m_CompletedState = c_StatePending;
+        private const int StatePending = 0;
+        private const int StateCompletedSynchronously = 1;
+        private const int StateCompletedAsynchronously = 2;
+        private int _completedState = StatePending;
 
         // Field that may or may not get set depending on usage
-        private ManualResetEvent m_AsyncWaitHandle;
+        private ManualResetEvent _waitHandle;
 
         // Fields set when operation completes
-        private Exception m_exception;
+        private Exception _exception;
 
         /// <summary>
         /// The object which started the operation.
         /// </summary>
-        private object m_owner;
+        private readonly object _owner;
 
         /// <summary>
         /// Used to verify the BeginXXX and EndXXX calls match.
         /// </summary>
-        private string m_operationId;
+        private string _operationId;
 
         protected AsyncResultNoResult(
             AsyncCallback asyncCallback,
@@ -54,10 +54,10 @@ namespace Samples.AsynchronousProgrammingModel
             object owner,
             string operationId)
         {
-            m_AsyncCallback = asyncCallback;
-            m_AsyncState = state;
-            m_owner = owner;
-            m_operationId =
+            _asyncCallback = asyncCallback;
+            _asyncState = state;
+            _owner = owner;
+            _operationId =
                 String.IsNullOrEmpty(operationId) ? String.Empty : operationId;
         }
 
@@ -68,33 +68,34 @@ namespace Samples.AsynchronousProgrammingModel
 
         protected bool Complete(Exception exception)
         {
-            return this.Complete(exception, false /*completedSynchronously*/);
+            return Complete(exception, false /*completedSynchronously*/);
         }
 
         protected bool Complete(Exception exception, bool completedSynchronously)
         {
-            bool result = false;
+            var result = false;
 
             // The m_CompletedState field MUST be set prior calling the callback
-            Int32 prevState = Interlocked.Exchange(ref m_CompletedState,
-                completedSynchronously ? c_StateCompletedSynchronously :
-                c_StateCompletedAsynchronously);
-            if (prevState == c_StatePending)
+            var prevState = Interlocked.Exchange(ref _completedState,
+                completedSynchronously ? StateCompletedSynchronously :
+                StateCompletedAsynchronously);
+            
+            if (prevState == StatePending)
             {
                 // Passing null for exception means no error occurred. 
                 // This is the common case
-                m_exception = exception;
+                _exception = exception;
 
                 // Do any processing before completion.
-                this.Completing(exception, completedSynchronously);
+                Completing(exception, completedSynchronously);
 
                 // If the event exists, set it
-                if (m_AsyncWaitHandle != null) m_AsyncWaitHandle.Set();
+                if (_waitHandle != null) _waitHandle.Set();
 
-                this.MakeCallback(m_AsyncCallback, this);
+                MakeCallback(_asyncCallback, this);
 
                 // Do any final processing after completion
-                this.Completed(exception, completedSynchronously);
+                Completed(exception, completedSynchronously);
 
                 result = true;
             }
@@ -110,33 +111,33 @@ namespace Samples.AsynchronousProgrammingModel
 
         private void CheckUsage(object owner, string operationId)
         {
-            if (!object.ReferenceEquals(owner, m_owner))
+            if (!ReferenceEquals(owner, _owner))
             {
                 throw new InvalidOperationException(
                     "End was called on a different object than Begin.");
             }
 
             // Reuse the operation ID to detect multiple calls to end.
-            if (object.ReferenceEquals(null, m_operationId))
+            if (ReferenceEquals(null, _operationId))
             {
                 throw new InvalidOperationException(
                     "End was called multiple times for this operation.");
             }
 
-            if (!String.Equals(operationId, m_operationId))
+            if (!string.Equals(operationId, _operationId, StringComparison.Ordinal))
             {
                 throw new ArgumentException(
                     "End operation type was different than Begin.");
             }
 
             // Mark that End was already called.
-            m_operationId = null;
+            _operationId = null;
         }
 
         public static void End(
             IAsyncResult result, object owner, string operationId)
         {
-            AsyncResultNoResult asyncResult = result as AsyncResultNoResult;
+            var asyncResult = result as AsyncResultNoResult;
             if (asyncResult == null)
             {
                 throw new ArgumentException(
@@ -154,23 +155,23 @@ namespace Samples.AsynchronousProgrammingModel
                 // If the operation isn't done, wait for it
                 asyncResult.AsyncWaitHandle.WaitOne();
                 asyncResult.AsyncWaitHandle.Close();
-                asyncResult.m_AsyncWaitHandle = null;  // Allow early GC
+                asyncResult._waitHandle = null;  // Allow early GC
             }
 
             // Operation is done: if an exception occurred, throw it
-            if (asyncResult.m_exception != null) throw asyncResult.m_exception;
+            if (asyncResult._exception != null) throw asyncResult._exception;
         }
 
         #region Implementation of IAsyncResult
 
-        public Object AsyncState { get { return m_AsyncState; } }
+        public Object AsyncState { get { return _asyncState; } }
 
         public bool CompletedSynchronously
         {
             get
             {
-                return Thread.VolatileRead(ref m_CompletedState) ==
-                    c_StateCompletedSynchronously;
+                return Thread.VolatileRead(ref _completedState) ==
+                    StateCompletedSynchronously;
             }
         }
 
@@ -178,12 +179,11 @@ namespace Samples.AsynchronousProgrammingModel
         {
             get
             {
-                if (m_AsyncWaitHandle == null)
+                if (_waitHandle == null)
                 {
-                    bool done = IsCompleted;
-                    ManualResetEvent mre = new ManualResetEvent(done);
-                    if (Interlocked.CompareExchange(ref m_AsyncWaitHandle,
-                        mre, null) != null)
+                    var done = IsCompleted;
+                    var mre = new ManualResetEvent(done);
+                    if (Interlocked.CompareExchange(ref _waitHandle, mre, null) != null)
                     {
                         // Another thread created this object's event; dispose 
                         // the event we just created
@@ -195,11 +195,11 @@ namespace Samples.AsynchronousProgrammingModel
                         {
                             // If the operation wasn't done when we created 
                             // the event but now it is done, set the event
-                            m_AsyncWaitHandle.Set();
+                            _waitHandle.Set();
                         }
                     }
                 }
-                return m_AsyncWaitHandle;
+                return _waitHandle;
             }
         }
 
@@ -207,44 +207,34 @@ namespace Samples.AsynchronousProgrammingModel
         {
             get
             {
-                return Thread.VolatileRead(ref m_CompletedState) !=
-                    c_StatePending;
+                return Thread.VolatileRead(ref _completedState) != StatePending;
             }
         }
         #endregion
 
-        #region Extensibility
-
         protected virtual void Completing(
-            Exception exception, bool completedSynchronously)
-        {
-        }
+            Exception exception, bool completedSynchronously) {}
 
         protected virtual void MakeCallback(
             AsyncCallback callback, AsyncResultNoResult result)
         {
             // If a callback method was set, call it
             if (callback != null)
-            {
                 callback(result);
-            }
         }
 
         protected virtual void Completed(
-            Exception exception, bool completedSynchronously)
-        {
-        }
-        #endregion
+            Exception exception, bool completedSynchronously) {}
     }
 
-    internal partial class AsyncResult<TResult> : AsyncResultNoResult
+    class AsyncResult<T> : AsyncResultNoResult
     {
         // Field set when operation completes
-        private TResult m_result = default(TResult);
+        private T _result;
 
-        protected void SetResult(TResult result)
+        protected void SetResult(T result)
         {
-            m_result = result;
+            _result = result;
         }
 
         protected AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) :
@@ -252,9 +242,9 @@ namespace Samples.AsynchronousProgrammingModel
         {
         }
 
-        new public static TResult End(IAsyncResult result, object owner, string operationId)
+        new public static T End(IAsyncResult result, object owner, string operationId)
         {
-            AsyncResult<TResult> asyncResult = result as AsyncResult<TResult>;
+            var asyncResult = result as AsyncResult<T>;
             if (asyncResult == null)
             {
                 throw new ArgumentException(
@@ -267,7 +257,7 @@ namespace Samples.AsynchronousProgrammingModel
             AsyncResultNoResult.End(result, owner, operationId);
 
             // Return the result (if above didn't throw)
-            return asyncResult.m_result;
+            return asyncResult._result;
         }
     }
 }

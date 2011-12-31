@@ -34,7 +34,6 @@ namespace Elmah
     using System.Threading;
     using System.Web;
     using System.Collections.Generic;
-    using Samples.AsynchronousProgrammingModel;
 
     #endregion
 
@@ -429,7 +428,7 @@ namespace Elmah
             }
         }
 
-        private sealed class AsyncResult : Samples.AsynchronousProgrammingModel.AsyncResultNoResult
+        private sealed class AsyncResult : AsyncResultNoResult
         {
             public AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) : 
                 base(asyncCallback, state, owner, operationId) {}
