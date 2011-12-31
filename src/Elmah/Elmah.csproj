@@ -131,6 +131,7 @@
     <Compile Include="AboutPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Apm.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -343,8 +344,6 @@
     <Compile Include="StringFormatter.cs">
     </Compile>
     <Compile Include="StringTranslation.cs">
-    </Compile>
-    <Compile Include="SynchronousAsyncResult.cs">
     </Compile>
     <Compile Include="SQLiteErrorLog.cs">
     </Compile>

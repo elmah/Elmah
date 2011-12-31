@@ -164,7 +164,23 @@ namespace Elmah
             }
 
             // Operation is done: if an exception occurred, throw it
-            if (asyncResult._exception != null) throw asyncResult._exception;
+            if (asyncResult._exception != null)
+            {
+                //throw new ArgumentException("IAsyncResult object did not come from the corresponding async method on this type.", "asyncResult");
+                //
+                // IMPORTANT! The End method on SynchronousAsyncResult will 
+                // throw an exception if that's what Log did when 
+                // BeginLog called it. The unforunate side effect of this is
+                // the stack trace information for the exception is lost and 
+                // reset to this point. There seems to be a basic failure in the 
+                // framework to accommodate for this case more generally. One 
+                // could handle this through a custom exception that wraps the 
+                // original exception, but this assumes that an invocation will 
+                // only throw an exception of that custom type.
+                //
+
+                throw asyncResult._exception;
+            }
         }
 
         #region Implementation of IAsyncResult
@@ -237,15 +253,13 @@ namespace Elmah
         // Field set when operation completes
         private T _result;
 
-        protected void SetResult(T result)
+        public void SetResult(T result)
         {
             _result = result;
         }
 
-        protected AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) :
-            base(asyncCallback, state, owner, operationId)
-        {
-        }
+        public AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) :
+            base(asyncCallback, state, owner, operationId) {}
 
         new public static T End(IAsyncResult result, object owner, string operationId)
         {
