@@ -34,6 +34,7 @@ namespace Elmah
     using System.Threading;
     using System.Web;
     using System.Collections.Generic;
+    using Samples.AsynchronousProgrammingModel;
 
     #endregion
 
@@ -99,7 +100,7 @@ namespace Elmah
             context.Response.BufferOutput = false;
             format.Header();
 
-            var result = new AsyncResult(extraData);
+            var result = new AsyncResult(cb, extraData, typeof(ErrorLogDownloadHandler), "ProcessRequest");
             var log = ErrorLog.GetDefault(context);
             var pageIndex = 0;
             var lastBeatTime = DateTime.Now;
@@ -138,7 +139,7 @@ namespace Elmah
                     {
                         if (count > 0)
                             format.Entries(new ErrorLogEntry[0], total); // Terminator
-                        result.Complete(false, cb);
+                        result.Complete();
                         return;
                     }
 
@@ -152,7 +153,7 @@ namespace Elmah
                     {
                         if (!response.IsClientConnected)
                         {
-                            result.Complete(true, cb);
+                            result.Complete();
                             return;
                         }
 
@@ -178,7 +179,7 @@ namespace Elmah
                     // completion.
                     //
 
-                    result.Complete(cb, e);
+                    result.Complete(e);
                 }
             };
 
@@ -195,7 +196,7 @@ namespace Elmah
             if (result == null)
                 throw new ArgumentNullException("result");
             
-            ((AsyncResult) result).End();
+            AsyncResultNoResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
         }
 
         private static Format GetFormat(HttpContextBase context, string format)
@@ -428,112 +429,14 @@ namespace Elmah
             }
         }
 
-        private sealed class AsyncResult : IAsyncResult
+        private sealed class AsyncResult : Samples.AsynchronousProgrammingModel.AsyncResultNoResult
         {
-            private readonly object _lock = new object();
-            private ManualResetEvent _event;
-            private readonly object _userState;
-            private bool _completed;
-            private Exception _exception;
-            private bool _ended;
-            private bool _aborted;
+            public AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) : 
+                base(asyncCallback, state, owner, operationId) {}
 
-            internal event EventHandler Completed;
-
-            public AsyncResult(object userState)
+            public new void Complete(Exception exception = null)
             {
-                _userState = userState;
-            }
-
-            public bool IsCompleted
-            {
-                get { return _completed; }
-            }
-
-            public WaitHandle AsyncWaitHandle
-            {
-                get
-                {
-                    if (_event == null)
-                    {
-                        lock (_lock)
-                        {
-                            if (_event == null)
-                                _event = new ManualResetEvent(_completed);
-                        }
-                    }
-
-                    return _event;
-                }
-            }
-
-            public object AsyncState
-            {
-                get { return _userState; }
-            }
-
-            public bool CompletedSynchronously
-            {
-                get { return false; }
-            }
-
-            internal void Complete(bool aborted, AsyncCallback callback)
-            {
-                if (_completed)
-                    throw new InvalidOperationException();
-
-                _aborted = aborted;
-
-                try
-                {
-                    lock (_lock)
-                    {
-                        _completed = true;
-
-                        if (_event != null)
-                            _event.Set();
-                    }
-
-                    if (callback != null)
-                        callback(this);
-                }
-                finally
-                {
-                    OnCompleted();
-                }
-            }
-
-            internal void Complete(AsyncCallback callback, Exception e)
-            {
-                _exception = e;
-                Complete(false, callback);
-            }
-
-            internal bool End()
-            {
-                if (_ended)
-                    throw new InvalidOperationException();
-
-                _ended = true;
-
-                if (!IsCompleted)
-                    AsyncWaitHandle.WaitOne();
-
-                if (_event != null)
-                    _event.Close();
-
-                if (_exception != null)
-                    throw _exception;
-
-                return _aborted;
-            }
-
-            private void OnCompleted()
-            {
-                EventHandler handler = Completed;
-
-                if (handler != null)
-                    handler(this, EventArgs.Empty);
+                Complete(exception, false);
             }
         }
 
