@@ -195,7 +195,7 @@ namespace Elmah
             if (result == null)
                 throw new ArgumentNullException("result");
             
-            AsyncResultNoResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
+            AsyncResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
         }
 
         private static Format GetFormat(HttpContextBase context, string format)
@@ -425,17 +425,6 @@ namespace Elmah
                 }
 
                 Context.Response.Output.Write(writer);
-            }
-        }
-
-        private sealed class AsyncResult : AsyncResultNoResult
-        {
-            public AsyncResult(AsyncCallback asyncCallback, object state, object owner, string operationId) : 
-                base(asyncCallback, state, owner, operationId) {}
-
-            public new void Complete(Exception exception = null)
-            {
-                Complete(exception, false);
             }
         }
 

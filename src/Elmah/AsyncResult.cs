@@ -18,7 +18,7 @@ namespace Elmah
 
     #endregion
 
-    class AsyncResultNoResult : IAsyncResult
+    class AsyncResult : IAsyncResult
     {
         // Fields set at construction which never change while 
         // operation is pending
@@ -48,7 +48,7 @@ namespace Elmah
         /// </summary>
         private string _operationId;
 
-        protected AsyncResultNoResult(
+        protected internal AsyncResult(
             AsyncCallback asyncCallback,
             object state,
             object owner,
@@ -66,12 +66,17 @@ namespace Elmah
             // Starts processing of the operation.
         }
 
-        protected bool Complete(Exception exception)
+        public bool Complete()
+        {
+            return Complete(null);
+        }
+
+        public bool Complete(Exception exception)
         {
             return Complete(exception, false /*completedSynchronously*/);
         }
 
-        protected bool Complete(Exception exception, bool completedSynchronously)
+        public bool Complete(Exception exception, bool completedSynchronously)
         {
             var result = false;
 
@@ -137,7 +142,7 @@ namespace Elmah
         public static void End(
             IAsyncResult result, object owner, string operationId)
         {
-            var asyncResult = result as AsyncResultNoResult;
+            var asyncResult = result as AsyncResult;
             if (asyncResult == null)
             {
                 throw new ArgumentException(
@@ -216,7 +221,7 @@ namespace Elmah
             Exception exception, bool completedSynchronously) {}
 
         protected virtual void MakeCallback(
-            AsyncCallback callback, AsyncResultNoResult result)
+            AsyncCallback callback, AsyncResult result)
         {
             // If a callback method was set, call it
             if (callback != null)
@@ -227,7 +232,7 @@ namespace Elmah
             Exception exception, bool completedSynchronously) {}
     }
 
-    class AsyncResult<T> : AsyncResultNoResult
+    class AsyncResult<T> : AsyncResult
     {
         // Field set when operation completes
         private T _result;
@@ -254,7 +259,7 @@ namespace Elmah
             }
 
             // Wait until operation has completed 
-            AsyncResultNoResult.End(result, owner, operationId);
+            AsyncResult.End(result, owner, operationId);
 
             // Return the result (if above didn't throw)
             return asyncResult._result;
