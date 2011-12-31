@@ -40,14 +40,9 @@ namespace Elmah
     /// the 15 most recent errors recorded in the error log.
     /// </summary>
 
-    internal sealed class ErrorRssHandler : IHttpHandler
+    static class ErrorRssHandler
     {
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-
-        public void ProcessRequest(HttpContextBase context)
+        public static void ProcessRequest(HttpContextBase context)
         {
             context.Response.ContentType = "application/xml";
 
@@ -109,11 +104,6 @@ namespace Elmah
             //
 
             context.Response.Write(XmlText.StripIllegalXmlCharacters(XmlSerializer.Serialize(rss)));
-        }
-
-        public bool IsReusable
-        {
-            get { return false; }
         }
     }
 }

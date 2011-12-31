@@ -37,14 +37,9 @@ namespace Elmah
     /// Renders an error as an XML document.
     /// </summary>
 
-    internal sealed class ErrorXmlHandler : IHttpHandler
+    static class ErrorXmlHandler
     {
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-
-        public void ProcessRequest(HttpContextBase context)
+        public static void ProcessRequest(HttpContextBase context)
         {
             HttpResponseBase response = context.Response;
             response.ContentType = "application/xml";
@@ -88,11 +83,6 @@ namespace Elmah
             writer.WriteEndElement(/* error */);
             writer.WriteEndDocument();
             writer.Flush();
-        }
-
-        public bool IsReusable
-        {
-            get { return false; }
         }
     }
 }

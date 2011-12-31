@@ -195,6 +195,7 @@
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Error.cs">

@@ -36,14 +36,9 @@ namespace Elmah
     /// Renders an error as JSON Text (RFC 4627).
     /// </summary>
 
-    internal sealed class ErrorJsonHandler : IHttpHandler
+    static class ErrorJsonHandler
     {
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-        
-        public void ProcessRequest(HttpContextBase context)
+        public static void ProcessRequest(HttpContextBase context)
         {
             var response = context.Response;
             response.ContentType = "application/json";
@@ -76,11 +71,6 @@ namespace Elmah
             //
 
             ErrorJson.Encode(entry.Error, response.Output);
-        }
-
-        public bool IsReusable
-        {
-            get { return false; }
         }
     }
 }
