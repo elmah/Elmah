@@ -165,6 +165,9 @@ namespace Elmah
 
                     errorEntryList.Clear();
 
+                    // FIXME!!!
+                    // TODO Don't let the stack get too deep if callbacks complete synchronously!
+
                     log.BeginGetErrors(++pageIndex, _pageSize, errorEntryList,
                         onGetErrors[0], null);
                 }
