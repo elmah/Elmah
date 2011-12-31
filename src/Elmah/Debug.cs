@@ -40,14 +40,14 @@ namespace Elmah
     
     internal static class Debug
     {
-        [ Conditional("DEBUG") ]
+        [ Conditional("DEBUG"), DebuggerStepThrough ]
         [ AssertionMethod ]
         public static void Assert([AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition)
         {
             SysDebug.Assert(condition);
         }
 
-        [ Conditional("DEBUG") ]
+        [ Conditional("DEBUG"), DebuggerStepThrough ]
         public static void AssertStringNotEmpty(string s)
         {
             Assert(s != null);
