@@ -21,23 +21,35 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: DictionaryExtensions.cs 645 2009-06-01 21:42:07Z azizatif $")]
-
 namespace Elmah
 {
-    #region Imports
-
     using System;
-    using System.Collections;
 
-    #endregion
-
-    static class DictionaryExtensions
+    static class Apm
     {
-        public static T Find<T>(this IDictionary dict, object key, T @default)
+        //
+        // Provides boilerplate implementation for implementing asnychronous 
+        // BeginXXXX and EndXXXX methods over a synchronous implementation.
+        //
+
+        public static AsyncResult<T> BeginSync<T>(AsyncCallback asyncCallback, object asyncState, object owner, string operationId, Func<T> syncFunc)
         {
-            if (dict == null) throw new ArgumentNullException("dict");
-            return (T) (dict[key] ?? @default);
+            Debug.Assert(!string.IsNullOrEmpty(operationId));
+            Debug.Assert(syncFunc != null);
+
+            var asyncResult = new AsyncResult<T>(asyncCallback, asyncState, owner, operationId);
+
+            try
+            {
+                asyncResult.SetResult(syncFunc());
+                asyncResult.Complete(null, true);
+            }
+            catch (Exception e)
+            {
+                asyncResult.Complete(e, true);
+            }
+
+            return asyncResult;
         }
     }
 }

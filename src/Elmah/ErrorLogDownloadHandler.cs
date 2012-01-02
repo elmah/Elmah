@@ -28,11 +28,9 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections.Specialized;
     using System.Globalization;
     using System.IO;
     using System.Text.RegularExpressions;
-    using System.Threading;
     using System.Web;
     using System.Collections.Generic;
 
@@ -44,17 +42,7 @@ namespace Elmah
 
         private const int _pageSize = 100;
 
-        private Format _format;
-        private int _pageIndex;
-        private int _downloadCount;
-        private int _maxDownloadCount = -1;
-
-        private AsyncResult _result;
-        private ErrorLog _log;
-        private DateTime _lastBeatTime;
-        private List<ErrorLogEntry> _errorEntryList;
-        private HttpContextBase _context;
-        private AsyncCallback _callback;
+        #region IHttpAsyncHandler implementation
 
         void IHttpHandler.ProcessRequest(HttpContext context)
         {
@@ -66,168 +54,163 @@ namespace Elmah
             return BeginProcessRequest(new HttpContextWrapper(context), cb, extraData);
         }
 
-        private void ProcessRequest(HttpContextBase context)
+        void IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)
         {
-            EndProcessRequest(BeginProcessRequest(context, null, null));
+            EndProcessRequest(result);
         }
 
-        public bool IsReusable
+        bool IHttpHandler.IsReusable
         {
             get { return false; }
         }
 
-        public IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback cb, object extraData)
+        #endregion
+
+        public static void ProcessRequest(HttpContextBase context)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
+            EndProcessRequest(BeginProcessRequest(context, null, null));
+        }
 
-            if (_result != null)
-                throw new InvalidOperationException("An asynchronous operation is already pending.");
-
-            HttpRequestBase request = context.Request;
-            NameValueCollection query = request.QueryString;
+        public static IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback cb, object extraData)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+            
+            var request = context.Request;
+            var query = request.QueryString;
 
             //
             // Limit the download by some maximum # of records?
             //
 
-            _maxDownloadCount = Math.Max(0, Convert.ToInt32(query["limit"], CultureInfo.InvariantCulture));
+            var maxDownloadCount = Math.Max(0, Convert.ToInt32(query["limit"], CultureInfo.InvariantCulture));
 
             //
             // Determine the desired output format.
             //
 
-            string format = Mask.EmptyString(query["format"], "csv").ToLower(CultureInfo.InvariantCulture);
-
-            switch (format)
-            {
-                case "csv": _format = new CsvFormat(context); break;
-                case "jsonp": _format = new JsonPaddingFormat(context); break;
-                case "html-jsonp": _format = new JsonPaddingFormat(context, /* wrapped */ true); break;
-                default:
-                    throw new Exception("Request log format is not supported.");
-            }
-
-            Debug.Assert(_format != null);
+            var format = GetFormat(context, Mask.EmptyString(query["format"], "csv").ToLowerInvariant());
+            Debug.Assert(format != null);
 
             //
             // Emit format header, initialize and then fetch results.
             //
 
             context.Response.BufferOutput = false;
-            _format.Header();
+            format.Header();
 
-            AsyncResult result = _result = new AsyncResult(extraData);
-            _log = ErrorLog.GetDefault(context);
-            _pageIndex = 0;
-            _lastBeatTime = DateTime.Now;
-            _context = context;
-            _callback = cb;
-            _errorEntryList = new List<ErrorLogEntry>(_pageSize);
+            var result = new AsyncResult(cb, extraData, typeof(ErrorLogDownloadHandler), "ProcessRequest");
+            var log = ErrorLog.GetDefault(context);
+            var pageIndex = 0;
+            var lastBeatTime = DateTime.Now;
+            var errorEntryList = new List<ErrorLogEntry>(_pageSize);
+            var downloadCount = 0;
 
-            _log.BeginGetErrors(_pageIndex, _pageSize, _errorEntryList, 
-                new AsyncCallback(GetErrorsCallback), null);
+            var onGetErrors = new AsyncCallback[1];
+            onGetErrors[0] = ar =>
+            {
+                try
+                {
+                    if (ar == null) throw new ArgumentNullException("ar");
+
+                    var total = log.EndGetErrors(ar);
+                    var count = errorEntryList.Count;
+
+                    if (maxDownloadCount > 0)
+                    {
+                        var remaining = maxDownloadCount - (downloadCount + count);
+                        if (remaining < 0)
+                            count += remaining;
+                    }
+
+                    format.Entries(errorEntryList, 0, count, total);
+                    downloadCount += count;
+
+                    var response = context.Response;
+                    response.Flush();
+
+                    //
+                    // Done if either the end of the list (no more errors found) or
+                    // the requested limit has been reached.
+                    //
+
+                    if (count == 0 || downloadCount == maxDownloadCount)
+                    {
+                        if (count > 0)
+                            format.Entries(new ErrorLogEntry[0], total); // Terminator
+                        result.Complete();
+                        return;
+                    }
+
+                    //
+                    // Poll whether the client is still connected so data is not
+                    // unnecessarily sent to an abandoned connection. This check is 
+                    // only performed at certain intervals.
+                    //
+
+                    if (DateTime.Now - lastBeatTime > _beatPollInterval)
+                    {
+                        if (!response.IsClientConnected)
+                        {
+                            result.Complete();
+                            return;
+                        }
+
+                        lastBeatTime = DateTime.Now;
+                    }
+
+                    //
+                    // Fetch next page of results.
+                    //
+
+                    errorEntryList.Clear();
+
+                    // FIXME!!!
+                    // TODO Don't let the stack get too deep if callbacks complete synchronously!
+
+                    log.BeginGetErrors(++pageIndex, _pageSize, errorEntryList,
+                        onGetErrors[0], null);
+                }
+                catch (Exception e)
+                {
+                    //
+                    // If anything goes wrong during callback processing then 
+                    // the exception needs to be captured and the raising 
+                    // delayed until EndProcessRequest.Meanwhile, the 
+                    // BeginProcessRequest called is notified immediately of 
+                    // completion.
+                    //
+
+                    result.Complete(e);
+                }
+            };
+
+            Debug.Assert(onGetErrors[0] != null);
+
+            log.BeginGetErrors(pageIndex, _pageSize, errorEntryList, 
+                onGetErrors[0], null);
 
             return result;
         }
 
-        public void EndProcessRequest(IAsyncResult result)
+        public static void EndProcessRequest(IAsyncResult result)
         {
             if (result == null)
                 throw new ArgumentNullException("result");
             
-            if (result != _result)
-                throw new ArgumentException(null, "result");
-
-            _result = null;
-            _log = null;
-            _context = null;
-            _callback = null;
-            _errorEntryList = null;
-
-            ((AsyncResult) result).End();
+            AsyncResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
         }
 
-        private void GetErrorsCallback(IAsyncResult result)
+        private static Format GetFormat(HttpContextBase context, string format)
         {
-            Debug.Assert(result != null);
-
-            try
+            Debug.Assert(context != null);
+            switch (format)
             {
-                TryGetErrorsCallback(result);
+                case "csv": return new CsvFormat(context);
+                case "jsonp": return new JsonPaddingFormat(context);
+                case "html-jsonp": return new JsonPaddingFormat(context, /* wrapped */ true);
+                default:
+                    throw new Exception("Request log format is not supported.");
             }
-            catch (Exception e)
-            {
-                //
-                // If anything goes wrong during callback processing then 
-                // the exception needs to be captured and the raising 
-                // delayed until EndProcessRequest.Meanwhile, the 
-                // BeginProcessRequest called is notified immediately of 
-                // completion.
-                //
-
-                _result.Complete(_callback, e);
-            }
-        }
-
-        private void TryGetErrorsCallback(IAsyncResult result) 
-        {
-            Debug.Assert(result != null);
-
-            int total = _log.EndGetErrors(result);
-            int count = _errorEntryList.Count;
-
-            if (_maxDownloadCount > 0)
-            {
-                int remaining = _maxDownloadCount - (_downloadCount + count);
-                if (remaining < 0)
-                    count += remaining;
-            }
-
-            _format.Entries(_errorEntryList, 0, count, total);
-            _downloadCount += count;
-
-            var response = _context.Response;
-            response.Flush();
-
-            //
-            // Done if either the end of the list (no more errors found) or
-            // the requested limit has been reached.
-            //
-
-            if (count == 0 || _downloadCount == _maxDownloadCount)
-            {
-                if (count > 0)
-                    _format.Entries(new ErrorLogEntry[0], total); // Terminator
-                _result.Complete(false, _callback);
-                return;
-            }
-
-            //
-            // Poll whether the client is still connected so data is not
-            // unnecessarily sent to an abandoned connection. This check is 
-            // only performed at certain intervals.
-            //
-
-            if (DateTime.Now - _lastBeatTime > _beatPollInterval)
-            {
-                if (!response.IsClientConnected)
-                {
-                    _result.Complete(true, _callback);
-                    return;
-                }
-
-                _lastBeatTime = DateTime.Now;
-            }
-
-            //
-            // Fetch next page of results.
-            //
-
-            _errorEntryList.Clear();
-
-            _log.BeginGetErrors(++_pageIndex, _pageSize, _errorEntryList,
-                new AsyncCallback(GetErrorsCallback), null);
         }
 
         private abstract class Format
@@ -444,115 +427,6 @@ namespace Elmah
                 }
 
                 Context.Response.Output.Write(writer);
-            }
-        }
-
-        private sealed class AsyncResult : IAsyncResult
-        {
-            private readonly object _lock = new object();
-            private ManualResetEvent _event;
-            private readonly object _userState;
-            private bool _completed;
-            private Exception _exception;
-            private bool _ended;
-            private bool _aborted;
-
-            internal event EventHandler Completed;
-
-            public AsyncResult(object userState)
-            {
-                _userState = userState;
-            }
-
-            public bool IsCompleted
-            {
-                get { return _completed; }
-            }
-
-            public WaitHandle AsyncWaitHandle
-            {
-                get
-                {
-                    if (_event == null)
-                    {
-                        lock (_lock)
-                        {
-                            if (_event == null)
-                                _event = new ManualResetEvent(_completed);
-                        }
-                    }
-
-                    return _event;
-                }
-            }
-
-            public object AsyncState
-            {
-                get { return _userState; }
-            }
-
-            public bool CompletedSynchronously
-            {
-                get { return false; }
-            }
-
-            internal void Complete(bool aborted, AsyncCallback callback)
-            {
-                if (_completed)
-                    throw new InvalidOperationException();
-
-                _aborted = aborted;
-
-                try
-                {
-                    lock (_lock)
-                    {
-                        _completed = true;
-
-                        if (_event != null)
-                            _event.Set();
-                    }
-
-                    if (callback != null)
-                        callback(this);
-                }
-                finally
-                {
-                    OnCompleted();
-                }
-            }
-
-            internal void Complete(AsyncCallback callback, Exception e)
-            {
-                _exception = e;
-                Complete(false, callback);
-            }
-
-            internal bool End()
-            {
-                if (_ended)
-                    throw new InvalidOperationException();
-
-                _ended = true;
-
-                if (!IsCompleted)
-                    AsyncWaitHandle.WaitOne();
-
-                if (_event != null)
-                    _event.Close();
-
-                if (_exception != null)
-                    throw _exception;
-
-                return _aborted;
-            }
-
-            private void OnCompleted()
-            {
-                EventHandler handler = Completed;
-
-                if (handler != null)
-                    handler(this, EventArgs.Empty);
             }
         }
 

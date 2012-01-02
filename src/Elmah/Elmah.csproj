@@ -129,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutPage.cs" />
+    <Compile Include="Apm.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -184,6 +185,7 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
+    <Compile Include="AsyncResult.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
@@ -209,6 +211,7 @@
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Elnumerable.cs" />
     <Compile Include="Environment.cs" />
@@ -306,6 +309,7 @@
     </Compile>
     <Compile Include="ManifestResourceHelper.cs">
     </Compile>
+    <Compile Include="Mannex.cs" />
     <Compile Include="Mask.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -353,8 +357,6 @@
     <Compile Include="StringFormatter.cs">
     </Compile>
     <Compile Include="StringTranslation.cs">
-    </Compile>
-    <Compile Include="SynchronousAsyncResult.cs">
     </Compile>
     <Compile Include="SQLiteErrorLog.cs">
     </Compile>
@@ -415,6 +417,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
