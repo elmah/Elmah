@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.Configuration;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
@@ -37,11 +38,14 @@ namespace Elmah
     using System.Net;
     using System.Net.Mail;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Web;
     using System.Xml;
+    using Mannex;
     using Mannex.Collections.Generic;
     using Mannex.Collections.Specialized;
+    using Mannex.Text.RegularExpressions;
     using IDictionary = System.Collections.IDictionary;
 
     #endregion
@@ -85,6 +89,27 @@ namespace Elmah
     }
 
     public sealed class ErrorLogEvent : Event<ErrorLoggedEventArgs> { }
+
+    namespace Modules
+    {
+        public static class Starter
+        {
+            public static EventConnectionHandler Filter(NameValueCollection settings)
+            {
+                return Extensions.Filter(settings);
+            }
+
+            public static EventConnectionHandler Mail(NameValueCollection settings)
+            {
+                return Extensions.Mail(settings);
+            }
+        
+            public static EventConnectionHandler Log(NameValueCollection settings)
+            {
+                return Extensions.Log(settings);
+            }
+        }
+    }
 
     public static class Extensions
     {
@@ -480,6 +505,31 @@ namespace Elmah
         }
     }
 
+    sealed class ModulesSectionHandler : DictionarySectionHandler
+    {
+        protected override object GetKey(XmlNode node)
+        {
+            var key = (string) base.GetKey(node);
+            var parts = key.Split(':', (prefix, name) => new { Prefix = prefix, Name = name, });
+            if (string.IsNullOrEmpty(parts.Prefix) || string.IsNullOrEmpty(parts.Name))
+            {
+                var message = string.Format(@"'{0}' s an invalid key.", key);
+                throw new ConfigurationException(message, node);
+            }
+            return new XmlQualifiedName(parts.Name, node.GetNamespaceOfPrefix(parts.Prefix));
+        }
+
+        protected override object GetValue(XmlNode node)
+        {
+            var clone = node.Clone();
+            var attributes = clone.Attributes;
+            Debug.Assert(attributes != null);
+            attributes.RemoveAll();
+            var subHandler = new NameValueSectionHandler();
+            return subHandler.Create(null, null, clone);
+        }
+    }
+
     public delegate void EventConnectionHandler(EventStation container);
     public delegate EventConnectionHandler ExtensionSetupHandler(NameValueCollection settings);
 
@@ -531,16 +581,26 @@ namespace Elmah
                 if (0 == string.CompareOrdinal(xqn.Namespace, "elmah"))
                     continue;
 
-                string assemblyName, ns;
+                var m = xqn.Namespace.Match(@"\Aclr-namespace:(.+?);(.+)\z", 
+                            RegexOptions.Singleline | RegexOptions.CultureInvariant, 
+                            mm => !mm.Success 
+                                ? null 
+                                : mm.BindNum((first, second) => new
+                                {
+                                    Namespace    = first.Value,
+                                    AssemblyName = second.Value,
+                                }));
 
-                if (!Assertions.AssertionFactory.DecodeClrTypeNamespaceFromXmlNamespace(xqn.Namespace, out ns, out assemblyName) ||
-                    ns.Length > 0)
+                if (m == null)
                 {
-                    throw new Exception(string.Format("Error decoding CLR type namespace and assembly from the XML namespace '{0}'.", xqn.Namespace));
+                    throw new Exception(string.Format(
+                        @"Error decoding CLR namespace and assembly from the XML namespace '{0}'.",
+                        xqn.Namespace));
                 }
 
-                var assembly = Assembly.Load(assemblyName);
-                var type = assembly.GetType(ns + ".ErrorInitialization", /* throwOnError */ true);
+                var ns = m.Namespace;
+                var assembly = Assembly.Load(m.AssemblyName);
+                var type = assembly.GetType(ns + ".Starter", /* throwOnError */ true);
                 var handler = (ExtensionSetupHandler)Delegate.CreateDelegate(typeof(ExtensionSetupHandler), type, xqn.Name, true, /* throwOnBindFailure */ false);
                 // TODO Null handler handling
                 var settings = (NameValueCollection)e.Value;
