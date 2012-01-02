@@ -28,7 +28,6 @@ namespace Elmah
     #region Imports
     
     using System;
-    using System.Collections;
     using System.Web;
     using System.Collections.Generic;
 
@@ -58,7 +57,7 @@ namespace Elmah
 
         public virtual IAsyncResult BeginLog(Error error, AsyncCallback asyncCallback, object asyncState)
         {
-            return BeginSyncImpl(asyncCallback, asyncState, new LogHandler(Log), error);
+            return Apm.BeginSync(asyncCallback, asyncState, this, "Log", () => Log(error));
         }
 
         /// <summary>
@@ -68,10 +67,8 @@ namespace Elmah
 
         public virtual string EndLog(IAsyncResult asyncResult)
         {
-            return (string) EndSyncImpl(asyncResult);
+            return AsyncResult<string>.End(asyncResult, this, "Log");
         }
-
-        private delegate string LogHandler(Error error);
 
         /// <summary>
         /// Retrieves a single application error from log given its 
@@ -87,7 +84,7 @@ namespace Elmah
 
         public virtual IAsyncResult BeginGetError(string id, AsyncCallback asyncCallback, object asyncState)
         {
-            return BeginSyncImpl(asyncCallback, asyncState, new GetErrorHandler(GetError), id);
+            return Apm.BeginSync(asyncCallback, asyncState, this, "GetError", () => GetError(id));
         }
 
         /// <summary>
@@ -97,10 +94,8 @@ namespace Elmah
 
         public virtual ErrorLogEntry EndGetError(IAsyncResult asyncResult)
         {
-            return (ErrorLogEntry) EndSyncImpl(asyncResult);
+            return AsyncResult<ErrorLogEntry>.End(asyncResult, this, "GetError");
         }
-
-        private delegate ErrorLogEntry GetErrorHandler(string id);
 
         /// <summary>
         /// Retrieves a page of application errors from the log in 
@@ -116,7 +111,7 @@ namespace Elmah
 
         public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
         {
-            return BeginSyncImpl(asyncCallback, asyncState, new GetErrorsHandler(GetErrors), pageIndex, pageSize, errorEntryList);
+            return Apm.BeginSync(asyncCallback, asyncState, this, "GetErrors", () => GetErrors(pageIndex, pageSize, errorEntryList));
         }
 
         /// <summary>
@@ -126,10 +121,8 @@ namespace Elmah
         
         public virtual int EndGetErrors(IAsyncResult asyncResult)
         {
-            return (int) EndSyncImpl(asyncResult);
+            return AsyncResult<int>.End(asyncResult, this, "GetErrors");
         }
-
-        private delegate int GetErrorsHandler(int pageIndex, int pageSize, IList<ErrorLogEntry> errorEntryList);
 
         /// <summary>
         /// Get the name of this log.
@@ -252,60 +245,6 @@ namespace Elmah
             }
 
             return Mask.EmptyString(appName, "/");
-        }
-
-        //
-        // The following two methods are helpers that provide boilerplate 
-        // implementations for implementing asnychronous BeginXXXX and 
-        // EndXXXX methods over a default synchronous implementation.
-        //
-
-        private static IAsyncResult BeginSyncImpl(AsyncCallback asyncCallback, object asyncState, Delegate syncImpl, params object[] args)
-        {
-            Debug.Assert(syncImpl != null);
-
-            SynchronousAsyncResult asyncResult;
-            var syncMethodName = syncImpl.Method.Name;
-
-            try
-            {
-                asyncResult = SynchronousAsyncResult.OnSuccess(syncMethodName, asyncState, 
-                    syncImpl.DynamicInvoke(args));
-            }
-            catch (Exception e)
-            {
-                asyncResult = SynchronousAsyncResult.OnFailure(syncMethodName, asyncState, e);
-            }
-
-            if (asyncCallback != null)
-                asyncCallback(asyncResult);
-
-            return asyncResult;
-        }
-
-        private static object EndSyncImpl(IAsyncResult asyncResult)
-        {
-            if (asyncResult == null)
-                throw new ArgumentNullException("asyncResult");
-
-            var syncResult = asyncResult as SynchronousAsyncResult;
-
-            if (syncResult == null)
-                throw new ArgumentException("IAsyncResult object did not come from the corresponding async method on this type.", "asyncResult");
-
-            //
-            // IMPORTANT! The End method on SynchronousAsyncResult will 
-            // throw an exception if that's what Log did when 
-            // BeginLog called it. The unforunate side effect of this is
-            // the stack trace information for the exception is lost and 
-            // reset to this point. There seems to be a basic failure in the 
-            // framework to accommodate for this case more generally. One 
-            // could handle this through a custom exception that wraps the 
-            // original exception, but this assumes that an invocation will 
-            // only throw an exception of that custom type.
-            //
-
-            return syncResult.End();
         }
     }
 }

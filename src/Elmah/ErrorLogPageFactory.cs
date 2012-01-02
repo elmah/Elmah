@@ -84,7 +84,7 @@ namespace Elmah
                     && !context.Request.IsLocal 
                     && !SecurityConfiguration.Default.AllowRemoteAccess))
             {
-                (new ManifestResourceHandler("RemoteAccessError.htm", "text/html")).ProcessRequest(context);
+                ManifestResourceHandler.Create("RemoteAccessError.htm", "text/html")(context);
                 var response = context.Response;
                 response.Status = "403 Forbidden";
                 response.End();
@@ -115,23 +115,23 @@ namespace Elmah
                     return new ErrorHtmlPage();
 
                 case "xml":
-                    return new ErrorXmlHandler();
+                    return new DelegatingHttpHandler(ErrorXmlHandler.ProcessRequest);
 
                 case "json":
-                    return new ErrorJsonHandler();
+                    return new DelegatingHttpHandler(ErrorJsonHandler.ProcessRequest);
 
                 case "rss":
-                    return new ErrorRssHandler();
+                    return new DelegatingHttpHandler(ErrorRssHandler.ProcessRequest);
 
                 case "digestrss":
-                    return new ErrorDigestRssHandler();
+                    return new DelegatingHttpHandler(ErrorDigestRssHandler.ProcessRequest);
 
                 case "download":
                     return new ErrorLogDownloadHandler();
 
                 case "stylesheet":
-                    return new ManifestResourceHandler("ErrorLog.css",
-                        "text/css", Encoding.GetEncoding("Windows-1252"));
+                    return new DelegatingHttpHandler(ManifestResourceHandler.Create("ErrorLog.css",
+                        "text/css", Encoding.GetEncoding("Windows-1252")));
 
                 case "test":
                     throw new TestException();

@@ -40,49 +40,33 @@ namespace Elmah
     /// as the response entity.
     /// </summary>
 
-    internal sealed class ManifestResourceHandler : IHttpHandler
+    static class ManifestResourceHandler
     {
-        private readonly string _resourceName;
-        private readonly string _contentType;
-        private readonly Encoding _responseEncoding;
+        public static Action<HttpContextBase> Create(string resourceName, string contentType)
+        {
+            return Create(resourceName, contentType, null);
+        }
 
-        public ManifestResourceHandler(string resourceName, string contentType) :
-            this(resourceName, contentType, null) {}
-
-        public ManifestResourceHandler(string resourceName, string contentType, Encoding responseEncoding)
+        public static Action<HttpContextBase> Create(string resourceName, string contentType, Encoding responseEncoding)
         {
             Debug.AssertStringNotEmpty(resourceName);
             Debug.AssertStringNotEmpty(contentType);
 
-            _resourceName = resourceName;
-            _contentType = contentType;
-            _responseEncoding = responseEncoding;
-        }
+            return context =>
+            {
+                //
+                // Set the response headers for indicating the content type 
+                // and encoding (if specified).
+                //
 
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
+                var response = context.Response;
+                response.ContentType = contentType;
 
-        public void ProcessRequest(HttpContextBase context)
-        {
-            //
-            // Set the response headers for indicating the content type 
-            // and encoding (if specified).
-            //
+                if (responseEncoding != null)
+                    response.ContentEncoding = responseEncoding;
 
-            var response = context.Response;
-            response.ContentType = _contentType;
-
-            if (_responseEncoding != null)
-                response.ContentEncoding = _responseEncoding;
-
-            ManifestResourceHelper.WriteResourceToStream(response.OutputStream, _resourceName);
-        }
-
-        public bool IsReusable
-        {
-            get { return false; }
+                ManifestResourceHelper.WriteResourceToStream(response.OutputStream, resourceName);
+            };
         }
     }
 }

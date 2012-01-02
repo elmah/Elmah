@@ -44,43 +44,14 @@ namespace Elmah
     /// days on which errors occurred.
     /// </summary>
 
-    internal sealed class ErrorDigestRssHandler : IHttpHandler
+    static class ErrorDigestRssHandler
     {
-        private HttpContextBase _context;
-
-        void IHttpHandler.ProcessRequest(HttpContext context)
+        public static void ProcessRequest(HttpContextBase context)
         {
-            ProcessRequest(new HttpContextWrapper(context));            
-        }
+            var _context = context;
+            var Request = context.Request;
+            var Response = context.Response;
 
-        public void ProcessRequest(HttpContextBase context)
-        {
-            _context = context;
-            Render();
-        }
-
-        public bool IsReusable
-        {
-            get { return false; }
-        }
-
-        private HttpRequestBase Request
-        {
-            get { return _context.Request; }
-        }
-
-        private HttpResponseBase Response
-        {
-            get { return _context.Response; }
-        }
-
-        private HttpServerUtilityBase Server
-        {
-            get { return _context.Server; }
-        }
-
-        private void Render()
-        {
             Response.ContentType = "application/xml";
 
             ErrorLog log = ErrorLog.GetDefault(_context);
@@ -207,7 +178,7 @@ namespace Elmah
             writer.RenderBeginTag(HtmlTextWriterTag.Ul);
         }
 
-        private void RenderError(HtmlTextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
+        private static void RenderError(HtmlTextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
         {
             Debug.Assert(writer != null);
             Debug.Assert(baseUrl != null);
@@ -228,7 +199,7 @@ namespace Elmah
                     writer.RenderBeginTag(HtmlTextWriterTag.Span);
                 }
 
-                Server.HtmlEncode(errorType, writer);
+                HttpUtility.HtmlEncode(errorType, writer);
                         
                 if (abbreviated)
                     writer.RenderEndTag(/* span */);
@@ -238,7 +209,7 @@ namespace Elmah
 
             writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "/detail?id=" + HttpUtility.UrlEncode(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
-            Server.HtmlEncode(error.Message, writer);
+            HttpUtility.HtmlEncode(error.Message, writer);
             writer.RenderEndTag(/* a */);
                     
             writer.RenderEndTag( /* li */);

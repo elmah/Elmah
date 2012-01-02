@@ -131,6 +131,7 @@
     <Compile Include="AboutPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Apm.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -186,6 +187,7 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
+    <Compile Include="AsyncResult.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
@@ -195,6 +197,7 @@
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="DictionarySectionHandler.cs" />
     <Compile Include="Environment.cs" />
@@ -343,8 +346,6 @@
     <Compile Include="StringFormatter.cs">
     </Compile>
     <Compile Include="StringTranslation.cs">
-    </Compile>
-    <Compile Include="SynchronousAsyncResult.cs">
     </Compile>
     <Compile Include="SQLiteErrorLog.cs">
     </Compile>
