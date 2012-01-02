@@ -48,13 +48,12 @@ namespace Elmah
     {
         public static void ProcessRequest(HttpContextBase context)
         {
-            var _context = context;
-            var Request = context.Request;
-            var Response = context.Response;
+            var request = context.Request;
+            var response = context.Response;
 
-            Response.ContentType = "application/xml";
+            response.ContentType = "application/xml";
 
-            ErrorLog log = ErrorLog.GetDefault(_context);
+            ErrorLog log = ErrorLog.GetDefault(context);
 
             //
             // We'll be emitting RSS vesion 0.91.
@@ -68,14 +67,14 @@ namespace Elmah
             //
             
             Channel channel = new Channel();
-            string hostName = Environment.TryGetMachineName(_context);
+            string hostName = Environment.TryGetMachineName(context);
             channel.title = "Daily digest of errors in " 
                           + log.ApplicationName
                           + (hostName.Length > 0 ? " on " + hostName : null);
             channel.description = "Daily digest of application errors";
             channel.language = "en";
 
-            Uri baseUrl = new Uri(ErrorLogPageFactory.GetRequestUrl(_context).GetLeftPart(UriPartial.Authority) + Request.ServerVariables["URL"]);
+            Uri baseUrl = new Uri(ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + request.ServerVariables["URL"]);
             channel.link = baseUrl.ToString();
 
             rss.channel = channel;
@@ -168,7 +167,7 @@ namespace Elmah
             // Stream out the RSS XML.
             //
 
-            Response.Write(XmlText.StripIllegalXmlCharacters(XmlSerializer.Serialize(rss)));
+            response.Write(XmlText.StripIllegalXmlCharacters(XmlSerializer.Serialize(rss)));
         }
 
         private static void RenderStart(HtmlTextWriter writer) 
