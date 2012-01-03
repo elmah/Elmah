@@ -126,6 +126,7 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutPage.cs">
@@ -317,9 +318,7 @@
     <Compile Include="ReverseComparer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RichSiteSummary.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="RssXml.cs" />
     <Compile Include="SccAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
