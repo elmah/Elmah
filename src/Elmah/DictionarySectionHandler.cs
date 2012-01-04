@@ -126,7 +126,12 @@ namespace Elmah
 
         protected virtual object GetKey(XmlNode node)
         {
-            XmlAttribute keyAttribute = node.Attributes["key"];
+            return GetKey(node, "key");
+        }
+
+        protected static string GetKey(XmlNode node, string name)
+        {
+            XmlAttribute keyAttribute = node.Attributes[name];
             string value = keyAttribute == null ? null : keyAttribute.Value;
             if (value == null || value.Length == 0)
                 throw new ConfigurationException("Missing entry key.", node);
@@ -135,7 +140,12 @@ namespace Elmah
 
         protected virtual object GetValue(XmlNode node)
         {
-            XmlAttribute valueAttribute = node.Attributes["value"];
+            return GetValue(node, "value");
+        }
+
+        protected static string GetValue(XmlNode node, string name)
+        {
+            XmlAttribute valueAttribute = node.Attributes[name];
             return valueAttribute != null ? valueAttribute.Value : null;
         }
 

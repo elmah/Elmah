@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.ComponentModel;
     using System.Configuration;
     using System.Diagnostics;
     using System.Globalization;
@@ -37,15 +38,11 @@ namespace Elmah
     using System.Linq;
     using System.Net;
     using System.Net.Mail;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Web;
     using System.Xml;
-    using Mannex;
     using Mannex.Collections.Generic;
     using Mannex.Collections.Specialized;
-    using Mannex.Text.RegularExpressions;
     using IDictionary = System.Collections.IDictionary;
 
     #endregion
@@ -92,6 +89,59 @@ namespace Elmah
 
     namespace Modules
     {
+        public class Module
+        {
+            public virtual string Name { get; set; }
+            public bool HasSettingsSupport { get { return SettingsDescriptor != null; } }
+            public virtual ICustomTypeDescriptor SettingsDescriptor { get { return null; } }
+            public virtual object CreateSettings() { return null; }
+            public virtual EventConnectionHandler Initialize(object settings) { return delegate { }; }
+        }
+
+        public class Module<T> : Module where T : new()
+        {
+            public override ICustomTypeDescriptor SettingsDescriptor { get { return TypeDescriptor.GetProvider(typeof(T)).GetTypeDescriptor(typeof(T)); } }
+            public override object CreateSettings() { return new T(); }
+            public sealed override EventConnectionHandler Initialize(object settings) { return Initialize((T)settings); }
+            protected virtual EventConnectionHandler Initialize(T settings) { return base.Initialize(settings); }
+        }
+
+        public class LogModule : Module
+        {
+            public override EventConnectionHandler Initialize(object settings)
+            {
+                return Starter.Log(null);
+            }
+        }
+
+        public class FilterModule : Module
+        {
+            public override EventConnectionHandler Initialize(object settings)
+            {
+                return Starter.Filter(null);
+            }
+        }
+
+        public class MailModuleSettings
+        {
+            public string From { get; set; }
+            public string To { get; set; }
+            public MailPriority Priority { get; set; }
+        }
+
+        public class MailModule : Module<MailModuleSettings>
+        {
+            protected override EventConnectionHandler Initialize(MailModuleSettings settings)
+            {
+                return Extensions.Mail(new Extensions.ErrorMailReportingOptions
+                {
+                    MailSender = settings.From,
+                    MailRecipient = settings.To,
+                    MailPriority = settings.Priority,
+                });
+            }
+        }
+
         public static class Starter
         {
             public static EventConnectionHandler Filter(NameValueCollection settings)
@@ -192,7 +242,7 @@ namespace Elmah
 
             var mailRecipient = ErrorMailModule.GetSetting(config, "to");
             
-            var options = new ErrorMailReportingOptions
+            return Mail(new ErrorMailReportingOptions
             {
                 MailRecipient        = mailRecipient, 
                 MailSender           = ErrorMailModule.GetSetting(config, "from", mailRecipient), 
@@ -206,8 +256,11 @@ namespace Elmah
                 AuthPassword         = ErrorMailModule.GetSetting(config, "password", string.Empty), 
                 DontSendYsod         = Convert.ToBoolean(ErrorMailModule.GetSetting(config, "noYsod", bool.FalseString)), 
                 UseSsl               = Convert.ToBoolean(ErrorMailModule.GetSetting(config, "useSsl", bool.FalseString))
-            };
+            });
+        }
 
+        public static EventConnectionHandler Mail(ErrorMailReportingOptions options)
+        {
             return es =>
             {
                 es.Get<ExceptionEvent>().Firing += (_, args) =>
@@ -507,26 +560,53 @@ namespace Elmah
 
     sealed class ModulesSectionHandler : DictionarySectionHandler
     {
-        protected override object GetKey(XmlNode node)
+        protected override object GetKey(XmlNode node) { return GetKey(node, "name"); }
+        
+        protected override void OnAdd(IDictionary dictionary, object key, XmlNode node)
         {
-            var key = (string) base.GetKey(node);
-            var parts = key.Split(':', (prefix, name) => new { Prefix = prefix, Name = name, });
-            if (string.IsNullOrEmpty(parts.Prefix) || string.IsNullOrEmpty(parts.Name))
+            if (dictionary == null) throw new ArgumentNullException("dictionary");
+            if (key == null) throw new ArgumentNullException("key");
+            if (node == null) throw new ArgumentNullException("node");
+
+            var typeName = GetValue(node, "type");
+            if (string.IsNullOrEmpty(typeName))
             {
-                var message = string.Format(@"'{0}' s an invalid key.", key);
+                var message = String.Format("Missing type specification for module named '{0}'.", (object[]) key);
                 throw new ConfigurationException(message, node);
             }
-            return new XmlQualifiedName(parts.Name, node.GetNamespaceOfPrefix(parts.Prefix));
+
+            dictionary.Add(key, new ModuleSectionEntry(key.ToString(), typeName));
+        }
+    }
+
+    class ModuleSectionEntry
+    {
+        private NameValueCollection _settings;
+        
+        public string Name { get; private set; }
+        public string TypeName { get; private set; }
+        
+        public NameValueCollection Settings
+        {
+            get { return _settings ?? (_settings = GetSettings()); }
         }
 
-        protected override object GetValue(XmlNode node)
+        public ModuleSectionEntry(string name, string typeName)
         {
-            var clone = node.Clone();
-            var attributes = clone.Attributes;
-            Debug.Assert(attributes != null);
-            attributes.RemoveAll();
-            var subHandler = new NameValueSectionHandler();
-            return subHandler.Create(null, null, clone);
+            Debug.AssertStringNotEmpty(name);
+            Debug.AssertStringNotEmpty(typeName);
+
+            Name = name;
+            TypeName = typeName;
+        }
+
+        private NameValueCollection GetSettings()
+        {
+            var dict = (IDictionary) Configuration.GetSubsection(Name);
+            var settings = new NameValueCollection();
+            settings.Add(from System.Collections.DictionaryEntry e in dict 
+                         select e.Key.ToString().AsKeyTo(e.Value.ToString()));
+            return settings;
         }
     }
 
@@ -558,6 +638,7 @@ namespace Elmah
 
         static EventStation()
         {
+            // TODO Move out of here to avoid type initialization from failing
             AppendModules(LoadModules());
         }
 
@@ -576,35 +657,29 @@ namespace Elmah
             var e = config.GetEnumerator();
             while (e.MoveNext())
             {
-                var xqn = (XmlQualifiedName)e.Key;
-
-                if (0 == string.CompareOrdinal(xqn.Namespace, "elmah"))
-                    continue;
-
-                var m = xqn.Namespace.Match(@"\Aclr-namespace:(.+?);(.+)\z", 
-                            RegexOptions.Singleline | RegexOptions.CultureInvariant, 
-                            mm => !mm.Success 
-                                ? null 
-                                : mm.BindNum((first, second) => new
-                                {
-                                    Namespace    = first.Value,
-                                    AssemblyName = second.Value,
-                                }));
-
-                if (m == null)
+                var entry = (ModuleSectionEntry) e.Value;
+                var type = Type.GetType(entry.TypeName, /* throwOnError */ true);
+                Debug.Assert(type != null);
+                // TODO check type compatibility
+                var module = (Modules.Module) Activator.CreateInstance(type);
+                module.Name = entry.Name;
+                var desc = module.SettingsDescriptor;
+                var settings = module.CreateSettings();
+                if (desc != null && settings != null)
                 {
-                    throw new Exception(string.Format(
-                        @"Error decoding CLR namespace and assembly from the XML namespace '{0}'.",
-                        xqn.Namespace));
+                    var properties = desc.GetProperties();
+                    var collection = entry.Settings;
+                    foreach (var ee in from i in Enumerable.Range(0, collection.Count)
+                                       select collection.GetKey(i).AsKeyTo(collection[i]))
+                    {
+                        var property = properties.Find(ee.Key, true);
+                        // TODO property != null
+                        var converter = property.Converter;
+                        // TODO converter != null
+                        property.SetValue(settings, converter.ConvertFromInvariantString(ee.Value));
+                    }
                 }
-
-                var ns = m.Namespace;
-                var assembly = Assembly.Load(m.AssemblyName);
-                var type = assembly.GetType(ns + ".Starter", /* throwOnError */ true);
-                var handler = (ExtensionSetupHandler)Delegate.CreateDelegate(typeof(ExtensionSetupHandler), type, xqn.Name, true, /* throwOnBindFailure */ false);
-                // TODO Null handler handling
-                var settings = (NameValueCollection)e.Value;
-                customizations.Add(handler(settings));
+                customizations.Add(module.Initialize(settings));
             }
 
             return customizations.ToArray();
