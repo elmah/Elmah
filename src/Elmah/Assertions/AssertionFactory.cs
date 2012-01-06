@@ -341,7 +341,7 @@ namespace Elmah.Assertions
                 return new WebDataBindingExpression(text);
 
             if (type == typeof(Type))
-                return Type.GetType(text, /* throwOnError */ true, /* ignoreCase */ false);
+                return TypeResolution.GetType(text);
 
             if (type == typeof(bool))
             {

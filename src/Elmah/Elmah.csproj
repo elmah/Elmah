@@ -349,6 +349,7 @@
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TypeResolution.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>
     </Compile>

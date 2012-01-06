@@ -75,7 +75,7 @@ namespace Elmah
             // Locate, create and return the service provider object.
             //
 
-            Type type = Type.GetType(typeSpec, true);
+            var type = TypeResolution.GetType(typeSpec);
             return Activator.CreateInstance(type, new object[] { config });
         }
     }
