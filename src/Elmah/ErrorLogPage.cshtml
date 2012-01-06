@@ -49,6 +49,14 @@
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
         Footnote = string.Format("This log is provided by the {0}.", log.Name),
+        SpeedBarItems = new[] 
+        {
+            SpeedBar.RssFeed.Format(basePageName),
+            SpeedBar.RssDigestFeed.Format(basePageName),
+            SpeedBar.DownloadLog.Format(basePageName),
+            SpeedBar.Help,
+            SpeedBar.About.Format(basePageName),
+        },
     };
     
     // If the application name matches the APPL_MD_PATH then its
@@ -78,13 +86,6 @@
             </span>
         </h1>
         
-        @SpeedBar.Render(Request.Browser,
-                        SpeedBar.RssFeed.Format(basePageName),
-                        SpeedBar.RssDigestFeed.Format(basePageName),
-                        SpeedBar.DownloadLog.Format(basePageName),
-                        SpeedBar.Help,
-                        SpeedBar.About.Format(basePageName))
-
         @if (errorEntryList.Count > 0)
         {
             // Write error number range displayed on this page and the
@@ -121,7 +122,7 @@
 
             // Write out the main table to display the errors.
 
-            <table id="ErrorLog" cellspacing="0" style="border-collapse:collapse;">
+            <table id="ErrorLog" cellspacing="0" style="border-collapse:collapse;" class="condensed-table zebra-striped">
                 <tr>
                     <th class="host-col" style="white-space:nowrap;">Host</th>
                     <th class="code-col" style="white-space:nowrap;">Code</th>
@@ -138,7 +139,7 @@
                 var errorEntry = item.Entry;
                 var error = errorEntry.Error;
 
-                <tr class="@(errorIndex % 2 == 0 ? "even-row" : "odd-row")">
+                <tr class="@(errorIndex % 2 == 0 ? "even" : "odd")">
                     
                     <td class="host-col" style="white-space:nowrap;">@error.HostName</td>
                     <td class="code-col" style="white-space:nowrap;"><span title="@HttpWorkerRequest.GetStatusDescription(error.StatusCode)">@error.StatusCode</span></td>

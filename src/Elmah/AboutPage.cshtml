@@ -11,6 +11,12 @@
     {
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
+        SpeedBarItems = new[]
+        {
+            SpeedBar.Home.Format(basePageName),
+            SpeedBar.Help,
+            SpeedBar.About.Format(basePageName),
+        },
     };
 
     var stamps = SccStamp.FindAll(typeof (ErrorLog).Assembly)
@@ -44,13 +50,8 @@
 
 <h1 id="PageTitle">@title</h1>
 
-@SpeedBar.Render(Request.Browser,
-                 SpeedBar.Home.Format(basePageName),
-                 SpeedBar.Help,
-                 SpeedBar.About.Format(basePageName))
-
 <p>
-    <button 
+    <button class="btn"
         onclick="return onCheckForUpdate(this)"
         title="Checks if your ELMAH version is up to date (requires Internet connection)">Check for Update</button>
 </p>

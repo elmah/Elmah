@@ -62,6 +62,7 @@ namespace Elmah
                 var htmlWriter = (writer as HtmlTextWriter) ?? htmlTextWriterFactory(writer);
 
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, "SpeedList");
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "nav");
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.Ul);
 
                 foreach (var item in items)

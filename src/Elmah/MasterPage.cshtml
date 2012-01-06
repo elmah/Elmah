@@ -6,6 +6,7 @@
 {
     public string Title { get; set; }
     public object Footnote { get; set; }
+    public IEnumerable<SpeedBar.FormattedItem> SpeedBarItems { get; set; }
 }
 @{
     var basePageName = Request.ServerVariables["URL"];
@@ -23,30 +24,55 @@
         Product   = Mask.EmptyString(product, "(product)"),
         Copyright = copyright,
     });
+
+    var speedBarItems = (SpeedBarItems ?? Enumerable.Empty<SpeedBar.FormattedItem>()).ToArray();
 }
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
     <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
         @if (!string.IsNullOrEmpty(Title))
         {
             <title>@Title</title>
         }
+        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
         <link rel="stylesheet" type="text/css" href="@basePageName/stylesheet" />
+        <style type="text/css">
+          body {
+            padding-top: 60px;
+          }
+        </style>
     </head>
     <body>
-        @RenderBody()
-        <p id="Footer">
-            <span>Powered by <a href="http://elmah.googlecode.com/">@about.Product</a>, 
-                version @about.Version.
-                @about.Copyright 
-                Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
-            </span>
-            Server date is @now.ToString("D", CultureInfo.InvariantCulture). 
-            Server time is @now.ToString("T", CultureInfo.InvariantCulture). 
-            All dates and times displayed are in the 
-            @(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName) zone. 
-            @Footnote
-        </p>
+        @if (speedBarItems.Any())
+        {
+            <div class="topbar">
+                <div class="fill">
+                    <div class="container-fluid">
+                        <a class="brand" href="http://elmah.googlecode.com/">ELMAH</a>
+                        @SpeedBar.Render(Request.Browser, speedBarItems)
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="container-fluid">
+            
+            @RenderBody()
+            
+            <footer id="Footer">
+                <span>Powered by <a href="http://elmah.googlecode.com/">@about.Product</a>, 
+                    version @about.Version.
+                    @about.Copyright 
+                    Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
+                </span>
+                Server date is @now.ToString("D", CultureInfo.InvariantCulture). 
+                Server time is @now.ToString("T", CultureInfo.InvariantCulture). 
+                All dates and times displayed are in the 
+                @(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName) zone. 
+                @Footnote
+            </footer>
+        </div>
     </body>
 </html>

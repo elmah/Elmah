@@ -41,6 +41,12 @@
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
         Footnote = string.Format("This log is provided by the {0}.", log.Name),
+        SpeedBarItems = new[] 
+        {
+            SpeedBar.Home.Format(basePageName),
+            SpeedBar.Help,
+            SpeedBar.About.Format(basePageName),
+        },
     };
 
     var error = errorEntry.Error;
@@ -51,11 +57,6 @@
 *@
 
 <h1 id="PageTitle">@error.Message</h1>
-
-@SpeedBar.Render(Request.Browser,
-                 SpeedBar.Home.Format(basePageName),
-                 SpeedBar.Help,
-                 SpeedBar.About.Format(basePageName))
 
 <p id="ErrorTitle">@*
     *@<span id="ErrorType">@error.Type</span>@*
@@ -162,8 +163,8 @@ private void RenderCollection(HtmlTextWriter writer,
         items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
         
         <div id="@collection.Id">
-            <p class="table-caption">@collection.Title</p>
 
+            <h2>@collection.Title</h2>
             @*
             // Some values can be large and add scroll bars to the page
             // as well as ruin some formatting. So we encapsulate the
@@ -173,7 +174,7 @@ private void RenderCollection(HtmlTextWriter writer,
 
             <div class="scroll-view">
 
-                <table cellspacing="0" style="border-collapse:collapse;">
+                <table cellspacing="0" style="border-collapse:collapse;" class="condensed-table zebra-striped">
                     <tr>
                         <th class="name-col" style="white-space:nowrap;">Name</th>
                         <th class="value-col" style="white-space:nowrap;">Value</th>
@@ -181,7 +182,7 @@ private void RenderCollection(HtmlTextWriter writer,
     
                     @foreach (var item in items)
                     {
-                        <tr class="@(item.Index % 2 == 0 ? "even-row" : "odd-row")">
+                        <tr class="@(item.Index % 2 == 0 ? "even" : "odd")">
                             <td class="key-col">@item.Key</td>
                             <td class="value-col">@item.Value</td>
                         </tr>

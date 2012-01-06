@@ -37,6 +37,7 @@ namespace Elmah
 
     public string Title { get; set; }
     public object Footnote { get; set; }
+    public IEnumerable<SpeedBar.FormattedItem> SpeedBarItems { get; set; }
 
         #line default
         #line hidden
@@ -55,7 +56,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 10 "..\..\MasterPage.cshtml"
+            #line 11 "..\..\MasterPage.cshtml"
   
     var basePageName = Request.ServerVariables["URL"];
     
@@ -73,18 +74,17 @@ WriteLiteral("\r\n");
         Copyright = copyright,
     });
 
+    var speedBarItems = (SpeedBarItems ?? Enumerable.Empty<SpeedBar.FormattedItem>()).ToArray();
+
 
             
             #line default
             #line hidden
-WriteLiteral("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org" +
-"/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xh" +
-"tml\">\r\n    <head>\r\n        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Emulat" +
-"eIE7\" />\r\n");
+WriteLiteral("<!DOCTYPE html>\r\n<html>\r\n    <head>\r\n");
 
 
             
-            #line 31 "..\..\MasterPage.cshtml"
+            #line 33 "..\..\MasterPage.cshtml"
          if (!string.IsNullOrEmpty(Title))
         {
 
@@ -95,7 +95,7 @@ WriteLiteral("            <title>");
 
 
             
-            #line 33 "..\..\MasterPage.cshtml"
+            #line 35 "..\..\MasterPage.cshtml"
               Write(Title);
 
             
@@ -105,106 +105,144 @@ WriteLiteral("</title>\r\n");
 
 
             
-            #line 34 "..\..\MasterPage.cshtml"
+            #line 36 "..\..\MasterPage.cshtml"
         }
 
             
             #line default
             #line hidden
-WriteLiteral("        <link rel=\"stylesheet\" type=\"text/css\" href=\"");
+WriteLiteral(@"        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+          <script src=""http://html5shim.googlecode.com/svn/trunk/html5.js""></script>
+        <![endif]-->
+        <link rel=""stylesheet"" type=""text/css"" href=""");
 
 
             
-            #line 35 "..\..\MasterPage.cshtml"
+            #line 41 "..\..\MasterPage.cshtml"
                                                 Write(basePageName);
 
             
             #line default
             #line hidden
-WriteLiteral("/stylesheet\" />\r\n    </head>\r\n    <body>\r\n        ");
-
-
-            
-            #line 38 "..\..\MasterPage.cshtml"
-   Write(RenderBody());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n        <p id=\"Footer\">\r\n            <span>Powered by <a href=\"http://elmah.goo" +
-"glecode.com/\">");
-
-
-            
-            #line 40 "..\..\MasterPage.cshtml"
-                                                               Write(about.Product);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</a>, \r\n                version ");
-
-
-            
-            #line 41 "..\..\MasterPage.cshtml"
-                   Write(about.Version);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(".\r\n                ");
-
-
-            
-            #line 42 "..\..\MasterPage.cshtml"
-           Write(about.Copyright);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(" \r\n                Licensed under <a href=\"http://www.apache.org/licenses/LICENSE" +
-"-2.0\">Apache License, Version 2.0</a>. \r\n            </span>\r\n            Server" +
-" date is ");
-
-
-            
-            #line 45 "..\..\MasterPage.cshtml"
-                      Write(now.ToString("D", CultureInfo.InvariantCulture));
-
-            
-            #line default
-            #line hidden
-WriteLiteral(". \r\n            Server time is ");
-
-
-            
-            #line 46 "..\..\MasterPage.cshtml"
-                      Write(now.ToString("T", CultureInfo.InvariantCulture));
-
-            
-            #line default
-            #line hidden
-WriteLiteral(". \r\n            All dates and times displayed are in the \r\n            ");
-
-
-            
-            #line 48 "..\..\MasterPage.cshtml"
-        Write(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(" zone. \r\n            ");
+WriteLiteral("/stylesheet\" />\r\n        <style type=\"text/css\">\r\n          body {\r\n            p" +
+"adding-top: 60px;\r\n          }\r\n        </style>\r\n    </head>\r\n    <body>\r\n");
 
 
             
             #line 49 "..\..\MasterPage.cshtml"
-       Write(Footnote);
+         if (speedBarItems.Any())
+        {
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </p>\r\n    </body>\r\n</html>\r\n");
+WriteLiteral("            <div class=\"topbar\">\r\n                <div class=\"fill\">\r\n           " +
+"         <div class=\"container-fluid\">\r\n                        <a class=\"brand\"" +
+" href=\"http://elmah.googlecode.com/\">ELMAH</a>\r\n                        ");
+
+
+            
+            #line 55 "..\..\MasterPage.cshtml"
+                   Write(SpeedBar.Render(Request.Browser, speedBarItems));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </div>\r\n                </div>\r\n            </div>\r\n");
+
+
+            
+            #line 59 "..\..\MasterPage.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <div class=\"container-fluid\">\r\n            \r\n            ");
+
+
+            
+            #line 62 "..\..\MasterPage.cshtml"
+       Write(RenderBody());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            \r\n            <footer id=\"Footer\">\r\n                <span>Powered b" +
+"y <a href=\"http://elmah.googlecode.com/\">");
+
+
+            
+            #line 65 "..\..\MasterPage.cshtml"
+                                                                   Write(about.Product);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a>, \r\n                    version ");
+
+
+            
+            #line 66 "..\..\MasterPage.cshtml"
+                       Write(about.Version);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(".\r\n                    ");
+
+
+            
+            #line 67 "..\..\MasterPage.cshtml"
+               Write(about.Copyright);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" \r\n                    Licensed under <a href=\"http://www.apache.org/licenses/LIC" +
+"ENSE-2.0\">Apache License, Version 2.0</a>. \r\n                </span>\r\n          " +
+"      Server date is ");
+
+
+            
+            #line 70 "..\..\MasterPage.cshtml"
+                          Write(now.ToString("D", CultureInfo.InvariantCulture));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(". \r\n                Server time is ");
+
+
+            
+            #line 71 "..\..\MasterPage.cshtml"
+                          Write(now.ToString("T", CultureInfo.InvariantCulture));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(". \r\n                All dates and times displayed are in the \r\n                ");
+
+
+            
+            #line 73 "..\..\MasterPage.cshtml"
+            Write(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" zone. \r\n                ");
+
+
+            
+            #line 74 "..\..\MasterPage.cshtml"
+           Write(Footnote);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </footer>\r\n        </div>\r\n    </body>\r\n</html>\r\n");
 
 
         }
