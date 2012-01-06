@@ -129,28 +129,28 @@
                     <th class="type-col" style="white-space:nowrap;">Type</th>
                     <th class="error-col" style="white-space:nowrap;">Error</th>
                     <th class="user-col" style="white-space:nowrap;">User</th>
-                    <th class="date-col" style="white-space:nowrap;">Date</th>
-                    <th class="time-col" style="white-space:nowrap;">Time</th>
+                    <th class="time-col" style="white-space:nowrap;">When</th>
                 </tr>
 
             @foreach (var error in from item in errorEntryList.Index()
-                                 let e = item.Value.Error
-                                 select new
-                                 {
-                                     Index = item.Key,
-                                     item.Value.Id,
-                                     e.HostName,                                                 
-                                     e.StatusCode,
-                                     StatusDescription = 
-                                        e.StatusCode > 0
-                                        ? HttpWorkerRequest.GetStatusDescription(e.StatusCode)
-                                        : null,
-                                     e.Type,
-                                     HumaneType = ErrorDisplay.HumaneExceptionErrorType(e),
-                                     e.Message,
-                                     e.User,
-                                     e.Time,
-                                 })
+                                   let e = item.Value.Error
+                                   select new
+                                   {
+                                       Index = item.Key,
+                                       item.Value.Id,
+                                       e.HostName,                                                 
+                                       e.StatusCode,
+                                       StatusDescription = 
+                                          e.StatusCode > 0
+                                          ? HttpWorkerRequest.GetStatusDescription(e.StatusCode)
+                                          : null,
+                                       e.Type,
+                                       HumaneType = ErrorDisplay.HumaneExceptionErrorType(e),
+                                       e.Message,
+                                       e.User,
+                                       When = FuzzyTime.FormatInEnglish(e.Time),
+                                       Iso8601Time = e.Time.ToString("o"),
+                                   })
             {
                 <tr class="@(error.Index % 2 == 0 ? "even" : "odd")">
                     
@@ -171,8 +171,7 @@
                         <a href="@basePageName/detail?id=@error.Id">Details&hellip;</a></td>
                     
                     <td class="user-col" style="white-space:nowrap;">@error.User</td>
-                    <td class="date-col" style="white-space:nowrap;"><span title="@error.Time.ToLongDateString()">@error.Time.ToShortDateString()</span></td>
-                    <td class="time-col" style="white-space:nowrap;"><span title="@error.Time.ToLongTimeString()">@error.Time.ToShortTimeString()</span></td>
+                    <td class="time-col" style="white-space:nowrap;"><abbr title="@error.Iso8601Time">@error.When</abbr></td>
                 </tr>
             }
             </table>

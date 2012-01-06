@@ -203,6 +203,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="FuzzyTime.cs" />
     <Compile Include="HelperResult.cs" />
     <Compile Include="MasterPage.generated.cs">
       <DependentUpon>MasterPage.cshtml</DependentUpon>
