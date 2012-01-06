@@ -2493,8 +2493,11 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 {
     font-weight: bold;
 }
-
-.code-col, .date-col, .time-col
+.code-col 
+{
+    text-align: center;
+}
+.date-col, .time-col
 {
     text-align: right;
 }

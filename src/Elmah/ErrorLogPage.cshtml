@@ -133,20 +133,42 @@
                     <th class="time-col" style="white-space:nowrap;">Time</th>
                 </tr>
 
-            @foreach (var item in errorEntryList.Select((e, i) => new { Index = i, Entry = e, }))
+            @foreach (var error in from item in errorEntryList.Index()
+                                 let e = item.Value.Error
+                                 select new
+                                 {
+                                     Index = item.Key,
+                                     item.Value.Id,
+                                     e.HostName,                                                 
+                                     e.StatusCode,
+                                     StatusDescription = 
+                                        e.StatusCode > 0
+                                        ? HttpWorkerRequest.GetStatusDescription(e.StatusCode)
+                                        : null,
+                                     e.Type,
+                                     HumaneType = ErrorDisplay.HumaneExceptionErrorType(e),
+                                     e.Message,
+                                     e.User,
+                                     e.Time,
+                                 })
             {
-                var errorIndex = item.Index;
-                var errorEntry = item.Entry;
-                var error = errorEntry.Error;
-
-                <tr class="@(errorIndex % 2 == 0 ? "even" : "odd")">
+                <tr class="@(error.Index % 2 == 0 ? "even" : "odd")">
                     
                     <td class="host-col" style="white-space:nowrap;">@error.HostName</td>
-                    <td class="code-col" style="white-space:nowrap;"><span title="@HttpWorkerRequest.GetStatusDescription(error.StatusCode)">@error.StatusCode</span></td>
-                    <td class="type-col" style="white-space:nowrap;"><span title="@error.Type">@ErrorDisplay.HumaneExceptionErrorType(error)</span></td>
+                    <td class="code-col" style="white-space:nowrap;">
+                        @if (!string.IsNullOrEmpty(error.StatusDescription))
+                        {
+                            <span title="@error.StatusDescription">@error.StatusCode</span>
+                        }
+                        else if (error.StatusCode != 0)
+                        {
+                            @error.StatusCode
+                        }
+                    </td>
+                    <td class="type-col" style="white-space:nowrap;"><span title="@error.Type">@error.HumaneType</span></td>
                     
                     <td class="error-col"><span>@error.Message</span> 
-                        <a href="@basePageName/detail?id=@errorEntry.Id">Details&hellip;</a></td>
+                        <a href="@basePageName/detail?id=@error.Id">Details&hellip;</a></td>
                     
                     <td class="user-col" style="white-space:nowrap;">@error.User</td>
                     <td class="date-col" style="white-space:nowrap;"><span title="@error.Time.ToLongDateString()">@error.Time.ToShortDateString()</span></td>
