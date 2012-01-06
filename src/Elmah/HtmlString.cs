@@ -21,16 +21,26 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: ErrorLogPage.cs 776 2011-01-12 21:09:24Z azizatif $")]
-
 namespace Elmah
 {
-    /// <summary>
-    /// Renders an HTML page displaying a page of errors from the error log.
-    /// </summary>
-    
-    internal sealed partial class ErrorLogPage
+    // http://msdn.microsoft.com/en-us/library/system.web.ihtmlstring.aspx
+
+    interface IHtmlString
     {
-        public ErrorLog ErrorLog { get; set; }
+        string ToHtmlString();
+    }
+
+    sealed class HtmlString : IHtmlString
+    {
+        private readonly string _html;
+
+        public HtmlString(string html)
+        {
+            _html = html;
+        }
+
+        public string ToHtmlString() { return _html; }
+
+        public override string ToString() { return ToHtmlString(); }
     }
 }

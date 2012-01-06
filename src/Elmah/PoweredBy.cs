@@ -105,66 +105,13 @@ namespace Elmah
         {
             get
             {
-                string cacheKey = GetType().FullName;
-
-                //
-                // If cache is available then check if the version 
-                // information is already residing in there.
-                //
-
-                if (this.Cache != null)
-                    _about = (AboutSet) this.Cache[cacheKey];
-
-                //
-                // Not found in the cache? Go out and get the version 
-                // information of the assembly housing this component.
-                //
-                
-                if (_about == null)
+                return _about ?? (_about = GetAbout(Cache, (version, fileVersion, product, copyright) => new AboutSet
                 {
-                    //
-                    // NOTE: The assembly information is picked up from the 
-                    // applied attributes rather that the more convenient
-                    // FileVersionInfo because the latter required elevated
-                    // permissions and may throw a security exception if
-                    // called from a partially trusted environment, such as
-                    // the medium trust level in ASP.NET.
-                    //
-                    
-                    AboutSet about = new AboutSet();                    
-                    Assembly assembly = this.GetType().Assembly;
-                    about.Version = assembly.GetName().Version;
-                    
-                    AssemblyFileVersionAttribute version = (AssemblyFileVersionAttribute) Attribute.GetCustomAttribute(assembly, typeof(AssemblyFileVersionAttribute));
-                    
-                    if (version != null)
-                        about.FileVersion = new Version(version.Version);
-
-                    AssemblyProductAttribute product = (AssemblyProductAttribute) Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute));
-                    
-                    if (product != null)
-                        about.Product = product.Product;
-
-                    AssemblyCopyrightAttribute copyright = (AssemblyCopyrightAttribute) Attribute.GetCustomAttribute(assembly, typeof(AssemblyCopyrightAttribute));
-                    
-                    if (copyright != null)
-                        about.Copyright = copyright.Copyright;
-                    
-                    //
-                    // Cache for next time if the cache is available.
-                    //
-
-                    if (this.Cache != null)
-                    {
-                        this.Cache.Add(cacheKey, about,
-                            /* absoluteExpiration */ null, Cache.NoAbsoluteExpiration,
-                            TimeSpan.FromMinutes(2), CacheItemPriority.Normal, null);
-                    }
-                    
-                    _about = about;
-                }
-
-                return _about;
+                    Version     = version,
+                    FileVersion = fileVersion,
+                    Product     = product,
+                    Copyright   = copyright,
+                }));
             }
         }
 
@@ -181,6 +128,66 @@ namespace Elmah
 
                 return this.Page != null? this.Page.Cache : HttpRuntime.Cache;
             }
+        }
+
+        internal static T GetAbout<T>(Cache cache, Func<Version, Version, string, string, T> selector)
+        {
+            var cacheKey = typeof(PoweredBy).FullName;
+
+            //
+            // If cache is available then check if the version 
+            // information is already residing in there.
+            //
+
+            if (cache != null)
+            {
+                Debug.Assert(cacheKey != null);
+                var tuple = (object[]) cache[cacheKey];
+                if (tuple != null)
+                    return selector((Version) tuple[0], (Version) tuple[1], (string) tuple[2], (string) tuple[3]);
+            }
+
+            //
+            // Not found in the cache? Go out and get the version 
+            // information of the assembly housing this component.
+            //
+
+            //
+            // NOTE: The assembly information is picked up from the 
+            // applied attributes rather that the more convenient
+            // FileVersionInfo because the latter required elevated
+            // permissions and may throw a security exception if
+            // called from a partially trusted environment, such as
+            // the medium trust level in ASP.NET.
+            //
+
+            var assembly = typeof(ErrorLog).Assembly;
+
+            var attributes = new
+            {
+                Version   = (AssemblyFileVersionAttribute) Attribute.GetCustomAttribute(assembly, typeof(AssemblyFileVersionAttribute)),
+                Product   = (AssemblyProductAttribute)     Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute)),
+                Copyright = (AssemblyCopyrightAttribute)   Attribute.GetCustomAttribute(assembly, typeof(AssemblyCopyrightAttribute)),
+            };
+
+            var version     = assembly.GetName().Version;
+            var fileVersion = attributes.Version != null ? new Version(attributes.Version.Version) : null;
+            var product     = attributes.Product != null ? attributes.Product.Product : null;
+            var copyright   = attributes.Copyright != null ? attributes.Copyright.Copyright : null;
+
+            //
+            // Cache for next time if the cache is available.
+            //
+
+            if (cache != null)
+            {
+                cache.Add(cacheKey, 
+                    new object[] { version, fileVersion, product, copyright, },
+                    /* absoluteExpiration */ null, Cache.NoAbsoluteExpiration,
+                    TimeSpan.FromMinutes(2), CacheItemPriority.Normal, null);
+            }
+
+            return selector(version, fileVersion, product, copyright);
         }
 
         [ Serializable ]
