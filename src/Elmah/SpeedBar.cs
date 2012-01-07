@@ -79,7 +79,7 @@ namespace Elmah
         [ Serializable ]
         public abstract class Item
         {
-            public Item(string text, string title, string href)
+            protected Item(string text, string title, string href)
             {
                 Text = text ?? string.Empty;
                 Title = title ?? string.Empty;
