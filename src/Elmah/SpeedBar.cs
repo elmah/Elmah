@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.IO;
     using System.Web;
     using System.Web.UI;
 
@@ -42,24 +43,37 @@ namespace Elmah
         public static readonly FormattedItem Help = new FormattedItem("Help", "Documentation, discussions, issues and more", "http://elmah.googlecode.com/");
         public static readonly ItemTemplate About = new ItemTemplate("About", "Information about this version and build", "{0}/about");
 
-        public static void Render(HtmlTextWriter writer, params FormattedItem[] items)
+        public static HelperResult Render(HttpBrowserCapabilitiesBase browser, params FormattedItem[] items)
         {
-            Debug.Assert(writer != null);
+            return Render(browser.CreateHtmlTextWriter, items);
+        }
 
-            if (items == null || items.Length == 0)
-                return;
+        public static HelperResult Render(Func<TextWriter, HtmlTextWriter> htmlTextWriterFactory, params FormattedItem[] items)
+        {
+            htmlTextWriterFactory = htmlTextWriterFactory ?? (w => new HtmlTextWriter(w));
 
-            writer.AddAttribute(HtmlTextWriterAttribute.Id, "SpeedList");
-            writer.RenderBeginTag(HtmlTextWriterTag.Ul);
-
-            foreach (FormattedItem item in items)
+            return new HelperResult(writer =>
             {
-                writer.RenderBeginTag(HtmlTextWriterTag.Li);
-                item.Render(writer);
-                writer.RenderEndTag( /* li */);
-            }
+                if (writer == null) throw new ArgumentNullException("writer");
 
-            writer.RenderEndTag( /* ul */);
+                if (items == null || items.Length == 0)
+                    return;
+
+                var htmlWriter = (writer as HtmlTextWriter) ?? htmlTextWriterFactory(writer);
+
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, "SpeedList");
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "nav");
+                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Ul);
+
+                foreach (var item in items)
+                {
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Li);
+                    item.Render(htmlWriter);
+                    htmlWriter.RenderEndTag( /* li */);
+                }
+
+                htmlWriter.RenderEndTag( /* ul */);
+            });
         }
 
         [ Serializable ]

@@ -28,12 +28,13 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Web;
     using System.Web.UI;
-    using ContentSyndication;
-
+    using System.Xml.Linq;
     using System.Collections.Generic;
 
     #endregion
@@ -48,128 +49,105 @@ namespace Elmah
     {
         public static void ProcessRequest(HttpContextBase context)
         {
-            var _context = context;
-            var Request = context.Request;
-            var Response = context.Response;
+            var log = ErrorLog.GetDefault(context);
 
-            Response.ContentType = "application/xml";
-
-            ErrorLog log = ErrorLog.GetDefault(_context);
-
-            //
-            // We'll be emitting RSS vesion 0.91.
-            //
-
-            RichSiteSummary rss = new RichSiteSummary();
-            rss.version = "0.91";
-
-            //
-            // Set up the RSS channel.
-            //
+            var request = context.Request;
+            var response = context.Response;
             
-            Channel channel = new Channel();
-            string hostName = Environment.TryGetMachineName(_context);
-            channel.title = "Daily digest of errors in " 
-                          + log.ApplicationName
-                          + (hostName.Length > 0 ? " on " + hostName : null);
-            channel.description = "Daily digest of application errors";
-            channel.language = "en";
+            response.ContentType = "application/xml";
+            
+            var hostName = Environment.TryGetMachineName(context);
+            var title = "Daily digest of errors in "
+                      + log.ApplicationName
+                      + (hostName.Length > 0 ? " on " + hostName : null);
 
-            Uri baseUrl = new Uri(ErrorLogPageFactory.GetRequestUrl(_context).GetLeftPart(UriPartial.Authority) + Request.ServerVariables["URL"]);
-            channel.link = baseUrl.ToString();
+            var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + request.ServerVariables["URL"];
+            var baseUrl = new Uri(link.TrimEnd('/') + "/");
 
-            rss.channel = channel;
+            var items = GetItems(log, baseUrl, 30, 30).Take(30);
+            var rss = RssXml.Rss(title, link, "Daily digest of application errors", items);
 
-            //
-            // Build the channel items.
-            //
+            context.Response.Write(XmlText.StripIllegalXmlCharacters(rss.ToString()));
+        }
+        
+        private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit) 
+        {
+            Debug.Assert(log != null);
+            Debug.Assert(baseUrl != null);
+            Debug.Assert(baseUrl.IsAbsoluteUri);
+            Debug.Assert(pageSize > 0);
 
-            const int pageSize = 30;
-            const int maxPageLimit = 30;
-            List<Item> itemList = new List<Item>(pageSize);
-            List<ErrorLogEntry> errorEntryList = new List<ErrorLogEntry>(pageSize);
+            var runningDay = DateTime.MaxValue;
+            var runningErrorCount = 0;
+            string title = null;
+            DateTime? pubDate = null;
+            var sb = new StringBuilder();
+            var writer = new HtmlTextWriter(new StringWriter(sb));
 
-            //
-            // Start with the first page of errors.
-            //
+            var source = GetErrors(log, pageSize, (p, e) => new { PageIndex = p, Entry = e });
 
-            int pageIndex = 0;
-
-            //
-            // Initialize the running state.
-            //
-
-            DateTime runningDay = DateTime.MaxValue;
-            int runningErrorCount = 0;
-            Item item = null;
-            StringBuilder sb = new StringBuilder();
-            HtmlTextWriter writer = new HtmlTextWriter(new StringWriter(sb));
-
-            do
+            foreach (var entry in from item in source.TakeWhile(e => e.PageIndex < maxPageLimit) 
+                                   select item.Entry)
             {
+                var error = entry.Error;
+                var time = error.Time.ToUniversalTime();
+                var day = time.Date;
+
                 //
-                // Get a logical page of recent errors and loop through them.
+                // If we're dealing with a new day then break out to a 
+                // new channel item, finishing off the previous one.
                 //
 
-                errorEntryList.Clear();
-                log.GetErrors(pageIndex++, pageSize, errorEntryList);
-
-                foreach (ErrorLogEntry entry in errorEntryList)
+                if (day < runningDay)
                 {
-                    Error error = entry.Error;
-                    DateTime time = error.Time.ToUniversalTime();
-                    DateTime day = new DateTime(time.Year, time.Month, time.Day);
-
-                    //
-                    // If we're dealing with a new day then break out to a 
-                    // new channel item, finishing off the previous one.
-                    //
-
-                    if (day < runningDay)
+                    if (runningErrorCount > 0)
                     {
-                        if (runningErrorCount > 0)
-                        {
-                            RenderEnd(writer);
-                            item.description = sb.ToString();
-                            itemList.Add(item);
-                        }
-
-                        runningDay = day;
-                        runningErrorCount = 0;
-
-                        if (itemList.Count == pageSize)
-                            break;
-
-                        item = new Item();
-                        item.pubDate = time.ToString("r");
-                        item.title = string.Format("Digest for {0} ({1})", 
-                            runningDay.ToString("yyyy-MM-dd"), runningDay.ToLongDateString());
-
-                        sb.Length = 0;
-                        RenderStart(writer);
+                        RenderEnd(writer);
+                        Debug.Assert(title != null);
+                        Debug.Assert(pubDate != null);
+                        yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
                     }
 
-                    RenderError(writer, entry, baseUrl);
-                    runningErrorCount++;
+                    runningDay = day;
+                    runningErrorCount = 0;
+                    pubDate = time;
+                    title = string.Format("Digest for {0} ({1})", runningDay.ToString("yyyy-MM-dd"), runningDay.ToLongDateString());
+                    sb.Length = 0;
+                    RenderStart(writer);
                 }
+
+                RenderError(writer, entry, baseUrl);
+                runningErrorCount++;
             }
-            while (pageIndex < maxPageLimit && itemList.Count < pageSize && errorEntryList.Count > 0);
 
             if (runningErrorCount > 0)
             {
                 RenderEnd(writer);
-                item.description = sb.ToString();
-                itemList.Add(item);
+                Debug.Assert(title != null);
+                Debug.Assert(pubDate != null);
+                yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
             }
-
-            channel.item = itemList.ToArray();
-
-            //
-            // Stream out the RSS XML.
-            //
-
-            Response.Write(XmlText.StripIllegalXmlCharacters(XmlSerializer.Serialize(rss)));
         }
+
+        private static IEnumerable<T> GetErrors<T>(ErrorLog log, int pageSize, Func<int, ErrorLogEntry, T> resultor)
+        {
+            Debug.Assert(log != null);
+            Debug.Assert(pageSize > 0);
+            Debug.Assert(resultor != null);
+
+            var entries = new List<ErrorLogEntry>(pageSize);
+            for (var pageIndex = 0; ; pageIndex++)
+            {
+                log.GetErrors(pageIndex, pageSize, entries);
+                if (!entries.Any())
+                    break;
+                foreach (var entry in entries)
+                    yield return resultor(pageIndex, entry);
+                entries.Clear();
+            }
+        }
+
+        // TODO Consider moving the rest to a Razor template
 
         private static void RenderStart(HtmlTextWriter writer) 
         {
@@ -181,17 +159,18 @@ namespace Elmah
         private static void RenderError(HtmlTextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
         {
             Debug.Assert(writer != null);
-            Debug.Assert(baseUrl != null);
             Debug.Assert(entry != null);
+            Debug.Assert(baseUrl != null);
+            Debug.Assert(baseUrl.IsAbsoluteUri);
 
-            Error error = entry.Error;
+            var error = entry.Error;
             writer.RenderBeginTag(HtmlTextWriterTag.Li);
 
-            string errorType = ErrorDisplay.HumaneExceptionErrorType(error);
+            var errorType = ErrorDisplay.HumaneExceptionErrorType(error);
 
             if (errorType.Length > 0)
             {
-                bool abbreviated = errorType.Length < error.Type.Length;
+                var abbreviated = errorType.Length < error.Type.Length;
                         
                 if (abbreviated)
                 {
@@ -207,7 +186,7 @@ namespace Elmah
                 writer.Write(": ");
             }
 
-            writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "/detail?id=" + HttpUtility.UrlEncode(entry.Id));
+            writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
             HttpUtility.HtmlEncode(error.Message, writer);
             writer.RenderEndTag(/* a */);

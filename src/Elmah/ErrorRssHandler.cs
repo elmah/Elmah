@@ -28,9 +28,8 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Linq;
     using System.Web;
-    using ContentSyndication;
-
     using System.Collections.Generic;
 
     #endregion
@@ -44,66 +43,34 @@ namespace Elmah
     {
         public static void ProcessRequest(HttpContextBase context)
         {
-            context.Response.ContentType = "application/xml";
-
-            //
-            // Get the last set of errors for this application.
-            //
-
             const int pageSize = 15;
-            List<ErrorLogEntry> errorEntryList = new List<ErrorLogEntry>(pageSize);
-            ErrorLog log = ErrorLog.GetDefault(context);
-            log.GetErrors(0, pageSize, errorEntryList);
+            var entries = new List<ErrorLogEntry>(pageSize);
+            var log = ErrorLog.GetDefault(context);
+            log.GetErrors(0, pageSize, entries);
 
-            //
-            // We'll be emitting RSS vesion 0.91.
-            //
+            var response = context.Response;
+            response.ContentType = "application/xml";
 
-            RichSiteSummary rss = new RichSiteSummary();
-            rss.version = "0.91";
+            var hostName = Environment.TryGetMachineName(context);
+            var title = "Error log of "
+                      + log.ApplicationName
+                      + (hostName.Length > 0 ? " on " + hostName : null);
 
-            //
-            // Set up the RSS channel.
-            //
+            var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + context.Request.ServerVariables["URL"];
+            var baseUrl = new Uri(link.TrimEnd('/') + "/");
+
+            var items =
+                from entry in entries
+                let error = entry.Error
+                select RssXml.Item(
+                    error.Message,
+                    "An error of type " + error.Type + " occurred. " + error.Message,
+                    error.Time,
+                    baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id));
             
-            Channel channel = new Channel();
-            string hostName = Environment.TryGetMachineName(context);
-            channel.title = "Error log of " + log.ApplicationName 
-                          + (hostName.Length > 0 ? " on " + hostName : null);
-            channel.description = "Log of recent errors";
-            channel.language = "en";
-            channel.link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + 
-                context.Request.ServerVariables["URL"];
+            var rss = RssXml.Rss(title, link, "Log of recent errors", items);
 
-            rss.channel = channel;
-
-            //
-            // For each error, build a simple channel item. Only the title, 
-            // description, link and pubDate fields are populated.
-            //
-
-            channel.item = new Item[errorEntryList.Count];
-
-            for (int index = 0; index < errorEntryList.Count; index++)
-            {
-                ErrorLogEntry errorEntry = (ErrorLogEntry) errorEntryList[index];
-                Error error = errorEntry.Error;
-
-                Item item = new Item();
-
-                item.title = error.Message;
-                item.description = "An error of type " + error.Type + " occurred. " + error.Message;
-                item.link = channel.link + "/detail?id=" + HttpUtility.UrlEncode(errorEntry.Id);
-                item.pubDate = error.Time.ToUniversalTime().ToString("r");
-
-                channel.item[index] = item;
-            }
-
-            //
-            // Stream out the RSS XML.
-            //
-
-            context.Response.Write(XmlText.StripIllegalXmlCharacters(XmlSerializer.Serialize(rss)));
+            response.Write(XmlText.StripIllegalXmlCharacters(rss.ToString()));
         }
     }
 }

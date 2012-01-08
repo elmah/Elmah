@@ -1,0 +1,83 @@
+@* Generator: Template TypeVisibility: Internal *@
+@using System.IO
+@using System.Reflection
+@using Elmah
+@inherits WebTemplateBase
+@{
+    var basePageName = Request.ServerVariables["URL"];
+
+    const string title = "About ELMAH";
+    Layout = new Elmah.MasterPage
+    {
+        Context  = Context, /* TODO Consider not requiring this */
+        Title    = title,
+        SpeedBarItems = new[]
+        {
+            SpeedBar.Home.Format(basePageName),
+            SpeedBar.Help,
+            SpeedBar.About.Format(basePageName),
+        },
+    };
+
+    var stamps = SccStamp.FindAll(typeof (ErrorLog).Assembly)
+                          .OrderByDescending(s => s.Revision)
+                          .ToArray();
+}        
+@*
+// Emit a script that emit version info and checks for updates.
+*@
+
+<script type='text/javascript' language='JavaScript'>
+    function onCheckForUpdate(sender) {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.language = 'JavaScript';
+        script.src = 'http://elmah.googlecode.com/svn/www/update.js?__=' + (new Date()).getTime();
+        document.getElementsByTagName('head')[0].appendChild(script);
+        return false;
+    }
+    var ELMAH = {
+        info: {
+            version: '@GetVersion()',
+            fileVersion: '@GetFileVersion()',
+            type: '@Build.TypeLowercase',
+            status: '@Build.Status',
+            framework: '@Build.Framework',
+            imageRuntime: '@Build.ImageRuntimeVersion'
+        }
+    };
+</script>
+
+<h1 id="PageTitle">@title</h1>
+
+<p>
+    <button class="btn"
+        onclick="return onCheckForUpdate(this)"
+        title="Checks if your ELMAH version is up to date (requires Internet connection)">Check for Update</button>
+</p>
+
+<p>
+    This <strong>@Build.TypeLowercase</strong>
+    @(stamps.Any() ? "(SCC #" + stamps.First().Revision.ToString("N0") + ")" : null)
+    build was compiled from the following sources for CLR @Build.ImageRuntimeVersion:
+</p>
+
+<ul>
+    @foreach (var stamp in stamps)
+    {
+        <li><code>@stamp.Id</code></li>        
+    }
+</ul>
+@functions
+{
+    private Version GetVersion()
+    {
+        return GetType().Assembly.GetName().Version;
+    }
+
+    private Version GetFileVersion()
+    {
+        var version = (AssemblyFileVersionAttribute) Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyFileVersionAttribute));
+        return version != null ? new Version(version.Version) : new Version();
+    }
+}

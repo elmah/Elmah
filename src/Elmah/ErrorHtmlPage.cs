@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Web;
     using System.Web.UI;
 
     #endregion
@@ -37,29 +38,33 @@ namespace Elmah
     /// HTML recorded for an error from the error log.
     /// </summary>
     
-    internal sealed class ErrorHtmlPage : ErrorPageBase
+    internal sealed class ErrorHtmlPage : IHttpHandler
     {
-        protected override void Render(HtmlTextWriter writer)
+        public ErrorLog ErrorLog { get; set; }
+
+        public void ProcessRequest(HttpContextBase context)
         {
-            if (writer == null)
-                throw new ArgumentNullException("writer");
+            if (context == null) throw new ArgumentNullException("context");
 
             //
             // Retrieve the ID of the error to display and read it from 
             // the log.
             //
 
-            string errorId = this.Request.QueryString["id"] ?? string.Empty;
+            var errorId = context.Request.QueryString["id"] ?? string.Empty;
 
             if (errorId.Length == 0)
                 return;
 
-            ErrorLogEntry errorEntry = this.ErrorLog.GetError(errorId);
+            var log = ErrorLog ?? ErrorLog.GetDefault(context);
+            var errorEntry = log.GetError(errorId);
+
+            var response = context.Response;
 
             if (errorEntry == null)
             {
                 // TODO: Send error response entity
-                Response.Status = HttpStatus.NotFound.ToString();
+                response.Status = HttpStatus.NotFound.ToString();
                 return;
             }
 
@@ -71,7 +76,15 @@ namespace Elmah
             if (errorEntry.Error.WebHostHtmlMessage.Length == 0)
                 return;
 
-            writer.Write(errorEntry.Error.WebHostHtmlMessage);
+            response.Write(errorEntry.Error.WebHostHtmlMessage);
         }
+
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+            ProcessRequest(new HttpContextWrapper(context));
+        }
+
+        bool IHttpHandler.IsReusable { get { return true; } }
     }
 }

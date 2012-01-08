@@ -21,16 +21,22 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: ErrorLogPage.cs 776 2011-01-12 21:09:24Z azizatif $")]
-
 namespace Elmah
 {
-    /// <summary>
-    /// Renders an HTML page displaying a page of errors from the error log.
-    /// </summary>
-    
-    internal sealed partial class ErrorLogPage
+    #region Imports
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    #endregion
+
+    static class Elnumerable
     {
-        public ErrorLog ErrorLog { get; set; }
+        public static IEnumerable<KeyValuePair<int, T>> Index<T>(this IEnumerable<T> source)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            return source.Select((item, index) => new KeyValuePair<int, T>(index, item));
+        }
     }
 }

@@ -126,11 +126,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="AboutPage.cs" />
     <Compile Include="Apm.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
@@ -194,20 +193,36 @@
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
     </Compile>
+    <Compile Include="AboutPage.generated.cs">
+      <DependentUpon>AboutPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="ErrorDetailPage.generated.cs">
+      <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="FuzzyTime.cs" />
+    <Compile Include="HelperResult.cs" />
+    <Compile Include="MasterPage.generated.cs">
+      <DependentUpon>MasterPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="DictionarySectionHandler.cs" />
+    <Compile Include="Elnumerable.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Error.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorBuilding.cs" />
-    <Compile Include="ErrorDetailPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="ErrorDetailPage.cs" />
     <Compile Include="ErrorDigestRssHandler.cs">
     </Compile>
     <Compile Include="ErrorDisplay.cs">
@@ -221,9 +236,7 @@
     <Compile Include="ErrorFilterSectionHandler.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorHtmlPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="ErrorHtmlPage.cs" />
     <Compile Include="ErrorJson.cs">
     </Compile>
     <Compile Include="ErrorJsonHandler.cs">
@@ -241,8 +254,11 @@
     <Compile Include="ErrorLogModule.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorLogPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
+    <Compile Include="ErrorLogPage.cs" />
+    <Compile Include="ErrorLogPage.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorLogPage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ErrorLogPageFactory.cs">
       <SubType>Code</SubType>
@@ -256,9 +272,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorMailSectionHandler.cs">
-    </Compile>
-    <Compile Include="ErrorPageBase.cs">
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ErrorRssHandler.cs">
       <SubType>Code</SubType>
@@ -283,6 +296,7 @@
     </Compile>
     <Compile Include="HtmlLinkType.cs">
     </Compile>
+    <Compile Include="HtmlString.cs" />
     <Compile Include="HttpModuleBase.cs">
     </Compile>
     <Compile Include="HttpModuleRegistry.cs">
@@ -316,12 +330,11 @@
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RazorTemplateBase.cs" />
     <Compile Include="ReverseComparer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RichSiteSummary.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="RssXml.cs" />
     <Compile Include="SccAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -352,6 +365,8 @@
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TypeResolution.cs" />
+    <Compile Include="WebTemplateBase.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -369,6 +384,22 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="AboutPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="ErrorDetailPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorDetailPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>MasterPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="ErrorLogPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
+    </None>
     <None Include="MySql.sql" />
     <None Include="Pgsql.sql" />
   </ItemGroup>
