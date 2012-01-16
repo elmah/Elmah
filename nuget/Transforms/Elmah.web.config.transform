@@ -36,7 +36,8 @@
     </system.web>
     <system.webServer>
       <handlers>
-        <add verb="POST,GET,HEAD"
+        <add name="ELMAH"
+             verb="POST,GET,HEAD"
              path="elmah.axd" 
              type="Elmah.ErrorLogPageFactory, Elmah"
              preCondition="integratedMode" />
