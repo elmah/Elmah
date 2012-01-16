@@ -13,9 +13,6 @@
       <add name="ErrorMail" type="Elmah.ErrorMailModule, Elmah" />
       <add name="ErrorFilter" type="Elmah.ErrorFilterModule, Elmah"/>
     </httpModules>
-    <httpHandlers>
-      <add verb="POST,GET,HEAD" path="elmah.axd" type="Elmah.ErrorLogPageFactory, Elmah" />
-    </httpHandlers>
   </system.web>
   <system.webServer>
     <validation validateIntegratedModeConfiguration="false" />
@@ -24,8 +21,26 @@
       <add name="ErrorMail" type="Elmah.ErrorMailModule, Elmah" preCondition="managedHandler" />
       <add name="ErrorFilter" type="Elmah.ErrorFilterModule, Elmah" preCondition="managedHandler" />
     </modules>
-    <handlers>
-      <add name="Elmah" path="elmah.axd" verb="POST,GET,HEAD" type="Elmah.ErrorLogPageFactory, Elmah" preCondition="integratedMode" />
-    </handlers>
   </system.webServer>
+  <location path="elmah.axd">  
+    <system.web>
+      <httpHandlers>
+        <add verb="POST,GET,HEAD" 
+             path="elmah.axd" 
+             type="Elmah.ErrorLogPageFactory, Elmah" />
+      </httpHandlers>
+      <authorization>
+        <allow roles="elmah" />
+        <deny users="*" />  
+      </authorization>  
+    </system.web>
+    <system.webServer>
+      <handlers>
+        <add verb="POST,GET,HEAD"
+             path="elmah.axd" 
+             type="Elmah.ErrorLogPageFactory, Elmah"
+             preCondition="integratedMode" />
+      </handlers>
+    </system.webServer>
+  </location>
 </configuration>
