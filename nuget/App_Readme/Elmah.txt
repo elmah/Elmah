@@ -1,8 +1,4 @@
-Once you have installed ELMAH, a new httpHandler (elmah.axd) is configured within your application.
-This is deliberately set up to be secure such that it can only be accessed locally by authorised users.
-We have allowed authorised access to users with a role of "elmah".
-Obviously this is very unlikely to exist in your application.
-Therefore, either:
+Once you have installed ELMAH, a new httpHandler (elmah.axd) is configured within your application. This is deliberately set up to be secure such that it can only be accessed locally by authorised users. We have allowed authorised access to users with a role of "elmah". Obviously this is very unlikely to exist in your application. Therefore, either:
 
 a) add a new role to your application and assign it to the appropriate users OR
 b) change the authorization set under <location path="elmah" />
