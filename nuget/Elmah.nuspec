@@ -11,12 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ELMAH with initial configuration for getting started quickly. ELMAH (Error Logging Modules and Handlers) is an application-wide error logging facility that is completely pluggable. It can be dynamically added to a running ASP.NET web application, or even all ASP.NET web applications on a machine, without any need for re-compilation or re-deployment.</description>
     <summary>ELMAH with initial configuration for getting started quickly. ELMAH (Error Logging Modules and Handlers) is an application-wide error logging facility that is completely pluggable. It can be dynamically added to a running ASP.NET web application, or even all ASP.NET web applications on a machine, without any need for re-compilation or re-deployment.</summary>
-    <releaseNotes>This release updates the way that the elmah.axd httpHandler is registered in web.config.
-The handler is now registered in a &lt;location path="elmah.axd" /&gt; element which makes it much more secure.
-Furthermore, an &lt;authorization /&gt; element is placed on the location such that only users with a role of elmah are able to view the handler. 
-There are compelling reasons for doing this which are documented here: http://www.troyhunt.com/2012/01/aspnet-session-hijacking-with-google.html
-Additional information can be found on the project's wiki page: http://code.google.com/p/elmah/wiki/SecuringErrorLogPages
-Also, don't forget to look at App_Readme\Elmah.txt in your application's root folder.</releaseNotes>
+    <releaseNotes>This release updates the way the HTTP handler is registered in the web.config and is designed to work more strictly and securely when enabling remote access for authorized users. See http://code.google.com/p/elmah/wiki/SecuringErrorLogPages on the project site for more information.</releaseNotes>
     <language>en-US</language>
     <tags>elmah error logging unhandled exception</tags>
     <dependencies>
