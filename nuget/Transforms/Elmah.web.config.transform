@@ -29,10 +29,14 @@
              path="elmah.axd" 
              type="Elmah.ErrorLogPageFactory, Elmah" />
       </httpHandlers>
+      <!-- 
+        See http://code.google.com/p/elmah/wiki/SecuringErrorLogPages
+        for more information on securing ELMAH. -->
+      <!--
       <authorization>
         <allow roles="elmah" />
         <deny users="*" />  
-      </authorization>  
+      </authorization>-->
     </system.web>
     <system.webServer>
       <handlers>
