@@ -644,20 +644,36 @@ namespace Elmah
 
         public static EventConnectionHandler[] LoadModules()
         {
-            var config = (IDictionary) Configuration.GetSubsection("modules");
-            return config != null ? LoadModules(config) : _zeroModules;
+            return LoadModules(ConfigurationManager.AppSettings);
         }
 
-        public static EventConnectionHandler[] LoadModules(IDictionary config)
+        public static EventConnectionHandler[] LoadModules(NameValueCollection config)
         {
             if (config == null) throw new ArgumentNullException("config");
 
+            var modules =
+                from item in (ConfigurationManager.AppSettings["Elmah.Modules"] ?? string.Empty).Split(',')
+                let name = item.Trim()
+                where name.Length > 0
+                let prefix = name + "."
+                select new
+                {
+                    Name = name,
+                    TypeName = (config[name] ?? string.Empty).Trim(),
+                    Settings =
+                        from i in Enumerable.Range(0, config.Count)
+                        let key = config.GetKey(i).Trim()
+                        where key.Length > prefix.Length
+                           && key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                        select key.Substring(prefix.Length).AsKeyTo(config[i]),
+                };
+
             var customizations = new List<EventConnectionHandler>(config.Count);
 
-            var e = config.GetEnumerator();
-            while (e.MoveNext())
+            foreach (var entry in modules)
             {
-                var entry = (ModuleSectionEntry) e.Value;
+                if (entry.TypeName.Length == 0)
+                    throw new Exception(string.Format("Missing '{0}' module type specification.", entry.Name));
                 var type = Type.GetType(entry.TypeName, /* throwOnError */ true);
                 Debug.Assert(type != null);
                 // TODO check type compatibility
@@ -668,9 +684,7 @@ namespace Elmah
                 if (desc != null && settings != null)
                 {
                     var properties = desc.GetProperties();
-                    var collection = entry.Settings;
-                    foreach (var ee in from i in Enumerable.Range(0, collection.Count)
-                                       select collection.GetKey(i).AsKeyTo(collection[i]))
+                    foreach (var ee in entry.Settings)
                     {
                         var property = properties.Find(ee.Key, true);
                         // TODO property != null
