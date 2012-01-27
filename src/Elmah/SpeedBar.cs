@@ -79,20 +79,16 @@ namespace Elmah
         [ Serializable ]
         public abstract class Item
         {
-            private readonly string _text;
-            private readonly string _title;
-            private readonly string _href;
-
-            public Item(string text, string title, string href)
+            protected Item(string text, string title, string href)
             {
-                _text = text ?? string.Empty;
-                _title = title ?? string.Empty;
-                _href = href ?? string.Empty;
+                Text = text ?? string.Empty;
+                Title = title ?? string.Empty;
+                Href = href ?? string.Empty;
             }
 
-            public string Text  { get { return _text; } }
-            public string Title { get { return _title; } }
-            public string Href  { get { return _href; } }
+            public string Text { get; private set; }
+            public string Title { get; private set; }
+            public string Href { get; private set; }
 
             public override string ToString()
             {
