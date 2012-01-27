@@ -110,7 +110,7 @@ namespace Elmah
         {
             public override EventConnectionHandler Initialize(object settings)
             {
-                return Starter.Log(null);
+                return Extensions.Log(null);
             }
         }
 
@@ -118,7 +118,7 @@ namespace Elmah
         {
             public override EventConnectionHandler Initialize(object settings)
             {
-                return Starter.Filter(null);
+                return Extensions.Filter((NameValueCollection) null);
             }
         }
 
@@ -139,24 +139,6 @@ namespace Elmah
                     MailRecipient = settings.To,
                     MailPriority = settings.Priority,
                 });
-            }
-        }
-
-        public static class Starter
-        {
-            public static EventConnectionHandler Filter(NameValueCollection settings)
-            {
-                return Extensions.Filter(settings);
-            }
-
-            public static EventConnectionHandler Mail(NameValueCollection settings)
-            {
-                return Extensions.Mail(settings);
-            }
-        
-            public static EventConnectionHandler Log(NameValueCollection settings)
-            {
-                return Extensions.Log(settings);
             }
         }
     }
