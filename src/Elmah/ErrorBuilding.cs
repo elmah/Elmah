@@ -110,7 +110,25 @@ namespace Elmah
         {
             public override EventConnectionHandler Initialize(object settings)
             {
-                return Extensions.Log(null);
+                return es =>
+                {
+                    es.Get<ExceptionEvent>().Firing += (_, args) =>
+                    {
+                        var payload = args.Payload;
+                        var exception = payload.Exception;
+                        if (exception != null
+                            && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ExceptionContext))
+                            return;
+
+                        var log = ErrorLog.GetDefault(null);
+                        var error = payload.CreateError(es);
+                        var id = log.Log(error);
+                    
+                        var handler = es.Find<ErrorLogEvent>();
+                        if (handler != null)
+                            handler.Fire(null, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
+                    };
+                };
             }
         }
 
@@ -118,318 +136,279 @@ namespace Elmah
         {
             public override EventConnectionHandler Initialize(object settings)
             {
-                return Extensions.Filter((NameValueCollection) null);
+                var config = (ErrorFilterConfiguration) Configuration.GetSubsection("errorFilter");
+
+                if (config == null)
+                    return delegate { };
+
+                var assertion = config.Assertion;
+
+                return Filter(assertion.Test);
+            }
+
+            public static EventConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
+            {
+                return es =>
+                {
+                    es.Get<ExceptionFilterEvent>().Firing += (sender, args) =>
+                    {
+                        try
+                        {
+                            if (predicate(new ErrorFilterModule.AssertionHelperContext(/* TODO source */ sender, args.Payload.Exception, args.Payload.Context)))
+                                args.Payload.Dismiss();
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.WriteLine(e);
+                            throw; // TODO PrepareToRethrow()?
+                        }
+                    };
+                };
             }
         }
 
         public class MailModuleSettings
         {
-            public string From { get; set; }
-            public string To { get; set; }
+            public /* TODO MailAddressCollection */ string To { get; set; }
+            public /* TODO MailAddress */ string From { get; set; }
+            // ReSharper disable InconsistentNaming
+            public /* TODO MailAddressCollection */ string CC { get; set; } // ReSharper restore InconsistentNaming
+            public string Subject { get; set; }
             public MailPriority Priority { get; set; }
+            public bool Async { get; set; } // TODO Invert!
+            public string SmtpServer { get; set; }
+            public int SmtpPort { get; set; }
+            public string UserName { get; set; }
+            public string Password { get; set; }
+            public bool NoYsod { get; set; }
+            public bool UseSsl { get; set; }
         }
 
         public class MailModule : Module<MailModuleSettings>
         {
             protected override EventConnectionHandler Initialize(MailModuleSettings settings)
             {
-                return Extensions.Mail(new Extensions.ErrorMailReportingOptions
+                return Mail(new ErrorMailReportingOptions
                 {
                     MailSender = settings.From,
                     MailRecipient = settings.To,
+                    MailCopyRecipient = settings.CC,
+                    MailSubjectFormat = settings.Subject,
                     MailPriority = settings.Priority,
+                    ReportAsynchronously = settings.Async,
+                    SmtpServer = settings.SmtpServer,
+                    SmtpPort = settings.SmtpPort,
+                    AuthUserName = settings.UserName,
+                    AuthPassword = settings.Password,
+                    DontSendYsod = settings.NoYsod,
+                    UseSsl = settings.UseSsl,
                 });
             }
-        }
-    }
 
-    public static class Extensions
-    {
-        public static EventConnectionHandler Filter(NameValueCollection settings)
-        {
-            var config = (ErrorFilterConfiguration)Configuration.GetSubsection("errorFilter");
-
-            if (config == null)
-                return delegate { };
-
-            var assertion = config.Assertion;
-
-            return Filter(assertion.Test);
-        }
-
-        public static EventConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
-        {
-            return es =>
+            class ErrorMailReportingOptions
             {
-                es.Get<ExceptionFilterEvent>().Firing += (sender, args) =>
+                public string MailRecipient { get; set; }
+                public string MailSender { get; set; }
+                public string MailCopyRecipient { get; set; }
+                public string MailSubjectFormat { get; set; }
+                public MailPriority MailPriority { get; set; }
+                public bool ReportAsynchronously { get; set; }
+                public string SmtpServer { get; set; }
+                public int SmtpPort { get; set; }
+                public string AuthUserName { get; set; }
+                public string AuthPassword { get; set; }
+                public bool DontSendYsod { get; set; }
+                public bool UseSsl { get; set; }
+            }
+
+            static EventConnectionHandler Mail(ErrorMailReportingOptions options)
+            {
+                return es =>
                 {
-                    try
+                    es.Get<ExceptionEvent>().Firing += (_, args) =>
                     {
-                        if (predicate(new ErrorFilterModule.AssertionHelperContext(/* TODO source */ sender, args.Payload.Exception, args.Payload.Context)))
-                            args.Payload.Dismiss();
-                    }
-                    catch (Exception e)
-                    {
-                        Trace.WriteLine(e);
-                        throw; // TODO PrepareToRethrow()?
-                    }
-                };
-            };
-        }
+                        var error = args.Payload.CreateError(es);
 
-        public static EventConnectionHandler Log(NameValueCollection settings)
-        {
-            return es =>
-            {
-                es.Get<ExceptionEvent>().Firing += (_, args) =>
-                {
-                    var payload = args.Payload;
-                    var exception = payload.Exception;
-                    if (exception != null
-                        && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ExceptionContext))
-                            return;
-
-                    var log = ErrorLog.GetDefault(null);
-                    var error = payload.CreateError(es);
-                    var id = log.Log(error);
-                    
-                    var handler = es.Find<ErrorLogEvent>();
-                    if (handler != null)
-                        handler.Fire(null, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
-                };
-            };
-        }
-
-        public class ErrorMailReportingOptions
-        {
-            public string MailRecipient { get; set; }
-            public string MailSender { get; set; }
-            public string MailCopyRecipient { get; set; }
-            public string MailSubjectFormat { get; set; }
-            public MailPriority MailPriority { get; set; }
-            public bool ReportAsynchronously { get; set; }
-            public string SmtpServer { get; set; }
-            public int SmtpPort { get; set; }
-            public string AuthUserName { get; set; }
-            public string AuthPassword { get; set; }
-            public bool DontSendYsod { get; set; }
-            public bool UseSsl { get; set; }
-        }
-
-        public static EventConnectionHandler Mail(NameValueCollection settings)
-        {
-            var config = new Dictionary<string, string>(settings.Count);
-            foreach (var i in Enumerable.Range(0, settings.Count))
-                config.Add(settings.GetKey(i), settings[i]);
-
-            var mailRecipient = ErrorMailModule.GetSetting(config, "to");
-            
-            return Mail(new ErrorMailReportingOptions
-            {
-                MailRecipient        = mailRecipient, 
-                MailSender           = ErrorMailModule.GetSetting(config, "from", mailRecipient), 
-                MailCopyRecipient    = ErrorMailModule.GetSetting(config, "cc", string.Empty), 
-                MailSubjectFormat    = ErrorMailModule.GetSetting(config, "subject", string.Empty), 
-                MailPriority         = (MailPriority) Enum.Parse(typeof(MailPriority), ErrorMailModule.GetSetting(config, "priority", MailPriority.Normal.ToString()), true), 
-                ReportAsynchronously = Convert.ToBoolean(ErrorMailModule.GetSetting(config, "async", bool.TrueString)),
-                SmtpServer           = ErrorMailModule.GetSetting(config, "smtpServer", string.Empty), 
-                SmtpPort             = Convert.ToUInt16(ErrorMailModule.GetSetting(config, "smtpPort", "0"), CultureInfo.InvariantCulture), 
-                AuthUserName         = ErrorMailModule.GetSetting(config, "userName", string.Empty),                 
-                AuthPassword         = ErrorMailModule.GetSetting(config, "password", string.Empty), 
-                DontSendYsod         = Convert.ToBoolean(ErrorMailModule.GetSetting(config, "noYsod", bool.FalseString)), 
-                UseSsl               = Convert.ToBoolean(ErrorMailModule.GetSetting(config, "useSsl", bool.FalseString))
-            });
-        }
-
-        public static EventConnectionHandler Mail(ErrorMailReportingOptions options)
-        {
-            return es =>
-            {
-                es.Get<ExceptionEvent>().Firing += (_, args) =>
-                {
-                    var error = args.Payload.CreateError(es);
-
-                    if (options.ReportAsynchronously)
-                    {
-                        //
-                        // Schedule the reporting at a later time using a worker from 
-                        // the system thread pool. This makes the implementation
-                        // simpler, but it might have an impact on reducing the
-                        // number of workers available for processing ASP.NET
-                        // requests in the case where lots of errors being generated.
-                        //
-
-                        ThreadPool.QueueUserWorkItem(delegate 
+                        if (options.ReportAsynchronously)
                         {
-                            try
-                            {
-                                ReportError(error, options);
-                            }
-
                             //
-                            // Catch and trace COM/SmtpException here because this
-                            // method will be called on a thread pool thread and
-                            // can either fail silently in 1.x or with a big band in
-                            // 2.0. For latter, see the following MS KB article for
-                            // details:
-                            //
-                            //     Unhandled exceptions cause ASP.NET-based applications 
-                            //     to unexpectedly quit in the .NET Framework 2.0
-                            //     http://support.microsoft.com/kb/911816
+                            // Schedule the reporting at a later time using a worker from 
+                            // the system thread pool. This makes the implementation
+                            // simpler, but it might have an impact on reducing the
+                            // number of workers available for processing ASP.NET
+                            // requests in the case where lots of errors being generated.
                             //
 
-                            catch (SmtpException e)
+                            ThreadPool.QueueUserWorkItem(delegate 
                             {
-                                Trace.TraceError(e.ToString());
-                            }
-                        });
-                    }
-                    else
-                    {
-                        ReportError(error, options);
-                    }
+                                try
+                                {
+                                    ReportError(error, options);
+                                }
+                                //
+                                // Catch and trace COM/SmtpException here because this
+                                // method will be called on a thread pool thread and
+                                // can either fail silently in 1.x or with a big band in
+                                // 2.0. For latter, see the following MS KB article for
+                                // details:
+                                //
+                                //     Unhandled exceptions cause ASP.NET-based applications 
+                                //     to unexpectedly quit in the .NET Framework 2.0
+                                //     http://support.microsoft.com/kb/911816
+                                //
+                                catch (SmtpException e)
+                                {
+                                    Trace.TraceError(e.ToString());
+                                }
+                            });
+                        }
+                        else
+                        {
+                            ReportError(error, options);
+                        }
+                    };
                 };
-            };
-        }
+            }
 
-        /// <summary>
-        /// Schedules the error to be e-mailed synchronously.
-        /// </summary>
+            /// <summary>
+            /// Schedules the error to be e-mailed synchronously.
+            /// </summary>
 
-        private static void ReportError(Error error, ErrorMailReportingOptions options)
-        {
-            if (error == null)
-                throw new ArgumentNullException("error");
-
-            //
-            // Start by checking if we have a sender and a recipient.
-            // These values may be null if someone overrides the
-            // implementation of OnInit but does not override the
-            // MailSender and MailRecipient properties.
-            //
-
-            var sender = options.MailSender ?? string.Empty;
-            var recipient = options.MailRecipient ?? string.Empty;
-            var copyRecipient = options.MailCopyRecipient ?? string.Empty;
-
-            if (recipient.Length == 0)
-                return;
-
-            //
-            // Create the mail, setting up the sender and recipient and priority.
-            //
-
-            var mail = new MailMessage();
-            mail.Priority = options.MailPriority;
-
-            mail.From = new MailAddress(sender);
-            mail.To.Add(recipient);
-
-            if (copyRecipient.Length > 0)
-                mail.CC.Add(copyRecipient);
-
-            //
-            // Format the mail subject.
-            // 
-
-            string subjectFormat = Mask.EmptyString(options.MailSubjectFormat, "Error ({1}): {0}");
-            mail.Subject = string.Format(subjectFormat, error.Message, error.Type).
-                Replace('\r', ' ').Replace('\n', ' ');
-
-            //
-            // Format the mail body.
-            //
-
-            var formatter = new ErrorMailHtmlFormatter(); // TODO CreateErrorFormatter();
-
-            var bodyWriter = new StringWriter();
-            formatter.Format(bodyWriter, error);
-            mail.Body = bodyWriter.ToString();
-
-            switch (formatter.MimeType)
+            private static void ReportError(Error error, ErrorMailReportingOptions options)
             {
-                case "text/html": mail.IsBodyHtml = true; break;
-                case "text/plain": mail.IsBodyHtml = false; break;
+                if (error == null)
+                    throw new ArgumentNullException("error");
 
-                default:
+                //
+                // Start by checking if we have a sender and a recipient.
+                // These values may be null if someone overrides the
+                // implementation of OnInit but does not override the
+                // MailSender and MailRecipient properties.
+                //
+
+                var sender = options.MailSender ?? String.Empty;
+                var recipient = options.MailRecipient ?? String.Empty;
+                var copyRecipient = options.MailCopyRecipient ?? String.Empty;
+
+                if (recipient.Length == 0)
+                    return;
+
+                //
+                // Create the mail, setting up the sender and recipient and priority.
+                //
+
+                var mail = new MailMessage();
+                mail.Priority = options.MailPriority;
+
+                mail.From = new MailAddress(sender);
+                mail.To.Add(recipient);
+
+                if (copyRecipient.Length > 0)
+                    mail.CC.Add(copyRecipient);
+
+                //
+                // Format the mail subject.
+                // 
+
+                string subjectFormat = Mask.EmptyString(options.MailSubjectFormat, "Error ({1}): {0}");
+                mail.Subject = String.Format(subjectFormat, error.Message, error.Type).
+                    Replace('\r', ' ').Replace('\n', ' ');
+
+                //
+                // Format the mail body.
+                //
+
+                var formatter = new ErrorMailHtmlFormatter(); // TODO CreateErrorFormatter();
+
+                var bodyWriter = new StringWriter();
+                formatter.Format(bodyWriter, error);
+                mail.Body = bodyWriter.ToString();
+
+                switch (formatter.MimeType)
                 {
-                    throw new ApplicationException(string.Format(
-                        "The error mail module does not know how to handle the {1} media type that is created by the {0} formatter.",
-                        formatter.GetType().FullName, formatter.MimeType));
+                    case "text/html": mail.IsBodyHtml = true; break;
+                    case "text/plain": mail.IsBodyHtml = false; break;
+
+                    default:
+                        {
+                            throw new ApplicationException(String.Format(
+                                "The error mail module does not know how to handle the {1} media type that is created by the {0} formatter.",
+                                formatter.GetType().FullName, formatter.MimeType));
+                        }
+                }
+
+                var args = new ErrorMailEventArgs(error, mail);
+                var es = EventStation.Default;
+
+                try
+                {
+                    //
+                    // If an HTML message was supplied by the web host then attach 
+                    // it to the mail if not explicitly told not to do so.
+                    //
+
+                    if (!options.DontSendYsod && error.WebHostHtmlMessage.Length > 0)
+                    {
+                        var ysodAttachment = ErrorMailModule.CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
+                        if (ysodAttachment != null)
+                            mail.Attachments.Add(ysodAttachment);
+                    }
+
+                    //
+                    // Send off the mail with some chance to pre- or post-process
+                    // using event.
+                    //
+
+                    es.Get<ErrorMailEvents.Mailing>().Fire(null, args);
+                    SendMail(mail, options);
+                    es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
+                }
+                finally
+                {
+                    es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
+                    mail.Dispose();
                 }
             }
 
-            var args = new ErrorMailEventArgs(error, mail);
-            var es = EventStation.Default;
-
-            try
-            {
-                //
-                // If an HTML message was supplied by the web host then attach 
-                // it to the mail if not explicitly told not to do so.
-                //
-
-                if (!options.DontSendYsod && error.WebHostHtmlMessage.Length > 0)
-                {
-                    var ysodAttachment = ErrorMailModule.CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
-                    if (ysodAttachment != null)
-                        mail.Attachments.Add(ysodAttachment);
-                }
-
-                //
-                // Send off the mail with some chance to pre- or post-process
-                // using event.
-                //
-
-                es.Get<ErrorMailEvents.Mailing>().Fire(null, args);
-                SendMail(mail, options);
-                es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
-            }
-            finally
-            {
-                es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
-                mail.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Sends the e-mail using SmtpMail or SmtpClient.
-        /// </summary>
+            /// <summary>
+            /// Sends the e-mail using SmtpMail or SmtpClient.
+            /// </summary>
         
-        private static void SendMail(MailMessage mail, ErrorMailReportingOptions options)
-        {
-            if (mail == null)
-                throw new ArgumentNullException("mail");
-
-            //
-            // Under .NET Framework 2.0, the authentication settings
-            // go on the SmtpClient object rather than mail message
-            // so these have to be set up here.
-            //
-
-            var client = new SmtpClient();
-
-            var host = options.SmtpServer ?? string.Empty;
-
-            if (host.Length > 0)
+            private static void SendMail(MailMessage mail, ErrorMailReportingOptions options)
             {
-                client.Host = host;
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                if (mail == null)
+                    throw new ArgumentNullException("mail");
+
+                //
+                // Under .NET Framework 2.0, the authentication settings
+                // go on the SmtpClient object rather than mail message
+                // so these have to be set up here.
+                //
+
+                var client = new SmtpClient();
+
+                var host = options.SmtpServer ?? String.Empty;
+
+                if (host.Length > 0)
+                {
+                    client.Host = host;
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                }
+
+                var port = options.SmtpPort;
+                if (port > 0)
+                    client.Port = port;
+
+                var userName = options.AuthUserName ?? String.Empty;
+                var password = options.AuthPassword ?? String.Empty;
+
+                if (userName.Length > 0 && password.Length > 0)
+                    client.Credentials = new NetworkCredential(userName, password);
+
+                client.EnableSsl = options.UseSsl;
+
+                client.Send(mail);
             }
-
-            var port = options.SmtpPort;
-            if (port > 0)
-                client.Port = port;
-
-            var userName = options.AuthUserName ?? string.Empty;
-            var password = options.AuthPassword ?? string.Empty;
-
-            if (userName.Length > 0 && password.Length > 0)
-                client.Credentials = new NetworkCredential(userName, password);
-
-            client.EnableSsl = options.UseSsl;
-
-            client.Send(mail);
         }
     }
 
