@@ -117,7 +117,7 @@ namespace Elmah
                         var payload = args.Payload;
                         var exception = payload.Exception;
                         if (exception != null
-                            && ExceptionFilterEvent.Fire(es, /* TODO source? */ null, exception, payload.ExceptionContext))
+                            && ExceptionFilterEvent.Fire(es, this, exception, payload.ExceptionContext))
                             return;
 
                         var log = ErrorLog.GetDefault(null);
@@ -154,7 +154,7 @@ namespace Elmah
                     {
                         try
                         {
-                            if (predicate(new ErrorFilterModule.AssertionHelperContext(/* TODO source */ sender, args.Payload.Exception, args.Payload.Context)))
+                            if (predicate(new ErrorFilterModule.AssertionHelperContext(sender, args.Payload.Exception, args.Payload.Context)))
                                 args.Payload.Dismiss();
                         }
                         catch (Exception e)
