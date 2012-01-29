@@ -221,13 +221,19 @@ namespace Elmah
                 public bool UseSsl { get; set; }
             }
 
-            static EventConnectionHandler Mail(ErrorMailReportingOptions options)
+            EventConnectionHandler Mail(ErrorMailReportingOptions options)
             {
                 return es =>
                 {
                     es.Get<ExceptionEvent>().Firing += (_, args) =>
                     {
-                        var error = args.Payload.CreateError(es);
+                        var payload = args.Payload;
+                        var exception = payload.Exception;
+                        if (exception != null
+                            && ExceptionFilterEvent.Fire(es, this, exception, payload.ExceptionContext))
+                            return;
+
+                        var error = payload.CreateError(es);
 
                         if (options.ReportAsynchronously)
                         {
