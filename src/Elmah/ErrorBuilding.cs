@@ -619,7 +619,7 @@ namespace Elmah
             if (config == null) throw new ArgumentNullException("config");
 
             var modules =
-                from item in (ConfigurationManager.AppSettings["Elmah.Modules"] ?? string.Empty).Split(',')
+                from item in (config["Elmah.Modules"] ?? string.Empty).Split(',')
                 let name = item.Trim()
                 where name.Length > 0
                 let prefix = name + "."
