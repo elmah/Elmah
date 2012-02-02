@@ -34,12 +34,12 @@ namespace Elmah
     #line default
     #line hidden
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.2.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.3.2.0")]
     internal partial class AboutPage : WebTemplateBase
     {
 #line hidden
 
-        #line 72 "..\..\AboutPage.cshtml"
+        #line 86 "..\..\AboutPage.cshtml"
 
     private Version GetVersion()
     {
@@ -209,11 +209,111 @@ WriteLiteral("\r\n    build was compiled from the following sources for CLR ");
             
             #line default
             #line hidden
-WriteLiteral(":\r\n</p>\r\n\r\n<ul>\r\n");
+WriteLiteral(":\r\n</p>\r\n\r\n");
 
 
             
-            #line 66 "..\..\AboutPage.cshtml"
+            #line 65 "..\..\AboutPage.cshtml"
+ foreach (var entry in Elmah.Modules.Configuration.Parse())
+{
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <h2>");
+
+
+            
+            #line 67 "..\..\AboutPage.cshtml"
+   Write(entry.Name);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h2>\r\n");
+
+
+            
+            #line 68 "..\..\AboutPage.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 68 "..\..\AboutPage.cshtml"
+     if (entry.Settings.Any())
+    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <dl>\r\n");
+
+
+            
+            #line 71 "..\..\AboutPage.cshtml"
+         foreach (var pair in entry.Settings)
+        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <dt>");
+
+
+            
+            #line 73 "..\..\AboutPage.cshtml"
+           Write(pair.Key);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</dt>");
+
+
+
+WriteLiteral("<dd>");
+
+
+            
+            #line 73 "..\..\AboutPage.cshtml"
+                             Write(pair.Value);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</dd>\r\n");
+
+
+            
+            #line 74 "..\..\AboutPage.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        </dl>\r\n");
+
+
+            
+            #line 76 "..\..\AboutPage.cshtml"
+    }
+            
+            #line default
+            #line hidden
+            
+            #line 76 "..\..\AboutPage.cshtml"
+     
+}
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n<ul>\r\n");
+
+
+            
+            #line 80 "..\..\AboutPage.cshtml"
      foreach (var stamp in stamps)
     {
 
@@ -224,7 +324,7 @@ WriteLiteral("        <li><code>");
 
 
             
-            #line 68 "..\..\AboutPage.cshtml"
+            #line 82 "..\..\AboutPage.cshtml"
              Write(stamp.Id);
 
             
@@ -234,7 +334,7 @@ WriteLiteral("</code></li>        \r\n");
 
 
             
-            #line 69 "..\..\AboutPage.cshtml"
+            #line 83 "..\..\AboutPage.cshtml"
     }
 
             

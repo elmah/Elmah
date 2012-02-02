@@ -89,6 +89,112 @@ namespace Elmah
 
     namespace Modules
     {
+        public static class Configuration
+        {
+            public class Entry
+            {
+                public string Name { get; private set; }
+                public string TypeName { get; private set; }
+                public IEnumerable<KeyValuePair<string, string>> Settings { get; private set; }
+
+                public Entry(string name, string typeName, IEnumerable<KeyValuePair<string, string>> settings)
+                {
+                    //TODO arg checking
+                    Name = name;
+                    TypeName = typeName;
+                    Settings = settings.ToArray(); // Don't trust source so copy
+                }
+
+                public EventConnectionHandler LoadInitialized()
+                {
+                    return Load((m, s) => m.Initialize(s));
+                }
+
+                public virtual T Load<T>(Func<Module, object, T> resultor)
+                {
+                    if (resultor == null) throw new ArgumentNullException("resultor");
+
+                    var type = Type.GetType(TypeName, /* throwOnError */ true);
+                    Debug.Assert(type != null);
+                    // TODO check type compatibility
+
+                    var module = (Module)Activator.CreateInstance(type);
+                    module.Name = Name;
+
+                    var descriptor = module.SettingsDescriptor;
+                    var settingsObject = module.CreateSettings();
+                    if (descriptor != null && settingsObject != null)
+                    {
+                        var properties = descriptor.GetProperties();
+                        foreach (var ee in Settings)
+                        {
+                            var property = properties.Find(ee.Key, true);
+                            // TODO property != null
+                            var converter = property.Converter;
+                            // TODO converter != null
+                            property.SetValue(settingsObject, converter.ConvertFromInvariantString(ee.Value));
+                        }
+                    }
+
+                    return resultor(module, settingsObject);
+                }
+            }
+
+            public static IEnumerable<Entry> Parse()
+            {
+                return Parse(null);
+            }
+
+            public static IEnumerable<Entry> Parse(NameValueCollection config)
+            {
+                return ParseImpl(config ?? ConfigurationManager.AppSettings);
+            }
+
+            static IEnumerable<Entry> ParseImpl(NameValueCollection config)
+            {
+                Debug.Assert(config != null);
+
+                return
+                    from item in (config["Elmah.Modules"] ?? string.Empty).Split(',')
+                    let name = item.Trim()
+                    where name.Length > 0
+                    let prefix = name + "."
+                    let typeName = ValidatedTypeName((config[name] ?? string.Empty))
+                    let settings =
+                        from i in Enumerable.Range(0, config.Count)
+                        let key = config.GetKey(i).Trim()
+                        where key.Length > prefix.Length
+                            && key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                        select key.Substring(prefix.Length).AsKeyTo(config[i])
+                    select new Entry(name, typeName, settings);
+            }
+
+            private static string ValidatedTypeName(string input)
+            {
+                Debug.Assert(input != null);
+                var trimmed = input.Trim();
+                if (trimmed.Length == 0)
+                    throw new Exception(String.Format("Missing '{0}' module type specification.", input));
+                return trimmed;
+            }
+
+            public static IEnumerable<T> Parse<T>(Func<Module, object, T> resultor)
+            {
+                return Parse(null, resultor);
+            }
+
+            public static IEnumerable<T> Parse<T>(
+                NameValueCollection config,
+                Func<Module, object, T> resultor)
+            {
+                if (resultor == null) throw new ArgumentNullException("resultor");
+
+                var entries = Parse(config).ToArray();
+                return from entry in entries
+                       select entry.Load(resultor);
+            }
+        }
+
         public class Module
         {
             public virtual string Name { get; set; }
@@ -136,7 +242,7 @@ namespace Elmah
         {
             public override EventConnectionHandler Initialize(object settings)
             {
-                var config = (ErrorFilterConfiguration) Configuration.GetSubsection("errorFilter");
+                var config = (ErrorFilterConfiguration) Elmah.Configuration.GetSubsection("errorFilter");
 
                 if (config == null)
                     return delegate { };
@@ -611,59 +717,14 @@ namespace Elmah
 
         public static EventConnectionHandler[] LoadModules()
         {
-            return LoadModules(ConfigurationManager.AppSettings);
+            return LoadModules(null);
         }
 
         public static EventConnectionHandler[] LoadModules(NameValueCollection config)
         {
-            if (config == null) throw new ArgumentNullException("config");
-
-            var modules =
-                from item in (config["Elmah.Modules"] ?? string.Empty).Split(',')
-                let name = item.Trim()
-                where name.Length > 0
-                let prefix = name + "."
-                select new
-                {
-                    Name = name,
-                    TypeName = (config[name] ?? string.Empty).Trim(),
-                    Settings =
-                        from i in Enumerable.Range(0, config.Count)
-                        let key = config.GetKey(i).Trim()
-                        where key.Length > prefix.Length
-                           && key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                        select key.Substring(prefix.Length).AsKeyTo(config[i]),
-                };
-
-            var customizations = new List<EventConnectionHandler>(config.Count);
-
-            foreach (var entry in modules)
-            {
-                if (entry.TypeName.Length == 0)
-                    throw new Exception(string.Format("Missing '{0}' module type specification.", entry.Name));
-                var type = Type.GetType(entry.TypeName, /* throwOnError */ true);
-                Debug.Assert(type != null);
-                // TODO check type compatibility
-                var module = (Modules.Module) Activator.CreateInstance(type);
-                module.Name = entry.Name;
-                var desc = module.SettingsDescriptor;
-                var settings = module.CreateSettings();
-                if (desc != null && settings != null)
-                {
-                    var properties = desc.GetProperties();
-                    foreach (var ee in entry.Settings)
-                    {
-                        var property = properties.Find(ee.Key, true);
-                        // TODO property != null
-                        var converter = property.Converter;
-                        // TODO converter != null
-                        property.SetValue(settings, converter.ConvertFromInvariantString(ee.Value));
-                    }
-                }
-                customizations.Add(module.Initialize(settings));
-            }
-
-            return customizations.ToArray();
+            return Elmah.Modules.Configuration.Parse(config)
+                                              .Select(entry => entry.LoadInitialized())
+                                              .ToArray();
         }
 
         public static ICollection<EventConnectionHandler> Modules

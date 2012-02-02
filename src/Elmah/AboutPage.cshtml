@@ -62,6 +62,20 @@
     build was compiled from the following sources for CLR @Build.ImageRuntimeVersion:
 </p>
 
+@foreach (var entry in Elmah.Modules.Configuration.Parse())
+{
+    <h2>@entry.Name</h2>
+    @if (entry.Settings.Any())
+    {
+        <dl>
+        @foreach (var pair in entry.Settings)
+        {
+            <dt>@pair.Key</dt><dd>@pair.Value</dd>
+        }
+        </dl>
+    }
+}
+
 <ul>
     @foreach (var stamp in stamps)
     {
