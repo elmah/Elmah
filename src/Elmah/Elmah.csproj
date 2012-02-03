@@ -358,6 +358,9 @@
     <Compile Include="SqlServerCompactErrorLog.cs" />
     <Compile Include="StringFormatter.cs">
     </Compile>
+    <Compile Include="StringSeparatorStock.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="StringTranslation.cs">
     </Compile>
     <Compile Include="SQLiteErrorLog.cs">
