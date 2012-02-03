@@ -155,7 +155,7 @@ namespace Elmah
                 Debug.Assert(config != null);
 
                 return
-                    from item in (config["Elmah.Modules"] ?? string.Empty).Split(',')
+                    from item in (config["Elmah.Modules"] ?? string.Empty).Split(StringSeparatorStock.Comma)
                     let name = item.Trim()
                     where name.Length > 0
                     let prefix = name + "."
