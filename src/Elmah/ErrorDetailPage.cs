@@ -117,7 +117,7 @@ namespace Elmah
             HttpUtility.HtmlEncode(text.Substring(anchor, parameters.Index - anchor), writer);
             writer.Write("<span class='st-params'>(");
             int position = 0;
-            foreach (string parameter in parameters.Captures[0].Value.Split(','))
+            foreach (string parameter in parameters.Captures[0].Value.Split(StringSeparatorStock.Comma))
             {
                 int spaceIndex = parameter.LastIndexOf(' ');
                 if (spaceIndex <= 0)
