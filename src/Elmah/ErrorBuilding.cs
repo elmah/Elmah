@@ -84,7 +84,7 @@ namespace Elmah
         }
     }
 
-    public sealed class ErrorLogEvent : Event<ErrorLoggedEventArgs> { }
+    public sealed class ErrorLoggedEvent : Event<ErrorLoggedEventArgs> { }
 
     namespace Modules
     {
@@ -224,7 +224,7 @@ namespace Elmah
                         var error = args.CreateError(ehub);
                         var id = log.Log(error);
 
-                        var handler = ehub.Find<ErrorLogEvent>();
+                        var handler = ehub.Find<ErrorLoggedEvent>();
                         if (handler != null)
                             handler.Fire(this, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
                     }
