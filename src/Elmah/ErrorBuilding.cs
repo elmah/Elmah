@@ -43,6 +43,7 @@ namespace Elmah
     using System.Xml;
     using Mannex.Collections.Generic;
     using Mannex.Collections.Specialized;
+    using Modules;
     using IDictionary = System.Collections.IDictionary;
 
     #endregion
@@ -215,7 +216,7 @@ namespace Elmah
         {
             public override ModuleConnectionHandler Initialize(object settings)
             {
-                return ehub => ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) =>
+                return ehub => ehub.OnException((sender, args) =>
                 {
                     var exception = args.Exception;
                     if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
@@ -228,8 +229,6 @@ namespace Elmah
                         if (handler != null)
                             handler.Fire(this, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
                     }
-
-                    return new Unit();
                 });
             }
         }
@@ -250,7 +249,7 @@ namespace Elmah
 
             public static ModuleConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
             {
-                return ehub => ehub.Get<ExceptionFilterEvent>().AddHandler(next => (sender, args) =>
+                return ehub => ehub.OnExceptionFilter((sender, args) =>
                 {
                     try
                     {
@@ -262,6 +261,58 @@ namespace Elmah
                         throw; // TODO PrepareToRethrow()?
                     }
                 });
+            }
+        }
+
+        static class EventSubscriptionHelper
+        {
+            public static void OnException(this ExtensionHub ehub, Action<object, ExceptionEventArgs> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+            }
+
+            public static void OnExceptionFilter(this ExtensionHub ehub, Func<object, ExceptionFilterEventArgs, bool> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ExceptionFilterEvent>().AddHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
+            }
+
+            public static void OnErrorMailing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ErrorMailEvents.Mailing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+            }
+
+            public static void OnErrorMailed(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ErrorMailEvents.Mailed>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+            }
+
+            public static void OnErrorMailDisposing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ErrorMailEvents.Disposing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+            }
+
+            public static void OnErrorInitializing(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ErrorInitialization.Initializing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+            }
+
+            public static void OnErrorInitialized(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
+            {
+                if (ehub == null) throw new ArgumentNullException("ehub");
+                if (handler == null) throw new ArgumentNullException("handler");
+                ehub.Get<ErrorInitialization.Initialized>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
         }
 
@@ -321,7 +372,7 @@ namespace Elmah
 
             ModuleConnectionHandler Mail(ErrorMailReportingOptions options)
             {
-                return ehub => ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) =>
+                return ehub => ehub.OnException((sender, args) =>
                 {
                     var exception = args.Exception;
                     if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
@@ -366,8 +417,6 @@ namespace Elmah
                             ReportError(error, options);
                         }
                     }
-
-                    return new Unit();
                 });
             }
 
@@ -680,7 +729,7 @@ namespace Elmah
                 if (binder == null)
                     return default(TOutput);
 
-                handler = _cachedHandler = GetBinders().Aggregate((Func<object, TInput, TOutput>) null, (next, b) => b(next));
+                handler = _cachedHandler = GetBinders().Aggregate((Func<object, TInput, TOutput>)delegate { return default(TOutput); }, (next, b) => b(next));
             }
 
             return handler(sender, input);
@@ -861,7 +910,7 @@ namespace Elmah
 
         public static void InitHostName(ExtensionHub ehub)
         {
-            ehub.Get<Initializing>().AddHandler(next => (sender, args) => { InitHostName(args); return new Unit(); });
+            ehub.OnErrorInitializing((_, args) => InitHostName(args));
         }
 
         private static void InitHostName(ErrorInitializationContext args)
@@ -872,16 +921,12 @@ namespace Elmah
 
         public static void InitUserName(ExtensionHub ehub)
         {
-            ehub.Get<Initializing>().AddHandler(next => (sender, args) =>
-            {
-                args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty;
-                return new Unit();
-            });
+            ehub.OnErrorInitializing((_, args) => args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty);
         }
 
         public static void InitWebCollections(ExtensionHub ehub)
         {
-            ehub.Get<Initializing>().AddHandler(next => (sender, args) => { InitWebCollections(args); return new Unit(); });
+            ehub.OnErrorInitializing((_, args) => InitWebCollections(args));
         }
 
         private static void InitWebCollections(ErrorInitializationContext args)
