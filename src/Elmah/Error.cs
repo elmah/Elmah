@@ -84,7 +84,7 @@ namespace Elmah
         /// </summary>
 
         public Error(Exception e, HttpContextBase context) :
-            this(e, context, EventStation.Default) { }
+            this(e, context, ExtensionHub.Default) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Error"/> class
@@ -92,7 +92,7 @@ namespace Elmah
         /// object representing the context during the exception.
         /// </summary>
 
-        public Error(Exception e, object context, EventStation station)
+        public Error(Exception e, object context, ExtensionHub station)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
