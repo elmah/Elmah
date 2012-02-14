@@ -513,7 +513,7 @@ namespace Elmah
         }
     }
 
-    public sealed class ExceptionEvent : Event<ExceptionEvent.Context>
+    public sealed class ExceptionEvent : Event<ExceptionEventArgs>
     {
         public static void Fire(object sender, Exception exception, object context)
         {
@@ -526,29 +526,29 @@ namespace Elmah
             if (handler == null)
                 return;
 
-            handler.Fire(sender, new Context(exception, context));
+            handler.Fire(sender, new ExceptionEventArgs(exception, context));
+        }
+    }
+
+    public sealed class ExceptionEventArgs
+    {
+        public Exception Exception { get; private set; }
+        public object ExceptionContext { get; private set; }
+
+        public ExceptionEventArgs(Exception exception) : 
+            this(exception, null) {}
+
+        public ExceptionEventArgs(Exception exception, object context)
+        {
+            if (exception == null) throw new ArgumentNullException("exception");
+
+            Exception = exception;
+            ExceptionContext = context;
         }
 
-        public sealed class Context
+        public Error CreateError(ExtensionHub ehub)
         {
-            public Exception Exception { get; private set; }
-            public object ExceptionContext { get; private set; }
-
-            public Context(Exception exception) : 
-                this(exception, null) {}
-
-            public Context(Exception exception, object context)
-            {
-                if (exception == null) throw new ArgumentNullException("exception");
-
-                Exception = exception;
-                ExceptionContext = context;
-            }
-
-            public Error CreateError(ExtensionHub ehub)
-            {
-                return new Error(Exception, ExceptionContext, ehub);
-            }
+            return new Error(Exception, ExceptionContext, ehub);
         }
     }
 
