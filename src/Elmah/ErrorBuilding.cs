@@ -33,11 +33,11 @@ namespace Elmah
     using System.ComponentModel;
     using System.Configuration;
     using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Net.Mail;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Web;
     using System.Xml;
@@ -72,16 +72,15 @@ namespace Elmah
         }
     }
 
-    public sealed class ExceptionFilterEvent : Event<ExceptionFilterEventArgs>
+    public sealed class ExceptionFilterEvent : Event<ExceptionFilterEventArgs, bool>
     {
-        public static bool Fire(EventStation es, object sender, Exception exception, object context)
+        public static bool Fire(ExtensionHub ehub, object sender, Exception exception, object context)
         {
-            var handler = es.Find<ExceptionFilterEvent>();
+            var handler = ehub.Find<ExceptionFilterEvent>();
             if (handler == null) 
                 return false;
             var args = new ExceptionFilterEventArgs(exception, context);
-            handler.Fire(sender, args);
-            return args.Dismissed;
+            return handler.Fire(sender, args);
         }
     }
 
@@ -105,7 +104,7 @@ namespace Elmah
                     Settings = settings.ToArray(); // Don't trust source so copy
                 }
 
-                public EventConnectionHandler LoadInitialized()
+                public ModuleConnectionHandler LoadInitialized()
                 {
                     return Load((m, s) => m.Initialize(s));
                 }
@@ -201,46 +200,43 @@ namespace Elmah
             public bool HasSettingsSupport { get { return SettingsDescriptor != null; } }
             public virtual ICustomTypeDescriptor SettingsDescriptor { get { return null; } }
             public virtual object CreateSettings() { return null; }
-            public virtual EventConnectionHandler Initialize(object settings) { return delegate { }; }
+            public virtual ModuleConnectionHandler Initialize(object settings) { return delegate { }; }
         }
 
         public class Module<T> : Module where T : new()
         {
             public override ICustomTypeDescriptor SettingsDescriptor { get { return TypeDescriptor.GetProvider(typeof(T)).GetTypeDescriptor(typeof(T)); } }
             public override object CreateSettings() { return new T(); }
-            public sealed override EventConnectionHandler Initialize(object settings) { return Initialize((T)settings); }
-            protected virtual EventConnectionHandler Initialize(T settings) { return base.Initialize(settings); }
+            public sealed override ModuleConnectionHandler Initialize(object settings) { return Initialize((T)settings); }
+            protected virtual ModuleConnectionHandler Initialize(T settings) { return base.Initialize(settings); }
         }
 
         public class LogModule : Module
         {
-            public override EventConnectionHandler Initialize(object settings)
+            public override ModuleConnectionHandler Initialize(object settings)
             {
-                return es =>
+                return ehub => ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) =>
                 {
-                    es.Get<ExceptionEvent>().Firing += (_, args) =>
+                    var exception = args.Exception;
+                    if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
                     {
-                        var payload = args.Payload;
-                        var exception = payload.Exception;
-                        if (exception != null
-                            && ExceptionFilterEvent.Fire(es, this, exception, payload.ExceptionContext))
-                            return;
-
                         var log = ErrorLog.GetDefault(null);
-                        var error = payload.CreateError(es);
+                        var error = args.CreateError(ehub);
                         var id = log.Log(error);
-                    
-                        var handler = es.Find<ErrorLogEvent>();
+
+                        var handler = ehub.Find<ErrorLogEvent>();
                         if (handler != null)
-                            handler.Fire(null, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
-                    };
-                };
+                            handler.Fire(this, new ErrorLoggedEventArgs(new ErrorLogEntry(log, id, error)));
+                    }
+
+                    return new Unit();
+                });
             }
         }
 
         public class FilterModule : Module
         {
-            public override EventConnectionHandler Initialize(object settings)
+            public override ModuleConnectionHandler Initialize(object settings)
             {
                 var config = (ErrorFilterConfiguration) Elmah.Configuration.GetSubsection("errorFilter");
 
@@ -252,24 +248,20 @@ namespace Elmah
                 return Filter(assertion.Test);
             }
 
-            public static EventConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
+            public static ModuleConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
             {
-                return es =>
+                return ehub => ehub.Get<ExceptionFilterEvent>().AddHandler(next => (sender, args) =>
                 {
-                    es.Get<ExceptionFilterEvent>().Firing += (sender, args) =>
+                    try
                     {
-                        try
-                        {
-                            if (predicate(new ErrorFilterModule.AssertionHelperContext(sender, args.Payload.Exception, args.Payload.Context)))
-                                args.Payload.Dismiss();
-                        }
-                        catch (Exception e)
-                        {
-                            Trace.WriteLine(e);
-                            throw; // TODO PrepareToRethrow()?
-                        }
-                    };
-                };
+                        return predicate(new ErrorFilterModule.AssertionHelperContext(sender, args.Exception, args.Context));
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.WriteLine(e);
+                        throw; // TODO PrepareToRethrow()?
+                    }
+                });
             }
         }
 
@@ -292,7 +284,7 @@ namespace Elmah
 
         public class MailModule : Module<MailModuleSettings>
         {
-            protected override EventConnectionHandler Initialize(MailModuleSettings settings)
+            protected override ModuleConnectionHandler Initialize(MailModuleSettings settings)
             {
                 return Mail(new ErrorMailReportingOptions
                 {
@@ -327,19 +319,14 @@ namespace Elmah
                 public bool UseSsl { get; set; }
             }
 
-            EventConnectionHandler Mail(ErrorMailReportingOptions options)
+            ModuleConnectionHandler Mail(ErrorMailReportingOptions options)
             {
-                return es =>
+                return ehub => ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) =>
                 {
-                    es.Get<ExceptionEvent>().Firing += (_, args) =>
+                    var exception = args.Exception;
+                    if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
                     {
-                        var payload = args.Payload;
-                        var exception = payload.Exception;
-                        if (exception != null
-                            && ExceptionFilterEvent.Fire(es, this, exception, payload.ExceptionContext))
-                            return;
-
-                        var error = payload.CreateError(es);
+                        var error = args.CreateError(ehub);
 
                         if (options.ReportAsynchronously)
                         {
@@ -378,8 +365,10 @@ namespace Elmah
                         {
                             ReportError(error, options);
                         }
-                    };
-                };
+                    }
+
+                    return new Unit();
+                });
             }
 
             /// <summary>
@@ -450,7 +439,7 @@ namespace Elmah
                 }
 
                 var args = new ErrorMailEventArgs(error, mail);
-                var es = EventStation.Default;
+                var ehub = ExtensionHub.Default;
 
                 try
                 {
@@ -471,13 +460,13 @@ namespace Elmah
                     // using event.
                     //
 
-                    es.Get<ErrorMailEvents.Mailing>().Fire(null, args);
+                    ehub.Get<ErrorMailEvents.Mailing>().Fire(/* TODO sender */ null, args);
                     SendMail(mail, options);
-                    es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
+                    ehub.Get<ErrorMailEvents.Mailed>().Fire(/* TODO sender */ null, args);
                 }
                 finally
                 {
-                    es.Get<ErrorMailEvents.Mailed>().Fire(null, args);
+                    ehub.Get<ErrorMailEvents.Mailed>().Fire(/* TODO sender */ null, args);
                     mail.Dispose();
                 }
             }
@@ -528,12 +517,12 @@ namespace Elmah
     {
         public static void Fire(object sender, Exception exception, object context)
         {
-            Fire(sender, exception, context, EventStation.Default);
+            Fire(sender, exception, context, ExtensionHub.Default);
         }
 
-        public static void Fire(object sender, Exception exception, object context, EventStation station)
+        public static void Fire(object sender, Exception exception, object context, ExtensionHub ehub)
         {
-            var handler = station.Find<ExceptionEvent>();
+            var handler = ehub.Find<ExceptionEvent>();
             if (handler == null)
                 return;
 
@@ -556,9 +545,9 @@ namespace Elmah
                 ExceptionContext = context;
             }
 
-            public Error CreateError(EventStation es)
+            public Error CreateError(ExtensionHub ehub)
             {
-                return new Error(Exception, ExceptionContext, es);
+                return new Error(Exception, ExceptionContext, ehub);
             }
         }
     }
@@ -568,67 +557,6 @@ namespace Elmah
         public sealed class Mailing   : Event<ErrorMailEventArgs> { }
         public sealed class Mailed    : Event<ErrorMailEventArgs> { }
         public sealed class Disposing : Event<ErrorMailEventArgs> { }
-    }
-
-    public static class EventFiringEventArgs
-    {
-        public static EventFiringEventArgs<T> Create<T>(T payload)
-        {
-            return new EventFiringEventArgs<T>(payload);
-        }
-    }
-
-    public class EventFiringEventArgs<T> : EventArgs
-    {
-        private readonly T _payload;
-
-        public EventFiringEventArgs() : 
-            this(default(T)) {}
-
-        public EventFiringEventArgs(T payload)
-        {
-            _payload = payload;
-        }
-
-        public bool IsHandled { get; set; }
-        public T Payload { get { return _payload; } }
-        public object Result { get; set; }
-    }
-
-    public delegate void EventFiringHandler<T>(object sender, EventFiringEventArgs<T> args);
-
-    public class Event<T>
-    {
-        public event EventFiringHandler<T> Firing;
-
-        public void Fire(object sender, T payload)
-        {
-            Fire(sender, new EventFiringEventArgs<T>(payload));
-        }
-
-        public virtual void Fire(object sender, EventFiringEventArgs<T> args)
-        {
-            if (args.IsHandled) // Rare but possible
-                return;
-            var handler = Firing;
-            if (handler == null) 
-                return;
-            Fire(handler.GetInvocationList(), sender, args);
-        }
-
-        private static void Fire(IEnumerable<Delegate> handlers, object sender, EventFiringEventArgs<T> args)
-        {
-            Debug.Assert(handlers != null);
-            Debug.Assert(args != null);
-            Debug.Assert(!args.IsHandled);
-
-            foreach (EventFiringHandler<T> handler in handlers)
-            {
-                handler(sender, args);
-                if (args.IsHandled)
-                    return;
-            }
-        }
     }
 
     sealed class ModulesSectionHandler : DictionarySectionHandler
@@ -682,11 +610,146 @@ namespace Elmah
             return settings;
         }
     }
+   
+    public delegate void ModuleConnectionHandler(ExtensionHub ehub);
 
-    public delegate void EventConnectionHandler(EventStation container);
-    public delegate EventConnectionHandler ExtensionSetupHandler(NameValueCollection settings);
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential, Size = 1)]
+    public struct Unit : IEquatable<Unit>
+    {
+        public static bool operator ==(Unit unit1, Unit unit2) { return true; }
+        public static bool operator !=(Unit unit1, Unit unit2) { return false; }
+        public bool Equals(Unit other) { return true; }
+        public override bool Equals(object obj) { return obj is Unit; }
+        public override int GetHashCode() { return 0; }
+    }
 
-    public sealed class EventStation
+    sealed class DelegatingDisposable : IDisposable
+    {
+        private Action _disposer;
+
+        public DelegatingDisposable(Action disposer)
+        {
+            if (disposer == null) throw new ArgumentNullException("disposer");
+            _disposer = disposer;
+        }
+
+        public void Dispose()
+        {
+            var disposer = _disposer;
+            if (disposer == null)
+                return;
+            _disposer = null;
+            disposer();
+        }
+    }
+
+    public class Event<TInput, TOutput>
+    {
+        private Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> _binder;
+        private Func<object, TInput, TOutput> _cachedHandler;
+
+        public IDisposable AddHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
+        {
+            if (binder == null) throw new ArgumentNullException("binder");
+            
+            _binder += binder;
+            _cachedHandler = null;
+            return new DelegatingDisposable(() => RemoveHandler(binder));
+        }
+
+        private void RemoveHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
+        {
+            if (binder == null) throw new ArgumentNullException("binder");
+
+            _binder -= binder;
+            _cachedHandler = null;
+        }
+
+        public TOutput Fire(TInput input)
+        {
+            return Fire(null, input);
+        }
+
+        public virtual TOutput Fire(object sender, TInput input)
+        {
+            var handler = _cachedHandler;
+            if (handler == null)
+            {
+                var binder = _binder;
+                if (binder == null)
+                    return default(TOutput);
+
+                handler = _cachedHandler = GetBinders().Aggregate((Func<object, TInput, TOutput>) null, (next, b) => b(next));
+            }
+
+            return handler(sender, input);
+        }
+
+        protected virtual IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>> GetBinders()
+        {
+            var delegates = _binder.GetInvocationList();
+            Array.Reverse(delegates);
+            var binders =
+                from Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> d 
+                    in delegates 
+                select d;
+            return binders;
+        }
+    }
+
+    /*
+    static class ActionExtensions
+    {
+        public static Func<T1, T2, Unit> ToFunc<T1, T2>(this Action<T1, T2> action)
+        {
+            if (action == null) throw new ArgumentNullException("action");
+            return (arg1, arg2) => { action(arg1, arg2); return new Unit(); };
+        }
+
+        public static Action<T1, T2> ToAction<T1, T2>(this Func<T1, T2, Unit> function)
+        {
+            if (function == null) throw new ArgumentNullException("function");
+            return (arg1, arg2) => function(arg1, arg2);
+        }
+    }*/
+
+    public class Event<TInput> : Event<TInput, Unit>
+    {/*
+        private List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>,
+                                  Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>> _binders;
+
+        private List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>,
+                                  Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>> Binders
+        {
+            get { return _binders ?? (_binders = new List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>, Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>>()); }
+        }
+
+        public void AddHandler(Func<Action<object, TInput>, Action<object, TInput>> binder)
+        {
+            Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>> binderFunc = next => binder((sender, args) => next.ToAction()).ToFunc();
+            Binders.Add(binder.AsKeyTo(binderFunc));
+        }
+
+        public void RemoveHandler(Func<Action<object, TInput>, Action<object, TInput>> binder)
+        {
+            var binderFunc = Binders.FirstOrDefault(b => b.Key == binder).Value;
+            if (binderFunc != null)
+                RemoveHandler(binderFunc);
+        }
+*/
+        public new void Fire(TInput input)
+        {
+            Fire(null, input);
+        }
+
+        public new void Fire(object sender, TInput input)
+        {
+            base.Fire(sender, input);
+        }
+    }
+
+    public sealed class ExtensionHub
     {
         private readonly Dictionary<Type, object> _events = new Dictionary<Type, object>();
 
@@ -700,60 +763,60 @@ namespace Elmah
             return (T) _events.Find(typeof(T));
         }
 
-        private static ICollection<EventConnectionHandler> _modules = Array.AsReadOnly(new EventConnectionHandler[]
+        private static ICollection<ModuleConnectionHandler> _modules = Array.AsReadOnly(new ModuleConnectionHandler[]
         {
             ErrorInitialization.InitUserName, 
             ErrorInitialization.InitHostName, 
             ErrorInitialization.InitWebCollections, 
         });
 
-        private static readonly EventConnectionHandler[] _zeroModules = new EventConnectionHandler[0];
+        private static readonly ModuleConnectionHandler[] _zeroModules = new ModuleConnectionHandler[0];
 
-        static EventStation()
+        static ExtensionHub()
         {
             // TODO Move out of here to avoid type initialization from failing
             AppendModules(LoadModules());
         }
 
-        public static EventConnectionHandler[] LoadModules()
+        public static ModuleConnectionHandler[] LoadModules()
         {
             return LoadModules(null);
         }
 
-        public static EventConnectionHandler[] LoadModules(NameValueCollection config)
+        public static ModuleConnectionHandler[] LoadModules(NameValueCollection config)
         {
             return Elmah.Modules.Configuration.Parse(config)
                                               .Select(entry => entry.LoadInitialized())
                                               .ToArray();
         }
 
-        public static ICollection<EventConnectionHandler> Modules
+        public static ICollection<ModuleConnectionHandler> Modules
         {
             get { return _modules; }
         }
 
-        public static void AppendModules(params EventConnectionHandler[] modules)
+        public static void AppendModules(params ModuleConnectionHandler[] modules)
         {
             SetModules(modules, true);
         }
 
-        public static void ResetModules(params EventConnectionHandler[] modules)
+        public static void ResetModules(params ModuleConnectionHandler[] modules)
         {
             SetModules(modules, false);
         }
 
-        public static void SetModules(EventConnectionHandler[] modules, bool append)
+        public static void SetModules(ModuleConnectionHandler[] modules, bool append)
         {
             if (modules == null)
                 return;
 
-            ICollection<EventConnectionHandler> current;
-            EventConnectionHandler[] updated;
+            ICollection<ModuleConnectionHandler> current;
+            ModuleConnectionHandler[] updated;
             do
             {
                 current = _modules;
                 int currentCount = append ? current.Count : 0;
-                updated = new EventConnectionHandler[currentCount + modules.Length];
+                updated = new ModuleConnectionHandler[currentCount + modules.Length];
                 if (append)
                     current.CopyTo(updated, 0);
                 Array.Copy(modules, 0, updated, currentCount, modules.Length);
@@ -762,10 +825,10 @@ namespace Elmah
             while (current != Interlocked.CompareExchange(ref _modules, Array.AsReadOnly(updated), current));
         }
 
-        [ThreadStatic] static EventStation _thread;
+        [ThreadStatic] static ExtensionHub _thread;
         [ThreadStatic] static object _dependency;
 
-        public static EventStation Default
+        public static ExtensionHub Default
         {
             get
             {
@@ -774,7 +837,7 @@ namespace Elmah
                          ? _thread : null;
                 if (self == null)
                 {
-                    self = new EventStation();
+                    self = new ExtensionHub();
                     _dependency = modules;
                     foreach (var module in modules)
                         module(self);
@@ -807,36 +870,36 @@ namespace Elmah
     public static class ErrorInitialization
     {
         public sealed class Initializing : Event<ErrorInitializationContext> { }
-        public sealed class Initialized : Event<ErrorInitializationContext> { }
+        public sealed class Initialized  : Event<ErrorInitializationContext> { }
 
-        private static void OnErrorInitializing(EventStation extensions, ErrorInitializationContext args)
+        private static void OnErrorInitializing(ExtensionHub ehub, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
-            var handler = extensions.Find<Initializing>();
+            var handler = ehub.Find<Initializing>();
             if (handler != null) handler.Fire(/* TODO sender */ null, args);
         }
 
-        private static void OnErrorInitialized(EventStation extensions, ErrorInitializationContext args)
+        private static void OnErrorInitialized(ExtensionHub ehub, ErrorInitializationContext args)
         {
             Debug.Assert(args != null);
-            var handler = extensions.Find<Initialized>();
+            var handler = ehub.Find<Initialized>();
             if (handler != null) handler.Fire(/* TODO sender */ null, args);
         }
 
-        public static void Initialize(EventStation extensions, ErrorInitializationContext args)
+        public static void Initialize(ExtensionHub ehub, ErrorInitializationContext args)
         {
-            OnErrorInitializing(extensions, args);
-            OnErrorInitialized(extensions, args);
+            OnErrorInitializing(ehub, args);
+            OnErrorInitialized(ehub, args);
         }
 
-        public static EventConnectionHandler InitHostName(NameValueCollection settings)
+        public static ModuleConnectionHandler InitHostName(NameValueCollection settings)
         {
             return InitHostName;
         }
 
-        public static void InitHostName(EventStation container)
+        public static void InitHostName(ExtensionHub ehub)
         {
-            container.Get<Initializing>().Firing += (_, args) => InitHostName(args.Payload);
+            ehub.Get<Initializing>().AddHandler(next => (sender, args) => { InitHostName(args); return new Unit(); });
         }
 
         private static void InitHostName(ErrorInitializationContext args)
@@ -845,17 +908,18 @@ namespace Elmah
             args.Error.HostName = Environment.TryGetMachineName(context != null ? new HttpContextWrapper(context) : null);
         }
 
-        public static void InitUserName(EventStation container)
+        public static void InitUserName(ExtensionHub ehub)
         {
-            container.Get<Initializing>().Firing += (_, args) =>
+            ehub.Get<Initializing>().AddHandler(next => (sender, args) =>
             {
-                args.Payload.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty;
-            };
+                args.Error.User = Thread.CurrentPrincipal.Identity.Name ?? String.Empty;
+                return new Unit();
+            });
         }
 
-        public static void InitWebCollections(EventStation container)
+        public static void InitWebCollections(ExtensionHub ehub)
         {
-            container.Get<Initializing>().Firing += (_, args) => InitWebCollections(args.Payload);
+            ehub.Get<Initializing>().AddHandler(next => (sender, args) => { InitWebCollections(args); return new Unit(); });
         }
 
         private static void InitWebCollections(ErrorInitializationContext args)
