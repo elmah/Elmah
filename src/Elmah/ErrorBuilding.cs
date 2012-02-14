@@ -698,46 +698,8 @@ namespace Elmah
         }
     }
 
-    /*
-    static class ActionExtensions
-    {
-        public static Func<T1, T2, Unit> ToFunc<T1, T2>(this Action<T1, T2> action)
-        {
-            if (action == null) throw new ArgumentNullException("action");
-            return (arg1, arg2) => { action(arg1, arg2); return new Unit(); };
-        }
-
-        public static Action<T1, T2> ToAction<T1, T2>(this Func<T1, T2, Unit> function)
-        {
-            if (function == null) throw new ArgumentNullException("function");
-            return (arg1, arg2) => function(arg1, arg2);
-        }
-    }*/
-
     public class Event<TInput> : Event<TInput, Unit>
-    {/*
-        private List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>,
-                                  Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>> _binders;
-
-        private List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>,
-                                  Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>> Binders
-        {
-            get { return _binders ?? (_binders = new List<KeyValuePair<Func<Action<object, TInput>, Action<object, TInput>>, Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>>>>()); }
-        }
-
-        public void AddHandler(Func<Action<object, TInput>, Action<object, TInput>> binder)
-        {
-            Func<Func<object, TInput, Unit>, Func<object, TInput, Unit>> binderFunc = next => binder((sender, args) => next.ToAction()).ToFunc();
-            Binders.Add(binder.AsKeyTo(binderFunc));
-        }
-
-        public void RemoveHandler(Func<Action<object, TInput>, Action<object, TInput>> binder)
-        {
-            var binderFunc = Binders.FirstOrDefault(b => b.Key == binder).Value;
-            if (binderFunc != null)
-                RemoveHandler(binderFunc);
-        }
-*/
+    {
         public new void Fire(TInput input)
         {
             Fire(null, input);
