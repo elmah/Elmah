@@ -22,6 +22,11 @@
       <add name="ErrorFilter" type="Elmah.ErrorFilterModule, Elmah" preCondition="managedHandler" />
     </modules>
   </system.webServer>
+  <elmah>
+    <!-- set allowRemoteAccess="true" if you want to view your log from a remote machine 
+        but be extremely careful and ensure that the handler is secured by authorization -->
+    <security allowRemoteAccess="false" />
+  </elmah>
   <location path="elmah.axd">  
     <system.web>
       <httpHandlers>
