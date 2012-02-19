@@ -27,7 +27,7 @@
         but be extremely careful and ensure that the handler is secured by authorization -->
     <security allowRemoteAccess="false" />
   </elmah>
-  <location path="elmah.axd">  
+  <location path="elmah.axd" inheritInChildApplications="false">
     <system.web>
       <httpHandlers>
         <add verb="POST,GET,HEAD" 
