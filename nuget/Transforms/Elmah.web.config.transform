@@ -29,10 +29,14 @@
              path="elmah.axd" 
              type="Elmah.ErrorLogPageFactory, Elmah" />
       </httpHandlers>
+      <!-- TODO - secure your error log by uncommenting this section and either:
+           a) creating a role named elmah and assigning it to users who are allowed to view the log or
+           b) changing the declaration such that only appropriate users and/or roles have access
       <authorization>
         <allow roles="elmah" />
         <deny users="*" />  
-      </authorization>  
+      </authorization>
+      -->  
     </system.web>
     <system.webServer>
       <handlers>
