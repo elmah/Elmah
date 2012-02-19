@@ -40,11 +40,9 @@ namespace Elmah
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Web;
-    using System.Xml;
     using Mannex.Collections.Generic;
     using Mannex.Collections.Specialized;
     using Modules;
-    using IDictionary = System.Collections.IDictionary;
 
     #endregion
 
@@ -608,58 +606,6 @@ namespace Elmah
         public sealed class Disposing : Event<ErrorMailEventArgs> { }
     }
 
-    sealed class ModulesSectionHandler : DictionarySectionHandler
-    {
-        protected override object GetKey(XmlNode node) { return GetKey(node, "name"); }
-        
-        protected override void OnAdd(IDictionary dictionary, object key, XmlNode node)
-        {
-            if (dictionary == null) throw new ArgumentNullException("dictionary");
-            if (key == null) throw new ArgumentNullException("key");
-            if (node == null) throw new ArgumentNullException("node");
-
-            var typeName = GetValue(node, "type");
-            if (string.IsNullOrEmpty(typeName))
-            {
-                var message = String.Format("Missing type specification for module named '{0}'.", (object[]) key);
-                throw new ConfigurationException(message, node);
-            }
-
-            dictionary.Add(key, new ModuleSectionEntry(key.ToString(), typeName));
-        }
-    }
-
-    class ModuleSectionEntry
-    {
-        private NameValueCollection _settings;
-        
-        public string Name { get; private set; }
-        public string TypeName { get; private set; }
-        
-        public NameValueCollection Settings
-        {
-            get { return _settings ?? (_settings = GetSettings()); }
-        }
-
-        public ModuleSectionEntry(string name, string typeName)
-        {
-            Debug.AssertStringNotEmpty(name);
-            Debug.AssertStringNotEmpty(typeName);
-
-            Name = name;
-            TypeName = typeName;
-        }
-
-        private NameValueCollection GetSettings()
-        {
-            var dict = (IDictionary) Configuration.GetSubsection(Name);
-            var settings = new NameValueCollection();
-            settings.Add(from System.Collections.DictionaryEntry e in dict 
-                         select e.Key.ToString().AsKeyTo(e.Value.ToString()));
-            return settings;
-        }
-    }
-   
     public delegate void ModuleConnectionHandler(ExtensionHub ehub);
 
     [Serializable]
