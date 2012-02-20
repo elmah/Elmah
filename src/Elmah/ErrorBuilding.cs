@@ -849,11 +849,6 @@ namespace Elmah
             OnErrorInitialized(ehub, args);
         }
 
-        public static ModuleConnectionHandler InitHostName(NameValueCollection settings)
-        {
-            return InitHostName;
-        }
-
         public static void InitHostName(ExtensionHub ehub)
         {
             ehub.OnErrorInitializing((_, args) => InitHostName(args));
