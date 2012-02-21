@@ -39,7 +39,6 @@ namespace Elmah
     /// <see cref="Error"/> objects.
     /// </summary>
 
-    [ Serializable ]
     public static class ErrorJson
     {
         /// <summary>
