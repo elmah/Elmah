@@ -24,8 +24,8 @@
   </system.webServer>
   <elmah>
     <!--
-        set allowRemoteAccess="true" if you want to view your log from a remote machine 
-        but be extremely careful and ensure that the handler is secured by authorization (see below)
+        See http://code.google.com/p/elmah/wiki/SecuringErrorLogPages for 
+        more information on remote access and securing ELMAH.
     -->
     <security allowRemoteAccess="false" />
   </elmah>
@@ -37,15 +37,11 @@
              type="Elmah.ErrorLogPageFactory, Elmah" />
       </httpHandlers>
       <!-- 
-        TODO - secure your error log by uncommenting this section and either:
+        See http://code.google.com/p/elmah/wiki/SecuringErrorLogPages for 
+        more information on using ASP.NET authorization securing ELMAH.
 
-          a) creating a role named elmah and assigning it to users who are allowed to view the log or
-          b) changing the declaration such that only appropriate users and/or roles have access
-
-        See http://code.google.com/p/elmah/wiki/SecuringErrorLogPages        for more information on securing ELMAH.
-      -->      <!--
       <authorization>
-        <allow roles="elmah" />
+        <allow roles="admin" />
         <deny users="*" />  
       </authorization>
       -->  
