@@ -54,7 +54,6 @@ namespace Elmah
         private readonly TextWriter _writer;
         private readonly int[] _counters;
         private readonly char[] _terminators;
-        private int _depth;
         private string _memberName;
 
         public JsonTextWriter(TextWriter writer)
@@ -66,10 +65,7 @@ namespace Elmah
             _terminators = new char[levels];
         }
 
-        public int Depth
-        {
-            get { return _depth; }
-        }
+        public int Depth { get; private set; }
 
         private int ItemCount
         {
@@ -129,17 +125,17 @@ namespace Elmah
 
         private JsonTextWriter WriteImpl(string text, bool raw)
         {
-            Debug.Assert(raw || (text != null && text.Length > 0));
+            Debug.Assert(raw || !string.IsNullOrEmpty(text));
 
             if (Depth == 0 && (text.Length > 1 || (text[0] != '{' && text[0] != '[')))
                 throw new InvalidOperationException();
 
-            TextWriter writer = _writer;
+            var writer = _writer;
 
             if (ItemCount > 0)
                 writer.Write(',');   
 
-            string name = _memberName;
+            var name = _memberName;
             _memberName = null;
 
             if (name != null)
@@ -182,11 +178,11 @@ namespace Elmah
             return Write(value ? "true" : "false");
         }
 
-        private static readonly DateTime _epoch =  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime Epoch =  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public JsonTextWriter Number(DateTime time)
         {
-            double seconds = time.ToUniversalTime().Subtract(_epoch).TotalSeconds;
+            var seconds = time.ToUniversalTime().Subtract(Epoch).TotalSeconds;
             return Write(seconds.ToString(CultureInfo.InvariantCulture));
         }
 
@@ -201,7 +197,7 @@ namespace Elmah
                 throw new Exception();
 
             Write(start);
-            _depth++;
+            Depth++;
             Terminator = end[0];
             return this;
         }
@@ -214,7 +210,7 @@ namespace Elmah
             _writer.Write(' ');
             _writer.Write(Terminator);
             ItemCount = 0;
-            _depth--;
+            Depth--;
             return this;
         }
 
@@ -222,16 +218,17 @@ namespace Elmah
         {
             Debug.Assert(writer != null);
 
-            int length = (s ?? string.Empty).Length;
+            var length = (s ?? string.Empty).Length;
 
             writer.Write('"');
 
-            char last;
-            char ch = '\0';
+            var ch = '\0';
 
-            for (int index = 0; index < length; index++)
+            for (var index = 0; index < length; index++)
             {
-                last = ch;
+                var last = ch;
+
+                Debug.Assert(s != null);
                 ch = s[index];
 
                 switch (ch)
