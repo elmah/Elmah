@@ -29,6 +29,7 @@ namespace Elmah
 
     using System;
     using System.IO;
+    using System.Linq;
     using NameValueCollection = System.Collections.Specialized.NameValueCollection;
 
     #endregion
@@ -52,10 +53,9 @@ namespace Elmah
 
         public static string EncodeString(Error error)
         {
-            if (error == null) 
-                throw new ArgumentNullException("error");
+            if (error == null) throw new ArgumentNullException("error");
 
-            StringWriter writer = new StringWriter();
+            var writer = new StringWriter();
             Encode(error, writer);
             return writer.ToString();
         }
@@ -71,11 +71,8 @@ namespace Elmah
 
         public static void Encode(Error error, TextWriter writer)
         {
-            if (error == null) 
-                throw new ArgumentNullException("error");
-            
-            if (writer == null)
-                throw new ArgumentNullException("writer");
+            if (error == null) throw new ArgumentNullException("error");            
+            if (writer == null) throw new ArgumentNullException("writer");
 
             EncodeEnclosed(error, new JsonTextWriter(writer));
         }
@@ -132,7 +129,7 @@ namespace Elmah
             Debug.Assert(writer != null);
             Debug.AssertStringNotEmpty(name);
 
-            if (value == null || value.Length == 0)
+            if (string.IsNullOrEmpty(value))
                 return;
 
             writer.Member(name).String(value);
@@ -156,7 +153,7 @@ namespace Elmah
             // we could simply avoid emitting anything.
             //
 
-            int depth = writer.Depth;
+            var depth = writer.Depth;
 
             //
             // For each key, we get all associated values and loop through
@@ -168,25 +165,24 @@ namespace Elmah
             // multiple strings are naturally wrapped in an array.
             //
 
-            foreach (string key in collection.Keys)
+            var items = from i in Enumerable.Range(1, collection.Count)
+                        let values = collection.GetValues(i)
+                        where values != null && values.Length > 0
+                        let some = // Neither null nor empty
+                            from v in values
+                            where !string.IsNullOrEmpty(v)
+                            select v
+                        let nom = some.Take(2).Count()
+                        where nom > 0
+                        select new
+                        {
+                            Key = collection.GetKey(i), 
+                            IsArray = nom > 1, 
+                            Values = some,
+                        };
+            
+            foreach (var item in items)
             {
-                string[] values = collection.GetValues(key);
-
-                if (values == null || values.Length == 0)
-                    continue;
-
-                int count = 0; // Strings neither null nor empty.
-
-                for (int i = 0; i < values.Length; i++)
-                {
-                    string value = values[i];
-                    if (value != null && value.Length > 0)
-                        count++;
-                }
-
-                if (count == 0) // None?
-                    continue;   // Skip key
-
                 //
                 // There is at least one value so now we emit the key.
                 // Before doing that, we check if the collection member
@@ -199,19 +195,15 @@ namespace Elmah
                     writer.Object();
                 }
 
-                writer.Member(key);
+                writer.Member(item.Key);
 
-                if (count > 1)
+                if (item.IsArray)
                     writer.Array(); // Wrap multiples in an array
 
-                for (int i = 0; i < values.Length; i++)
-                {
-                    string value = values[i];
-                    if (value != null && value.Length > 0)
-                        writer.String(value);
-                }
+                foreach (var value in item.Values)
+                    writer.String(value);
 
-                if (count > 1) 
+                if (item.IsArray) 
                     writer.Pop();   // Close multiples array
             }
 
