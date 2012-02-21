@@ -28,18 +28,8 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections.Specialized;
     using System.IO;
-    using System.Threading;
-    using System.Web;
-    using System.Xml;
-
-    using XmlReader = System.Xml.XmlReader;
-    using XmlWriter = System.Xml.XmlWriter;
-    using Thread = System.Threading.Thread;
     using NameValueCollection = System.Collections.Specialized.NameValueCollection;
-    using XmlConvert = System.Xml.XmlConvert;
-    using WriteState = System.Xml.WriteState;
 
     #endregion
 
