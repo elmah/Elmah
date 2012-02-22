@@ -777,25 +777,6 @@ namespace Elmah
 
     public sealed class ExtensionHub
     {
-/*
-        public static Func<Func<Module, ModuleConnectionHandler>, Func<Module, ModuleConnectionHandler>> ModuleInitializer;
-
-        public static ModuleConnectionHandler InitializeModule(Module module)
-        {
-            if (module == null) throw new ArgumentNullException("module");
-
-            var binder = ModuleInitializer ?? (n => m => n(m));
-
-            var delegates = binder.GetInvocationList();
-            Array.Reverse(delegates);
-            var binders =
-                from Func<Func<Module, ModuleConnectionHandler>, Func<Module, ModuleConnectionHandler>> d
-                    in delegates
-                select d;
-            var handler = binders.Aggregate(new Func<Module, ModuleConnectionHandler>(InitializeModuleImpl), (next, b) => b(next));
-            return handler(module);
-        }*/
-
         private readonly Dictionary<Type, object> _events = new Dictionary<Type, object>();
 
         public T Get<T>() where T : class, new()
