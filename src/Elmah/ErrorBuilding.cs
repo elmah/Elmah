@@ -87,6 +87,8 @@ namespace Elmah
 
     namespace Modules
     {
+        using Debug = System.Diagnostics.Debug;
+
         public static class Configuration
         {
             public class Entry
@@ -103,9 +105,9 @@ namespace Elmah
                     Settings = settings.ToArray(); // Don't trust source so copy
                 }
 
-                public ModuleConnectionHandler LoadInitialized()
+                public InitializedModule LoadInitialized()
                 {
-                    return Load((m, s) => m.Initialize(s));
+                    return Load((m, s) => InitializedModule.Initialize(m, m.Initialize(s)));
                 }
 
                 public virtual T Load<T>(Func<Module, object, T> resultor)
@@ -116,8 +118,7 @@ namespace Elmah
                     Debug.Assert(type != null);
                     // TODO check type compatibility
 
-                    var module = (Module)Activator.CreateInstance(type);
-                    module.Name = Name;
+                    var module = (Module) Activator.CreateInstance(type, Name);
 
                     var descriptor = module.SettingsDescriptor;
                     var settingsObject = module.CreateSettings();
@@ -195,15 +196,77 @@ namespace Elmah
 
         public class Module
         {
-            public virtual string Name { get; set; }
+            public Module(string name)
+            {
+                if (name == null) throw new ArgumentNullException("name");
+                if (name.Trim().Length == 0) throw new ArgumentException(null, "name");
+                Name = name;
+            }
+
+            public string Name { get; private set; }
             public bool HasSettingsSupport { get { return SettingsDescriptor != null; } }
             public virtual ICustomTypeDescriptor SettingsDescriptor { get { return null; } }
             public virtual object CreateSettings() { return null; }
             public virtual ModuleConnectionHandler Initialize(object settings) { return delegate { }; }
         }
 
+        public sealed class InitializedModule
+        {
+            public Module Module { get; private set; }
+            public object Settings { get; private set; }
+            public ModuleConnectionHandler ConnectionHandler { get; private set; }
+
+            private InitializedModule(Module module, object settings, ModuleConnectionHandler connectionHandler)
+            {
+                Debug.Assert(module != null);
+                Debug.Assert(connectionHandler != null);
+                Module = module;
+                Settings = settings;
+                ConnectionHandler = connectionHandler;
+            }
+
+            public static InitializedModule Initialize(Module module, object settings)
+            {
+                if (module == null) throw new ArgumentNullException("module");
+                return new InitializedModule(module, settings, module.Initialize(settings));
+            }
+
+            public void Connect(ExtensionHub ehub)
+            {
+                ConnectionHandler(ehub);
+            }
+
+            public override string ToString()
+            {
+                return Module.Name;
+            }
+
+            public static InitializedModule Static(string name, ModuleConnectionHandler connectionHandler)
+            {
+                return Initialize(new StaticModule(name, connectionHandler), null);
+            }
+            
+            sealed class StaticModule : Module
+            {
+                private readonly ModuleConnectionHandler _connectionHandler;
+
+                public StaticModule(string name, ModuleConnectionHandler connectionHandler) :
+                    base(name)
+                {
+                    if (connectionHandler == null) throw new ArgumentNullException("connectionHandler");
+                    _connectionHandler = connectionHandler;
+                }
+
+                public override ModuleConnectionHandler Initialize(object settings)
+                {
+                    return _connectionHandler;
+                }
+            }
+        }
+
         public class Module<T> : Module where T : new()
         {
+            public Module(string name) : base(name){}
             public override ICustomTypeDescriptor SettingsDescriptor { get { return TypeDescriptor.GetProvider(typeof(T)).GetTypeDescriptor(typeof(T)); } }
             public override object CreateSettings() { return new T(); }
             public sealed override ModuleConnectionHandler Initialize(object settings) { return Initialize((T)settings); }
@@ -212,6 +275,8 @@ namespace Elmah
 
         public class LogModule : Module
         {
+            public LogModule(string name) : base(name){}
+
             public override ModuleConnectionHandler Initialize(object settings)
             {
                 return ehub => ehub.OnException((sender, args) =>
@@ -233,6 +298,8 @@ namespace Elmah
 
         public class FilterModule : Module
         {
+            public FilterModule(string name) : base(name) {}
+
             public override ModuleConnectionHandler Initialize(object settings)
             {
                 var config = (ErrorFilterConfiguration) Elmah.Configuration.GetSubsection("errorFilter");
@@ -333,6 +400,8 @@ namespace Elmah
 
         public class MailModule : Module<MailModuleSettings>
         {
+            public MailModule(string name) : base(name) {}
+
             protected override ModuleConnectionHandler Initialize(MailModuleSettings settings)
             {
                 return Mail(new ErrorMailReportingOptions
@@ -708,6 +777,25 @@ namespace Elmah
 
     public sealed class ExtensionHub
     {
+/*
+        public static Func<Func<Module, ModuleConnectionHandler>, Func<Module, ModuleConnectionHandler>> ModuleInitializer;
+
+        public static ModuleConnectionHandler InitializeModule(Module module)
+        {
+            if (module == null) throw new ArgumentNullException("module");
+
+            var binder = ModuleInitializer ?? (n => m => n(m));
+
+            var delegates = binder.GetInvocationList();
+            Array.Reverse(delegates);
+            var binders =
+                from Func<Func<Module, ModuleConnectionHandler>, Func<Module, ModuleConnectionHandler>> d
+                    in delegates
+                select d;
+            var handler = binders.Aggregate(new Func<Module, ModuleConnectionHandler>(InitializeModuleImpl), (next, b) => b(next));
+            return handler(module);
+        }*/
+
         private readonly Dictionary<Type, object> _events = new Dictionary<Type, object>();
 
         public T Get<T>() where T : class, new()
@@ -720,11 +808,11 @@ namespace Elmah
             return (T) _events.Find(typeof(T));
         }
 
-        private static ICollection<ModuleConnectionHandler> _modules = Array.AsReadOnly(new ModuleConnectionHandler[]
+        private static ICollection<InitializedModule> _modules = Array.AsReadOnly(new[]
         {
-            ErrorInitialization.InitUserName, 
-            ErrorInitialization.InitHostName, 
-            ErrorInitialization.InitWebCollections, 
+            InitializedModule.Static("ErrorUserNameInitialization", ErrorInitialization.InitUserName), 
+            InitializedModule.Static("ErrorHostNameInitialization", ErrorInitialization.InitHostName), 
+            InitializedModule.Static("ErrorWebCollectionsInitialization", ErrorInitialization.InitWebCollections), 
         });
 
         private static readonly ModuleConnectionHandler[] _zeroModules = new ModuleConnectionHandler[0];
@@ -735,45 +823,47 @@ namespace Elmah
             AppendModules(LoadModules());
         }
 
-        public static ModuleConnectionHandler[] LoadModules()
+        public static InitializedModule[] LoadModules()
         {
             return LoadModules(null);
         }
 
-        public static ModuleConnectionHandler[] LoadModules(NameValueCollection config)
+        public static InitializedModule[] LoadModules(NameValueCollection config)
         {
-            return Elmah.Modules.Configuration.Parse(config)
-                                              .Select(entry => entry.LoadInitialized())
-                                              .ToArray();
+            var modules = 
+                from e in Elmah.Modules.Configuration.Parse(config)
+                select e.LoadInitialized();
+            
+            return modules.ToArray();
         }
 
-        public static ICollection<ModuleConnectionHandler> Modules
+        public static ICollection<InitializedModule> Modules
         {
             get { return _modules; }
         }
 
-        public static void AppendModules(params ModuleConnectionHandler[] modules)
+        public static void AppendModules(params InitializedModule[] modules)
         {
             SetModules(modules, true);
         }
 
-        public static void ResetModules(params ModuleConnectionHandler[] modules)
+        public static void ResetModules(params InitializedModule[] modules)
         {
             SetModules(modules, false);
         }
 
-        public static void SetModules(ModuleConnectionHandler[] modules, bool append)
+        public static void SetModules(InitializedModule[] modules, bool append)
         {
             if (modules == null)
                 return;
 
-            ICollection<ModuleConnectionHandler> current;
-            ModuleConnectionHandler[] updated;
+            ICollection<InitializedModule> current;
+            InitializedModule[] updated;
             do
             {
                 current = _modules;
                 int currentCount = append ? current.Count : 0;
-                updated = new ModuleConnectionHandler[currentCount + modules.Length];
+                updated = new InitializedModule[currentCount + modules.Length];
                 if (append)
                     current.CopyTo(updated, 0);
                 Array.Copy(modules, 0, updated, currentCount, modules.Length);
@@ -797,7 +887,7 @@ namespace Elmah
                     self = new ExtensionHub();
                     _dependency = modules;
                     foreach (var module in modules)
-                        module(self);
+                        module.Connect(self);
                     _thread = self;
                 }
                 return self;
