@@ -164,7 +164,7 @@ namespace Elmah
             // multiple strings are naturally wrapped in an array.
             //
 
-            var items = from i in Enumerable.Range(1, collection.Count)
+            var items = from i in Enumerable.Range(0, collection.Count)
                         let values = collection.GetValues(i)
                         where values != null && values.Length > 0
                         let some = // Neither null nor empty
