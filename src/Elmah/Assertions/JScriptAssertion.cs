@@ -212,7 +212,8 @@ namespace Elmah.Assertions
         {
             private readonly string _expression;
             private readonly GlobalScope _scope;
-            private readonly FieldInfo _contextField;
+            private readonly FieldInfo _oldContextField;
+            private readonly FieldInfo _newContextField;
 
             public PartialTrustEvaluationStrategy(string expression, VsaEngine engine)
                 : base(engine)
@@ -223,7 +224,8 @@ namespace Elmah.Assertions
                 //
 
                 _scope = (GlobalScope)engine.GetGlobalScope().GetObject();
-                _contextField = _scope.AddField("$context");
+                _oldContextField = _scope.AddField("$context");
+                _newContextField = _scope.AddField("$");
                 _expression = expression;
             }
 
@@ -238,7 +240,8 @@ namespace Elmah.Assertions
                 // expression source.
                 //
 
-                _contextField.SetValue(_scope, context);
+                _oldContextField.SetValue(_scope, context);
+                _newContextField.SetValue(_scope, context);
 
                 try
                 {
@@ -281,7 +284,7 @@ namespace Elmah.Assertions
                     DefaultThisObject(engine), 
                     engine.LenientGlobalObject.Function, 
                     new object[] {
-                        /* parameters */ context, /* body... */ @"
+                        /* parameters */ context + ",$", /* body... */ @"
                         with (" + context + @") {
                             return (
                                 " + expression + @"
@@ -300,7 +303,7 @@ namespace Elmah.Assertions
 
                 var result = LateBinding.CallValue(
                                  DefaultThisObject(Engine), 
-                                 _function, /* args */ new[] { context }, 
+                                 _function, /* args */ new[] { context, context }, 
                                  /* construct */ false, /* brackets */ false, Engine);
                 
                 return Convert.ToBoolean(result);
