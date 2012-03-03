@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Elmah</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Elmah</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\..\..\bin\net-2.0\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;NET_2_0</DefineConstants>
+    <DocumentationFile>Elmah.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <LangVersion>ISO-2</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\..\..\bin\net-2.0\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;NET_2_0</DefineConstants>
+    <DocumentationFile>Elmah.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <LangVersion>ISO-2</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="Microsoft.Vsa" />
+    <Reference Include="mysql.data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\mysql.data.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Data.SQLite, Version=1.0.61.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\System.Data.SQLite.DLL</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Web.Services">
+      <Name>System.Web.Services</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Elmah\AboutPage.cs">
+      <Link>AboutPage.cs</Link>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ApplicationException.cs">
+      <Link>ApplicationException.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\AccessErrorLog.cs">
+      <Link>AccessErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\AssemblyInfo.cs">
+      <Link>AssemblyInfo.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\AssertionFactory.cs">
+      <Link>Assertions\AssertionFactory.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\ComparisonAssertion.cs">
+      <Link>Assertions\ComparisonAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\ComparisonResults.cs">
+      <Link>Assertions\ComparisonResults.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\CompositeAssertion.cs">
+      <Link>Assertions\CompositeAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\DataBinder.cs">
+      <Link>Assertions\DataBinder.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\DataBoundAssertion.cs">
+      <Link>Assertions\DataBoundAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\DelegatedContextExpression.cs">
+      <Link>Assertions\DelegatedContextExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\IAssertion.cs">
+      <Link>Assertions\IAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\IContextExpression.cs">
+      <Link>Assertions\IContextExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\IsNullAssertion.cs">
+      <Link>Assertions\IsNullAssertion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\JScriptAssertion.cs">
+      <Link>Assertions\JScriptAssertion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\LogicalAssertion.cs">
+      <Link>Assertions\LogicalAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\RegexMatchAssertion.cs">
+      <Link>Assertions\RegexMatchAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\StaticAssertion.cs">
+      <Link>Assertions\StaticAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\TypeAssertion.cs">
+      <Link>Assertions\TypeAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\UnaryNotAssertion.cs">
+      <Link>Assertions\UnaryNotAssertion.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Assertions\WebDataBindingExpression.cs">
+      <Link>Assertions\WebDataBindingExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Build.cs">
+      <Link>Build.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\CdoConfigurationFields.cs">
+      <Link>CdoConfigurationFields.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Configuration.cs">
+      <Link>Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ConfigurationSectionHelper.cs">
+      <Link>ConfigurationSectionHelper.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ConnectionStringHelper.cs">
+      <Link>ConnectionStringHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Debug.cs">
+      <Link>Debug.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\Environment.cs">
+      <Link>Environment.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Error.cs">
+      <Link>Error.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorDetailPage.cs">
+      <Link>ErrorDetailPage.cs</Link>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorDigestRssHandler.cs">
+      <Link>ErrorDigestRssHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorDisplay.cs">
+      <Link>ErrorDisplay.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorFilterConfiguration.cs">
+      <Link>ErrorFilterConfiguration.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorFilterModule.cs">
+      <Link>ErrorFilterModule.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorFilterSectionHandler.cs">
+      <Link>ErrorFilterSectionHandler.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorHtmlPage.cs">
+      <Link>ErrorHtmlPage.cs</Link>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorJson.cs">
+      <Link>ErrorJson.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorJsonHandler.cs">
+      <Link>ErrorJsonHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLog.cs">
+      <Link>ErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogDataSourceAdapter.cs">
+      <Link>ErrorLogDataSourceAdapter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogDownloadHandler.cs">
+      <Link>ErrorLogDownloadHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogEntry.cs">
+      <Link>ErrorLogEntry.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogModule.cs">
+      <Link>ErrorLogModule.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogPage.cs">
+      <Link>ErrorLogPage.cs</Link>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogPageFactory.cs">
+      <Link>ErrorLogPageFactory.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorLogSectionHandler.cs">
+      <Link>ErrorLogSectionHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorMailHtmlFormatter.cs">
+      <Link>ErrorMailHtmlFormatter.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorMailModule.cs">
+      <Link>ErrorMailModule.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorMailSectionHandler.cs">
+      <Link>ErrorMailSectionHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorPageBase.cs">
+      <Link>ErrorPageBase.cs</Link>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorRssHandler.cs">
+      <Link>ErrorRssHandler.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorSignal.cs">
+      <Link>ErrorSignal.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorTextFormatter.cs">
+      <Link>ErrorTextFormatter.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorTweetModule.cs">
+      <Link>ErrorTweetModule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorTweetSectionHandler.cs">
+      <Link>ErrorTweetSectionHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorXml.cs">
+      <Link>ErrorXml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ErrorXmlHandler.cs">
+      <Link>ErrorXmlHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ExceptionFiltering.cs">
+      <Link>ExceptionFiltering.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\FixIIS5xWildcardMappingModule.cs">
+      <Link>FixIIS5xWildcardMappingModule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\HtmlLinkType.cs">
+      <Link>HtmlLinkType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\HttpModuleBase.cs">
+      <Link>HttpModuleBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\HttpModuleRegistry.cs">
+      <Link>HttpModuleRegistry.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\HttpRequestSecurity.cs">
+      <Link>HttpRequestSecurity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\HttpStatus.cs">
+      <Link>HttpStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\InvariantStringArray.cs">
+      <Link>InvariantStringArray.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\JetBrains.Annotations.cs">
+      <Link>JetBrains.Annotations.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\JsonTextWriter.cs">
+      <Link>JsonTextWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ManifestResourceHandler.cs">
+      <Link>ManifestResourceHandler.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ManifestResourceHelper.cs">
+      <Link>ManifestResourceHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\Mask.cs">
+      <Link>Mask.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\MemoryErrorLog.cs">
+      <Link>MemoryErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\MsAjaxDeltaErrorLogModule.cs">
+      <Link>MsAjaxDeltaErrorLogModule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\MySqlErrorLog.cs">
+      <Link>MySqlErrorLog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\OracleErrorLog.cs">
+      <Link>OracleErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\PgsqlErrorLog.cs">
+      <Link>PgsqlErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\PoweredBy.cs">
+      <Link>PoweredBy.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\ReverseComparer.cs">
+      <Link>ReverseComparer.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\RichSiteSummary.cs">
+      <Link>RichSiteSummary.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\SccAttribute.cs">
+      <Link>SccAttribute.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\SccStamp.cs">
+      <Link>SccStamp.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\SecurityConfiguration.cs">
+      <Link>SecurityConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\SecuritySectionHandler.cs">
+      <Link>SecuritySectionHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ServiceCenter.cs">
+      <Link>ServiceCenter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\ServiceContainer.cs">
+      <Link>ServiceContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\SimpleServiceProviderFactory.cs">
+      <Link>SimpleServiceProviderFactory.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\SpeedBar.cs">
+      <Link>SpeedBar.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\SqlErrorLog.cs">
+      <Link>SqlErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\SqlServerCompactErrorLog.cs">
+      <Link>SqlServerCompactErrorLog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\StringFormatter.cs">
+      <Link>StringFormatter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\StringTranslation.cs">
+      <Link>StringTranslation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\SynchronousAsyncResult.cs">
+      <Link>SynchronousAsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\SQLiteErrorLog.cs">
+      <Link>SQLiteErrorLog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\TestException.cs">
+      <Link>TestException.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\XmlFileErrorLog.cs">
+      <Link>XmlFileErrorLog.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\..\Elmah\XmlSerializer.cs">
+      <Link>XmlSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Elmah\XmlText.cs">
+      <Link>XmlText.cs</Link>
+    </Compile>
+    <Content Include="..\..\Elmah\MySql.sql">
+      <Link>MySql.sql</Link>
+    </Content>
+    <Content Include="..\..\Elmah\SQLServer.sql">
+      <Link>SQLServer.sql</Link>
+    </Content>
+    <EmbeddedResource Include="..\..\Elmah\mkmdb.vbs">
+      <Link>mkmdb.vbs</Link>
+    </EmbeddedResource>
+    <Content Include="..\..\Elmah\Oracle.sql">
+      <Link>Oracle.sql</Link>
+    </Content>
+    <Content Include="..\..\Elmah\Pgsql.sql">
+      <Link>Pgsql.sql</Link>
+    </Content>
+    <EmbeddedResource Include="..\..\Elmah\RemoteAccessError.htm">
+      <Link>RemoteAccessError.htm</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\Elmah\ErrorLog.css">
+      <Link>ErrorLog.css</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
