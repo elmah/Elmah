@@ -259,8 +259,6 @@ namespace Elmah
                     [TimeUtc]
                 FROM
                     [ELMAH_Error]
-                WHERE
-                    [Application] = @Application
                 ORDER BY
                     [TimeUtc] DESC, 
                     [Sequence] DESC
