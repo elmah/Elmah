@@ -410,30 +410,5 @@ namespace Elmah
 
             return collection;
         }
-
-        private static bool ContainsKey(NameValueCollection collection, string key)
-        {
-            Debug.Assert(collection != null);
-
-            return IndexOfKey(collection, key) >= 0;
-        }
-
-        private static int IndexOfKey(NameValueCollection collection, string key)
-        {
-            Debug.Assert(collection != null);
-
-            if (collection.Count == 0)
-                return -1;
-
-            // ...failing, attempt a case-insensitive
-            CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
-            for (int index = 0; index < collection.Count; index++)
-            {
-                string indexKey = collection.GetKey(index);
-                if (0 == compareInfo.Compare(key, indexKey, CompareOptions.OrdinalIgnoreCase))
-                    return index;
-            }
-            return -1;
-        }
     }
 }
