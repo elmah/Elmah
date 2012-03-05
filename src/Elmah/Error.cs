@@ -29,6 +29,7 @@ namespace Elmah
 
     using System;
     using System.Diagnostics;
+    using System.Globalization;
     using System.Security;
     using System.Security.Principal;
     using System.Web;
@@ -125,7 +126,7 @@ namespace Elmah
             if (context != null)
             {
                 IPrincipal webUser = context.User;
-                if (webUser != null 
+                if (webUser != null
                     && Mask.NullString(webUser.Identity.Name).Length > 0)
                 {
                     _user = webUser.Identity.Name;
@@ -134,6 +135,18 @@ namespace Elmah
                 HttpRequest request = context.Request;
 
                 _serverVariables = CopyCollection(request.ServerVariables);
+
+                if (_serverVariables != null)
+                {
+                    // Hack for issue #140:
+                    // http://code.google.com/p/elmah/issues/detail?id=140
+ 
+                    const string authPasswordKey = "AUTH_PASSWORD";
+                    string authPassword = _serverVariables[authPasswordKey];
+                    if (authPassword != null) // yes, mask empty too!
+                        _serverVariables[authPasswordKey] = "*****";
+                }
+
                 _queryString = CopyCollection(request.QueryString);
                 _form = CopyCollection(request.Form);
                 _cookies = CopyCollection(request.Cookies);
@@ -396,6 +409,31 @@ namespace Elmah
                 collection = new NameValueCollection();
 
             return collection;
+        }
+
+        private static bool ContainsKey(NameValueCollection collection, string key)
+        {
+            Debug.Assert(collection != null);
+
+            return IndexOfKey(collection, key) >= 0;
+        }
+
+        private static int IndexOfKey(NameValueCollection collection, string key)
+        {
+            Debug.Assert(collection != null);
+
+            if (collection.Count == 0)
+                return -1;
+
+            // ...failing, attempt a case-insensitive
+            CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+            for (int index = 0; index < collection.Count; index++)
+            {
+                string indexKey = collection.GetKey(index);
+                if (0 == compareInfo.Compare(key, indexKey, CompareOptions.OrdinalIgnoreCase))
+                    return index;
+            }
+            return -1;
         }
     }
 }
