@@ -21,7 +21,7 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: FixIIS5xWildcardMappingModule.cs 566 2009-05-11 10:37:10Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
 
 //
 // this module is not currently available for .Net 1.0

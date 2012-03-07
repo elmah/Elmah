@@ -17,7 +17,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- $Id: MySql.sql 785 2011-01-22 01:44:08Z nberardi@gmail.com $
+-- $Id$
 
 -- ===========================================================================
 -- WARNING! 

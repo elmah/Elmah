@@ -17,7 +17,7 @@
 ' See the License for the specific language governing permissions and
 ' limitations under the License.
 
-' $Id: mkmdb.vbs 760 2011-01-02 23:17:56Z azizatif $
+' $Id$
 
 ' ---------------------------------------------------------------------------
 ' Script for creating an empty MS Access database file (MDB) to be used with

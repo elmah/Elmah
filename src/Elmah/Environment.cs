@@ -21,7 +21,7 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: Environment.cs 739 2010-10-19 00:08:29Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {

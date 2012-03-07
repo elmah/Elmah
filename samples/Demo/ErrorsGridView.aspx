@@ -94,6 +94,6 @@
         TypeName="Elmah.ErrorLogDataSourceAdapter" 
         SelectMethod="GetErrors" SelectCountMethod="GetErrorCount" />
     </form>
-    <!-- $Id: ErrorsGridView.aspx 571 2009-05-11 14:45:56Z azizatif $ -->
+    <!-- $Id$ -->
 </body>
 </html>

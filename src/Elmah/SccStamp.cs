@@ -21,7 +21,7 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: SccStamp.cs 566 2009-05-11 10:37:10Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {
@@ -55,7 +55,7 @@ namespace Elmah
             //
             // Expression to help parse:
             //
-            // STAMP := "$Id:" FILENAME REVISION DATE TIME "Z" USERNAME "$"
+            // STAMP := "$Id$"
             // DATE  := 4-DIGIT-YEAR "-" 2-DIGIT-MONTH "-" 2-DIGIT-DAY
             // TIME  := HH ":" MM ":" SS
             //

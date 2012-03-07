@@ -21,7 +21,7 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id: ErrorPageBase.cs 659 2009-07-23 18:21:39Z jamesdriscoll@btinternet.com $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {

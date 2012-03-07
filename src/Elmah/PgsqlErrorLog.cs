@@ -25,7 +25,7 @@
 
 #if !NET_1_1 && !NET_1_0
 
-[assembly: Elmah.Scc("$Id: PgsqlErrorLog.cs 696 2010-01-09 17:41:05Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {
