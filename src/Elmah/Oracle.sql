@@ -21,7 +21,7 @@
   
 */
 
--- $Id: Oracle.sql 568 2009-05-11 14:18:34Z azizatif $
+-- $Id$
 
 -- NB This script assumes you have logged on in the schema where you want to create the ELMAH objects
 

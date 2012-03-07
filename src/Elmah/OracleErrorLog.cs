@@ -26,7 +26,7 @@
 
 #if !NET_1_0
 
-[assembly: Elmah.Scc("$Id: OracleErrorLog.cs 907 2011-12-18 13:03:58Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {

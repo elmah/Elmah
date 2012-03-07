@@ -25,7 +25,7 @@
 
 #if !NET_1_1 && !NET_1_0
 
-[assembly: Elmah.Scc("$Id: SqlServerCompactErrorLog.cs 853 2011-05-10 14:05:25Z ejlskov@hotmail.com $")]
+[assembly: Elmah.Scc("$Id$")]
 
 namespace Elmah
 {

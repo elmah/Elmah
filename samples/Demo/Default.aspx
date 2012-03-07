@@ -5,7 +5,7 @@
 <%@ Import Namespace="System.Web.Configuration"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <script runat="server">
-    protected SccStamp Stamp = new SccStamp("$Id: Default.aspx 573 2009-05-11 14:49:01Z azizatif $");
+    protected SccStamp Stamp = new SccStamp("$Id$");
     protected const string RevisionDetailUrlFormat = "http://code.google.com/p/elmah/source/detail?r={0}";
     protected string MailPath;
     protected string SampleWebConfigPath;

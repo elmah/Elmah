@@ -22,7 +22,7 @@
 
 -- ELMAH DDL script for PostgreSQL based on DDL script for Microsoft SQL Server
 
--- $Id: Pgsql.sql 696 2010-01-09 17:41:05Z azizatif $
+-- $Id$
 
 /* ------------------------------------------------------------------------
         TABLES

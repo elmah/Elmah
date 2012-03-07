@@ -44,4 +44,4 @@ using ComVisible = System.Runtime.InteropServices.ComVisibleAttribute;
 [assembly: CLSCompliant(true)] 
 [assembly: ComVisible(false)]
 
-[assembly: Elmah.Scc("$Id: AssemblyInfo.cs 914 2011-12-18 20:01:36Z azizatif $")]
+[assembly: Elmah.Scc("$Id$")]
