@@ -61,7 +61,7 @@ namespace Elmah
                         var script = document.createElement('script');
                         script.type = 'text/javascript';
                         script.language = 'JavaScript';
-                        script.src = 'http://elmah.googlecode.com/svn/www/update.js?__=' + (new Date()).getTime();
+                        script.src = 'http://www.elmah.googlecode.com/hg/update.js?__=' + (new Date()).getTime();
                         document.getElementsByTagName('head')[0].appendChild(script);
                         return false;
                     }
