@@ -4,8 +4,8 @@ setlocal
 pushd "%~dp0"
 
 set hr=---------------------------------------------------------------------------
-set binzip=ELMAH-1.2-sp1-bin-x86.zip
-set srczip=ELMAH-1.2-sp1-src.zip
+set binzip=ELMAH-1.2-sp2-bin-x86.zip
+set srczip=ELMAH-1.2-sp2-src.zip
 set nuget=nuget\Tools\nuget.exe
 
 :main
