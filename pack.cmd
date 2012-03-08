@@ -5,14 +5,15 @@ pushd "%~dp0"
 
 set hr=---------------------------------------------------------------------------
 set binzip=ELMAH-1.2-sp1-bin-x86.zip
+set srczip=ELMAH-1.2-sp1-src.zip
 set nuget=nuget\Tools\nuget.exe
 
 :main
 call :clean ^
  && call :md tmp ^
  && call :download %binzip% /od:tmp ^
- && call :download ELMAH-1.2-sp1-src.zip /od:tmp ^
- && call :unzip tmp\ELMAH-1.2-sp1-src.zip -obase -y ^
+ && call :download %srczip% /od:tmp ^
+ && call :unzip tmp\%srczip% -obase -y ^
  && call :unzip tmp\%binzip% -obase -y ^
  && call :autoupdate ^
  && call :packall nuget\*.nuspec
