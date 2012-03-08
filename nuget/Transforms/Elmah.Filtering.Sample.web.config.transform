@@ -18,8 +18,8 @@
           // HTTP Status 404 - File not found
           HttpStatusCode == 404
           // FileNotFoundException or HttpRequestValidationException
-          || BaseException instanceof FileNotFoundException 
-          || BaseException instanceof HttpRequestValidationException
+          || $.BaseException instanceof FileNotFoundException 
+          || $.BaseException instanceof HttpRequestValidationException
           /* Using RegExp below (see http://msdn.microsoft.com/en-us/library/h6e2eb7w.aspx) */
           // Filter all errors caused by search engine crawlers
           || Context.Request.UserAgent.match(/crawler/i)                      

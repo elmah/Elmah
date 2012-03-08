@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>elmah.filtering.sample</id>
-    <version>1.2</version>
+    <version>1.2.2</version>
     <title>ELMAH Filtering Sample</title>
     <authors>Atif Aziz</authors>
     <owners>Atif Aziz, James Driscoll</owners>
@@ -11,10 +11,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Sample configuration supplying common filtering for ELMAH.</description>
     <summary>Sample configuration supplying common filtering for ELMAH.</summary>
+    <releaseNotes>Fixes an issue with JScript in Full trust</releaseNotes>
     <language>en-US</language>
     <tags>filtering elmah error logging unhandled exception</tags>
     <dependencies>
-      <dependency id="elmah" version="1.2" />
+      <dependency id="elmah" version="1.2.2" />
     </dependencies>
   </metadata>
   <files>
