@@ -5,8 +5,10 @@
 <%@ Import Namespace="System.Web.Configuration"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <script runat="server">
+<%--
     protected SccStamp Stamp = new SccStamp("$Id$");
     protected const string RevisionDetailUrlFormat = "http://code.google.com/p/elmah/source/detail?r={0}";
+--%>
     protected string MailPath;
     protected string SampleWebConfigPath;
     
@@ -278,9 +280,11 @@
     </dl>   
     </form>
     <hr />
+<%--
     <p>        
         Updated: <%= Server.HtmlEncode(Stamp.LastChanged.ToString("f")) %>
         (revision <a href='<%= string.Format(RevisionDetailUrlFormat, Stamp.Revision) %>'><%= Server.HtmlEncode(Stamp.Revision.ToString()) %></a>)
     </p>
+--%>
 </body>
 </html>
