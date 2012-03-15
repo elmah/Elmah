@@ -40,5 +40,6 @@
                      path="elmah.axd" 
                      type="Elmah.ErrorLogPageFactory, Elmah" />
             </httpHandlers>
+        </system.web>
     </location>  
 </configuration>
