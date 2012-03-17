@@ -277,13 +277,11 @@ namespace Elmah
                     command.ExecuteNonQuery();
 
                     // now we can get a handle to the NClob
-                    var xmlLob = (OracleLob)parameters[0].Value;
+                    var xmlLob = (Stream)parameters[0].Value;
                     // create a temporary buffer in which to store the XML
                     var tempbuff = Encoding.Unicode.GetBytes(errorXml);
                     // and finally we can write to it!
-                    xmlLob.BeginBatch(OracleLobOpenMode.ReadWrite);
                     xmlLob.Write(tempbuff,0,tempbuff.Length);
-                    xmlLob.EndBatch();
 
                     command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
                     command.CommandType = CommandType.StoredProcedure;
@@ -404,7 +402,7 @@ namespace Elmah
                 AddProviderSpecificTypeParameter(command, "v_AllXml", OracleType.NClob).Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
-                var xmlLob = (OracleLob)command.Parameters["v_AllXml"].Value;
+                var xmlLob = (Stream)command.Parameters["v_AllXml"].Value;
 
                 var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
                 var cbuffer = new char[1000];
