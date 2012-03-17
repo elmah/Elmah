@@ -38,6 +38,7 @@ if not "!DELAY_TEST!"=="test" (
 )
 pushd "%~dp0"
 
+set LIB_PATH_x64=lib\x64
 set BIN_PATH=bin\net-2.0\Release
 set DEMO_PATH=samples\Demo
 set DEMO_BIN_PATH=%DEMO_PATH%\bin
@@ -57,6 +58,20 @@ exit /b 1
 if not exist "%BIN_PATH%" call build 2.0
 if not exist "%DEMO_BIN_PATH%" md "%DEMO_BIN_PATH%"
 copy /y "%BIN_PATH%" "%DEMO_BIN_PATH%"
+
+REM See http://support.microsoft.com/kb/556009
+
+Set RegQry=HKLM\Hardware\Description\System\CentralProcessor\0
+ 
+REG.exe Query %RegQry% > checkOS.txt
+ 
+Find /i "x86" < CheckOS.txt > StringCheck.txt
+ 
+If %ERRORLEVEL% == 0 (
+	REM 32 bit SQLite will already be copied in
+) ELSE (
+	copy /y "%LIB_PATH_x64%\System.Data.SQLite.DLL" "%DEMO_BIN_PATH%"
+)
 
 set MAIL_PATH=%DEMO_PATH%\Mails
 if not exist "%MAIL_PATH%" md "%MAIL_PATH%"
