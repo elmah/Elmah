@@ -56,6 +56,8 @@ namespace Elmah
 
         private static DbProviderFactory _dbProviderFactory;
         private static PropertyInfo _providerSpecificTypeProperty;
+        private static object _clobDbType;
+        private static object _refCursorDbType;
 
         private static DbParameter AddParameter(DbCommand command, string parameterName)
         {
@@ -99,12 +101,26 @@ namespace Elmah
                 return;
 
             var parameter = _dbProviderFactory.CreateParameter();
+            Debug.Assert(parameter != null);
             var parameterType = parameter.GetType();
             _providerSpecificTypeProperty = (from property in parameterType.GetProperties() 
                                             let attributes = property.GetCustomAttributes(typeof (DbProviderSpecificTypePropertyAttribute), false) 
                                             from attribute in attributes
                                             where ((DbProviderSpecificTypePropertyAttribute) attribute).IsProviderSpecificTypeProperty 
                                             select property).FirstOrDefault();
+        }
+
+        static object GetProviderSpecificDbType(params string[] dbTypes)
+        {
+            Debug.Assert(_providerSpecificTypeProperty != null);
+            var enumValues = Enum.GetValues(_providerSpecificTypeProperty.PropertyType);
+
+            foreach (var dbType in dbTypes)
+                foreach (var enumValue in enumValues)
+                    if (enumValue.ToString().Equals(dbType, StringComparison.OrdinalIgnoreCase))
+                        return enumValue;
+
+            return null;
         }
         
         static OracleErrorLog()
@@ -114,6 +130,8 @@ namespace Elmah
                 return;
             
             GetProviderSpecificType();
+            _clobDbType = GetProviderSpecificDbType("NClob");
+            _refCursorDbType = GetProviderSpecificDbType("Cursor", "RefCursor");
         }
 
         private DbConnection CreateOpenConnection()
@@ -273,7 +291,7 @@ namespace Elmah
                     command.CommandType = CommandType.Text;
 
                     var parameters = command.Parameters;
-                    AddProviderSpecificTypeParameter(command, "tempblob", OracleType.NClob).Direction = ParameterDirection.Output;
+                    AddProviderSpecificTypeParameter(command, "tempblob", _clobDbType).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
                     // now we can get a handle to the NClob
@@ -294,7 +312,7 @@ namespace Elmah
                     AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
                     AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
                     AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
-                    AddProviderSpecificTypeParameter(command, "v_AllXml", OracleType.NClob).Value = xmlLob;
+                    AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Value = xmlLob;
                     AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
                     AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
 
@@ -330,7 +348,7 @@ namespace Elmah
                 AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
                 AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
                 AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32).Direction = ParameterDirection.Output;
-                AddProviderSpecificTypeParameter(command, "v_Results", OracleType.Cursor).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_Results", _refCursorDbType).Direction = ParameterDirection.Output;
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -399,7 +417,7 @@ namespace Elmah
                 var parameters = command.Parameters;
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
-                AddProviderSpecificTypeParameter(command, "v_AllXml", OracleType.NClob).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
                 var xmlLob = (Stream)command.Parameters["v_AllXml"].Value;
