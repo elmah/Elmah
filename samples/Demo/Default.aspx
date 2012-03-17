@@ -206,7 +206,7 @@
         <pre><%= Server.HtmlEncode(Server.MapPath("~/App_Data/errors.s3db")) %></pre>
         <p>There are several clients available for querying and administrating a
         SQLite database. If you don't have one handy, check out <a href="http://sqliteadmin.orbmu2k.de/">SQLite Administrator</a> (freeware).</p>
-        <p>The sample could have just as easily used Access or VistaDB as its database, 
+        <p>The sample could have just as easily used Access as its database, 
         logged to XML files or even memory and it still could have shipped as is with just
         a couple of changes to the <code>web.config</code> file.</p>
         <p><a href="#Questions">Back to top</a></p></dd>
@@ -275,7 +275,7 @@
         <p><a href="#Questions">Back to top</a></p></dd>
         <dt><a name="MediumTrustSupport"></a>Can I use ELMAH in a medium trust application?</dt>
         <dd><p>Yes, medium trust is fully supported by ELMAH as long as you use 
-        <code>SqlErrorLog</code> (Microsoft SQL Server) or <code>VistaDBErrorLog</code> (<a href="http://www.vistadb.net/">VistaDB</a>)
+        <code>SqlErrorLog</code> (Microsoft SQL Server)
         as the log implementations.</p></dd>
     </dl>   
     </form>
