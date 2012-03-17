@@ -32,7 +32,6 @@ namespace Elmah
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using System.Data.OracleClient;
     using System.IO;
     using System.Linq;
     using System.Reflection;
