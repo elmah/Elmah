@@ -330,7 +330,7 @@ namespace Elmah
 
                     if (parameters[0].Value is string)
                     {
-                        xmlValue = errorXml + "<!-- " + new string('a', 70000) + " -->";
+                        xmlValue = errorXml;
                     }
                     else
                     {
