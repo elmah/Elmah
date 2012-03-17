@@ -88,7 +88,7 @@ namespace Elmah
                 _dbProviderFactory = DbProviderFactories.GetFactory(providerInvariantName);
                 return true;
             }
-            catch (Exception ex)
+            catch (ArgumentException)
             {
                 return false;
             }
@@ -96,8 +96,7 @@ namespace Elmah
 
         static void GetProviderSpecificType()
         {
-            if (_dbProviderFactory == null)
-                return;
+            Debug.Assert(_dbProviderFactory != null);
 
             var parameter = _dbProviderFactory.CreateParameter();
             Debug.Assert(parameter != null);
@@ -107,6 +106,8 @@ namespace Elmah
                                             from attribute in attributes
                                             where ((DbProviderSpecificTypePropertyAttribute) attribute).IsProviderSpecificTypeProperty 
                                             select property).FirstOrDefault();
+
+            Debug.Assert(_providerSpecificTypeProperty != null);
         }
 
         static object GetProviderSpecificDbType(params string[] dbTypes)
@@ -122,15 +123,38 @@ namespace Elmah
             return null;
         }
         
-        static OracleErrorLog()
+        private static void InitializeProviderFactory(string providerName)
         {
-            if (!TryAndCreateDbProviderFactory("Oracle.DataAccess.Client") &&
-                !TryAndCreateDbProviderFactory("System.Data.OracleClient"))
-                return;
-            
+            Debug.Assert(_dbProviderFactory == null);
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                //
+                // If the user has supplied a provider name, that's the one
+                // we must use.
+                //
+
+                if (!TryAndCreateDbProviderFactory(providerName))
+                    throw new ArgumentException("providerName");
+            }
+            else
+            {
+                //
+                // Otherwise, we try to use ODP.Net in the first instance
+                // and then fallback to the Microsoft client.
+                //
+
+                if (!TryAndCreateDbProviderFactory("Oracle.DataAccess.Client"))
+                    TryAndCreateDbProviderFactory("System.Data.OracleClient");
+            }
+
+            Debug.Assert(_dbProviderFactory != null);
+
             GetProviderSpecificType();
             _clobDbType = GetProviderSpecificDbType("NClob");
+            Debug.Assert(_clobDbType != null);
             _refCursorDbType = GetProviderSpecificDbType("Cursor", "RefCursor");
+            Debug.Assert(_refCursorDbType != null);
         }
 
         private DbConnection CreateOpenConnection()
@@ -164,6 +188,15 @@ namespace Elmah
                 throw new ApplicationException("Connection string is missing for the Oracle error log.");
 
             _connectionString = connectionString;
+
+            //
+            // Initialize the provider factory if it hasn't already been done.
+            //
+
+            if (_dbProviderFactory == null)
+            {
+                InitializeProviderFactory(ConnectionStringHelper.GetConnectionStringProviderName(config));
+            }
 
             //
             // Set the application name as this implementation provides

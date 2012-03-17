@@ -93,6 +93,34 @@ namespace Elmah
         }
 
         /// <summary>
+        /// Gets the provider name from the named connection string (if supplied) 
+        /// from the given configuration dictionary.
+        /// </summary>
+
+        public static string GetConnectionStringProviderName(IDictionary config)
+        {
+            Debug.Assert(config != null);
+
+            //
+            // First look for a connection string name that can be 
+            // subsequently indexed into the <connectionStrings> section of 
+            // the configuration to get the actual connection string.
+            //
+
+            var connectionStringName = config.Find("connectionStringName", string.Empty);
+
+            if (connectionStringName.Length == 0)
+                return string.Empty;
+
+            var settings = ConfigurationManager.ConnectionStrings[connectionStringName];
+
+            if (settings == null)
+                return string.Empty;
+
+            return settings.ProviderName ?? string.Empty;
+        }
+
+        /// <summary>
         /// Extracts the Data Source file path from a connection string
         /// ~/ gets resolved as does |DataDirectory|
         /// </summary>
