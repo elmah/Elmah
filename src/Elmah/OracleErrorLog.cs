@@ -125,7 +125,7 @@ namespace Elmah
         
         static OracleErrorLog()
         {
-            if (/* !TryAndCreateDbProviderFactory("Oracle.DataAccess.Client2") && */
+            if (!TryAndCreateDbProviderFactory("Oracle.DataAccess.Client") &&
                 !TryAndCreateDbProviderFactory("System.Data.OracleClient"))
                 return;
             
@@ -294,12 +294,22 @@ namespace Elmah
                     AddProviderSpecificTypeParameter(command, "tempblob", _clobDbType).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
-                    // now we can get a handle to the NClob
-                    var xmlLob = (Stream)parameters[0].Value;
-                    // create a temporary buffer in which to store the XML
-                    var tempbuff = Encoding.Unicode.GetBytes(errorXml);
-                    // and finally we can write to it!
-                    xmlLob.Write(tempbuff,0,tempbuff.Length);
+                    object xmlValue;
+
+                    if (parameters[0].Value is string)
+                    {
+                        xmlValue = errorXml + "<!-- " + new string('a', 70000) + " -->";
+                    }
+                    else
+                    {
+                        // now we can get a handle to the NClob
+                        var xmlLob = (Stream)parameters[0].Value;
+                        // create a temporary buffer in which to store the XML
+                        var tempbuff = Encoding.Unicode.GetBytes(errorXml);
+                        // and finally we can write to it!
+                        xmlLob.Write(tempbuff, 0, tempbuff.Length);
+                        xmlValue = xmlLob;
+                    }
 
                     command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
                     command.CommandType = CommandType.StoredProcedure;
@@ -312,7 +322,7 @@ namespace Elmah
                     AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
                     AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
                     AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
-                    AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Value = xmlLob;
+                    AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Value = xmlValue;
                     AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
                     AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
 
@@ -420,19 +430,20 @@ namespace Elmah
                 AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
-                var xmlLob = (Stream)command.Parameters["v_AllXml"].Value;
+                errorXml = command.Parameters["v_AllXml"].Value as string;
+                if (errorXml == null)
+                {
+                    var xmlLob = (Stream) command.Parameters["v_AllXml"].Value;
 
-                var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
-                var cbuffer = new char[1000];
-                int actual;
-                var sb = new StringBuilder();
-                while((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) >0)
-                    sb.Append(cbuffer, 0, actual);
-                errorXml = sb.ToString();
+                    var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
+                    var cbuffer = new char[1000];
+                    int actual;
+                    var sb = new StringBuilder();
+                    while ((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) > 0)
+                        sb.Append(cbuffer, 0, actual);
+                    errorXml = sb.ToString();
+                }
             }
-
-            if (errorXml == null) 
-                return null;
 
             var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
