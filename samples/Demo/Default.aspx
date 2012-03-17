@@ -275,7 +275,7 @@
         <p><a href="#Questions">Back to top</a></p></dd>
         <dt><a name="MediumTrustSupport"></a>Can I use ELMAH in a medium trust application?</dt>
         <dd><p>Yes, medium trust is fully supported by ELMAH as long as you use 
-        <code>SqlErrorLog</code> (Microsoft SQL Server)
+        <code>SqlErrorLog</code> (Microsoft SQL Server) or <code>SqlServerCompactErrorLog</code> (Microsoft SQL Server Compact Edition)
         as the log implementations.</p></dd>
     </dl>   
     </form>
