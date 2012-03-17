@@ -62,7 +62,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config);
 
             //
             // If there is no connection string to use then throw an 
@@ -79,7 +79,7 @@ namespace Elmah
             // per-application isolation over a single store.
             //
 
-            string appName = (string) config["applicationName"] ?? string.Empty;
+            var appName = (string) config["applicationName"] ?? string.Empty;
 
             if (appName.Length > _maxAppNameLength)
             {
@@ -182,14 +182,14 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
-            Guid id = Guid.NewGuid();
+            var errorXml = ErrorXml.EncodeString(error);
+            var id = Guid.NewGuid();
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = new OracleConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 connection.Open();
-                using (OracleTransaction transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction())
                 {
                     // because we are storing the XML data in a NClob, we need to jump through a few hoops!!
                     // so first we've got to operate within a transaction
@@ -199,14 +199,14 @@ namespace Elmah
                     command.CommandText = "declare xx nclob; begin dbms_lob.createtemporary(xx, false, 0); :tempblob := xx; end;";
                     command.CommandType = CommandType.Text;
 
-                    OracleParameterCollection parameters = command.Parameters;
+                    var parameters = command.Parameters;
                     parameters.Add("tempblob", OracleType.NClob).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
                     // now we can get a handle to the NClob
-                    OracleLob xmlLob = (OracleLob)parameters[0].Value;
+                    var xmlLob = (OracleLob)parameters[0].Value;
                     // create a temporary buffer in which to store the XML
-                    byte[] tempbuff = Encoding.Unicode.GetBytes(errorXml);
+                    var tempbuff = Encoding.Unicode.GetBytes(errorXml);
                     // and finally we can write to it!
                     xmlLob.BeginBatch(OracleLobOpenMode.ReadWrite);
                     xmlLob.Write(tempbuff,0,tempbuff.Length);
@@ -247,13 +247,13 @@ namespace Elmah
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = new OracleConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorsXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                OracleParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
                 parameters.Add("v_Application", OracleType.NVarChar, _maxAppNameLength).Value = ApplicationName;
                 parameters.Add("v_PageIndex", OracleType.Int32).Value = pageIndex;
@@ -263,7 +263,7 @@ namespace Elmah
 
                 connection.Open();
 
-                using (OracleDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     Debug.Assert(reader != null);
 
@@ -271,10 +271,10 @@ namespace Elmah
                     {
                         while (reader.Read())
                         {
-                            string id = reader["ErrorId"].ToString();
-                            Guid guid = new Guid(id);
+                            var id = reader["ErrorId"].ToString();
+                            var guid = new Guid(id);
 
-                            Error error = new Error();
+                            var error = new Error();
 
                             error.ApplicationName = reader["Application"].ToString();
                             error.HostName = reader["Host"].ToString();
@@ -321,25 +321,25 @@ namespace Elmah
 
             string errorXml;
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = new OracleConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                OracleParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("v_Application", OracleType.NVarChar, _maxAppNameLength).Value = ApplicationName;
                 parameters.Add("v_ErrorId", OracleType.NVarChar, 32).Value = errorGuid.ToString("N");
                 parameters.Add("v_AllXml", OracleType.NClob).Direction = ParameterDirection.Output;
 
                 connection.Open();
                 command.ExecuteNonQuery();
-                OracleLob xmlLob = (OracleLob)command.Parameters["v_AllXml"].Value;
+                var xmlLob = (OracleLob)command.Parameters["v_AllXml"].Value;
 
-                StreamReader streamreader = new StreamReader(xmlLob, Encoding.Unicode);
-                char[] cbuffer = new char[1000];
+                var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
+                var cbuffer = new char[1000];
                 int actual;
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 while((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) >0)
                     sb.Append(cbuffer, 0, actual);
                 errorXml = sb.ToString();
@@ -348,7 +348,7 @@ namespace Elmah
             if (errorXml == null)
                 return null;
 
-            Error error = ErrorXml.DecodeString(errorXml);
+            var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
     }
