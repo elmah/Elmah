@@ -61,6 +61,17 @@
         <a href="http://msdn.microsoft.com/en-us/netframework/aa731542.aspx">Microsoft .NET Framework 2.0</a>.
     </p>
     <h2>
+        Version 1.2 <abbr title="Service Pack">SP</abbr> 2 Notes</h2>
+    <p>
+        The <code>SccStamp</code> class has breaking changes. Its <code>Revision</code>
+        property is now typed as <code>Object</code> instead of <code>Int32</code>.
+        Its <code>SortByRevision</code> method has been renamed to <code>SortByLastChanged</code>
+        These change should have practically no impact on existing installations as
+        <code>SccStamp</code> is not considered an integral part of the ELMAH public 
+        API. It is intended to be used by ELMAH itself for informational purposes
+        and support diagnostics.
+    </p>
+    <h2>
         Version 1.0 BETA 3 Notes</h2>
     <h3>
         Upgrading from ELMAH 1.0 BETA 2(a)</h3>

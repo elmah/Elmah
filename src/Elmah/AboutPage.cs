@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Globalization;
     using System.Reflection;
     using System.Web.UI;
 
@@ -109,13 +110,13 @@ namespace Elmah
             writer.RenderEndTag(); // </p>
 
             SccStamp[] stamps = SccStamp.FindAll(typeof(ErrorLog).Assembly);
-            SccStamp.SortByRevision(stamps, /* descending */ true);
+            SccStamp.SortByLastChanged(stamps, /* descending */ true);
 
             writer.RenderBeginTag(HtmlTextWriterTag.P);
             writer.Write("This <strong>{0}</strong> ", Build.TypeLowercase);
-            
+
             if (stamps.Length > 0)
-                writer.Write("(SCC #{0}) ", stamps[0].Revision.ToString("N0"));
+                writer.Write("(SCC {0}) ", stamps[0].Revision);
 
             writer.Write("build was compiled from the following sources for CLR {0}:", Build.ImageRuntimeVersion);
 

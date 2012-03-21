@@ -15,6 +15,15 @@
    distribution and execute the demo.cmd script. The demo Web site
    requires [4]Microsoft .NET Framework 2.0.
    
+Version 1.2 SP 2 Notes
+
+   The SccStamp class has breaking changes. Its Revision property is now
+   typed as Object instead of Int32. Its SortByRevision method has been
+   renamed to SortByLastChanged These change should have practically no
+   impact on existing installations as SccStamp is not considered an
+   integral part of the ELMAH public API. It is intended to be used by
+   ELMAH itself for informational purposes and support diagnostics.
+   
 Version 1.0 BETA 3 Notes
 
   Upgrading from ELMAH 1.0 BETA 2(a)

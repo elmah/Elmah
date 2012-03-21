@@ -46,7 +46,7 @@ namespace Elmah
         private readonly string _id;
         private readonly string _author;
         private readonly string _fileName;
-        private readonly int _revision;
+        private readonly string _revision;
         private readonly DateTime _lastChanged;
         private static readonly Regex _regex;
 
@@ -71,7 +71,7 @@ namespace Elmah
             _regex = new Regex(
                 @"\$ id: \s* 
                      (?<f>[^" + escapedNonFileNameChars + @"]+) \s+         # FILENAME
-                     (?<r>[0-9]+) \s+                                       # REVISION
+                     (?<r>[0-9a-f]+) \s+                                    # REVISION
                      ((?<y>[0-9]{4})-(?<mo>[0-9]{2})-(?<d>[0-9]{2})) \s+    # DATE
                      ((?<h>[0-9]{2})\:(?<mi>[0-9]{2})\:(?<s>[0-9]{2})Z) \s+ # TIME (UTC)
                      (?<a>\w+)                                              # AUTHOR",
@@ -107,7 +107,7 @@ namespace Elmah
             GroupCollection groups = match.Groups;
 
             _fileName = groups["f"].Value;
-            _revision = int.Parse(groups["r"].Value);
+            _revision = groups["r"].Value;
             _author = groups["a"].Value;
 
             int year = int.Parse(groups["y"].Value);
@@ -148,10 +148,10 @@ namespace Elmah
         }
 
         /// <summary>
-        /// Gets the revision number component of the SCC stamp ID.
+        /// Gets the revision component of the SCC stamp ID.
         /// </summary>
 
-        public int Revision
+        public object Revision
         {
             get { return _revision; }
         }
@@ -234,7 +234,7 @@ namespace Elmah
                 return null;
             
             stamps = (SccStamp[]) stamps.Clone();
-            SortByRevision(stamps, /* descending */ true);
+            SortByLastChanged(stamps, /* descending */ true);
             return stamps[0];
         }
 
@@ -243,9 +243,9 @@ namespace Elmah
         /// revision numbers in ascending order.
         /// </summary>
 
-        public static void SortByRevision(SccStamp[] stamps)
+        public static void SortByLastChanged(SccStamp[] stamps)
         {
-            SortByRevision(stamps, false);
+            SortByLastChanged(stamps, false);
         }
 
         /// <summary>
@@ -253,9 +253,9 @@ namespace Elmah
         /// revision numbers in ascending or descending order.
         /// </summary>
 
-        public static void SortByRevision(SccStamp[] stamps, bool descending)
+        public static void SortByLastChanged(SccStamp[] stamps, bool descending)
         {
-            IComparer comparer = new RevisionComparer();
+            IComparer comparer = new LastChangedComparer();
             
             if (descending)
                 comparer = new ReverseComparer(comparer);
@@ -263,7 +263,7 @@ namespace Elmah
             Array.Sort(stamps, comparer);
         }
 
-        private sealed class RevisionComparer : IComparer
+        private sealed class LastChangedComparer : IComparer
         {
             public int Compare(object x, object y)
             {
@@ -286,8 +286,8 @@ namespace Elmah
             {
                 Debug.Assert(lhs != null);
                 Debug.Assert(rhs != null);
-                
-                return lhs.Revision.CompareTo(rhs.Revision);
+
+                return lhs.LastChanged.CompareTo(rhs.LastChanged);
             }
         }
     }
