@@ -1,13 +1,32 @@
 @echo off
 setlocal
 pushd "%~dp0"
-for /f %%i in (kwindex.txt) do call :id %%i
+rem TODO check hg can be found in path
+rem TODO check whether keywords are already configured
+if exist .hg (call :addkws) else (call :norepo)
 goto :EOF
 
-:id
+:addkws
 setlocal
-echo %1
-for /f "usebackq tokens=*" %%i in (`hg parents %1 --template "%~nx1 {node|short} {date|isodate} {author|user}\n"`) do set x=%%i
-call replace %1 \$Id(:.+?)?\$ "$Id: %x% $" > %temp%\%~nx1
-copy %temp%\%~nx1 %1 /y > nul
+call :hgrckw >> .hg\hgrc
 goto :EOF
+
+:hgrckw
+setlocal
+echo.
+echo [keyword]
+echo README.*=
+echo src/Elmah/**.cs=
+echo src/Elmah/**.sql=
+echo src/Elmah/**.vbs=
+echo samples/Demo/**.aspx=
+echo.
+echo [keywordmaps]
+echo Id = {file^|basename} {node^|short} {date^|svnutcdate} {author^|user}
+echo Revision = {node^|short}
+goto :EOF
+
+:norepo
+setlocal
+echo abort: no repository found in '%cd%' (.hg not found)!
+exit /b 1
