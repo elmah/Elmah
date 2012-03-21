@@ -30,8 +30,8 @@ Version 1.0 BETA 3 Notes
   
     Microsoft SQL Server Error Log
     
-   If you are using the Microsoft SQL Server (2000 or later) for your
-   error log then you should re-create the stored procedures found in the
+   If you are using Microsoft SQL Server (2000 or later) for your error
+   log then you should re-create the stored procedures found in the
    supplied SQL script (see SQLServer.sql). The script does not contain
    DDL DROP or ALTER statements so you will have to drop the stored
    procedures manually before applying the CREATE PROCEDURE parts of the
