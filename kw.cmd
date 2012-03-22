@@ -6,8 +6,14 @@ if %errorlevel% neq 0 goto :nohgkwext
 if not exist .hg goto :norepo
 ver > nul
 if exist .hg\hgrc findstr keywordmaps .hg\hgrc > nul
-if errorlevel 1 (call :addkws) else (echo keywords appear already configured)
-hg kwdemo
+if errorlevel 1 (
+    call :addkws ^
+    && echo keyword expansion configured ^
+    && echo don't forget to `hg kwexpand`
+) else (
+    echo keywords appear already configured
+    echo don't forget to `hg kwexpand`
+)
 goto :EOF
 
 :norepo
