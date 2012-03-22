@@ -1,10 +1,24 @@
 @echo off
 setlocal
 pushd "%~dp0"
-rem TODO check hg can be found in path
-rem TODO check whether keywords are already configured
-if exist .hg (call :addkws) else (call :norepo)
+hg kwdemo 2>nul > nul
+if %errorlevel% neq 0 goto :nohgkwext
+if not exist .hg goto :norepo
+ver > nul
+if exist .hg\hgrc findstr keywordmaps .hg\hgrc > nul
+if errorlevel 1 (call :addkws) else (echo keywords appear already configured)
+hg kwdemo
 goto :EOF
+
+:norepo
+echo abort: no repository found in '%cd%' (.hg not found)!
+exit /b 1
+
+:nohgkwext
+echo hg not installed or not found in PATH!
+echo perhaps hg keyword extension is not enabled; see:
+echo http://mercurial.selenic.com/wiki/KeywordExtension
+exit /b 1
 
 :addkws
 setlocal
@@ -25,8 +39,3 @@ echo [keywordmaps]
 echo Id = {file^|basename} {node^|short} {date^|svnutcdate} {author^|user}
 echo Revision = {node^|short}
 goto :EOF
-
-:norepo
-setlocal
-echo abort: no repository found in '%cd%' (.hg not found)!
-exit /b 1
