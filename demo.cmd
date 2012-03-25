@@ -59,9 +59,7 @@ if not exist "%BIN_PATH%" call build 2.0
 if not exist "%DEMO_BIN_PATH%" md "%DEMO_BIN_PATH%"
 copy /y "%BIN_PATH%" "%DEMO_BIN_PATH%"
 
-If %PROCESSOR_ARCHITECTURE% NEQ "x86" (
-	copy /y "%LIB_PATH_x64%\System.Data.SQLite.DLL" "%DEMO_BIN_PATH%"
-)
+if %PROCESSOR_ARCHITECTURE% neq x86 copy /y "%LIB_PATH_x64%\System.Data.SQLite.DLL" "%DEMO_BIN_PATH%"
 
 set MAIL_PATH=%DEMO_PATH%\Mails
 if not exist "%MAIL_PATH%" md "%MAIL_PATH%"
