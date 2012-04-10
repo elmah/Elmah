@@ -20,5 +20,6 @@
   </metadata>
   <files>
     <file src="Transforms\Elmah.Filtering.Sample.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.txt" target="Readme.txt" />
   </files>
 </package>

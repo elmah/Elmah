@@ -20,5 +20,6 @@
   <files>
     <file src="Elmah.Xml\*" target="Content\App_Data\Elmah.Errors" />
     <file src="Transforms\Elmah.Xml.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.txt" target="Readme.txt" />
   </files>
 </package>

@@ -20,5 +20,6 @@
   <files>
     <file src="App_Data\*" target="Content\App_Data" />
     <file src="Transforms\Elmah.Access.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.txt" target="Readme.txt" />
   </files>
 </package>

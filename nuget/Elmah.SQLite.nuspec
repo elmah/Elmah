@@ -24,5 +24,6 @@
     <file src="..\base\lib\x64\System.Data.SQLite.DLL" target="NativeBinaries\x64\System.Data.SQLite.DLL" />
     <file src="32v64BitTools\*" target="Tools" />
     <file src="Transforms\Elmah.SQLite.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.txt" target="Readme.txt" />
   </files>
 </package>
