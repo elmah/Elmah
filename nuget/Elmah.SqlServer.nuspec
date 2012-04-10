@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ELMAH with configuration for getting started quickly on a Microsoft SQL Server (2000 or later) database as the error log. NB requires manual configuration.</description>
     <summary>ELMAH with configuration for getting started quickly on a Microsoft SQL Server (2000 or later) database as the error log. NB requires manual configuration.</summary>
+    <releaseNotes>This release adds in a Readme.txt in line with the new functionality in NuGet v1.7.</releaseNotes>
     <language>en-US</language>
     <tags>mssql elmah error logging unhandled exception</tags>
     <dependencies>

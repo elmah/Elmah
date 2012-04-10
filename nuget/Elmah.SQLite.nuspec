@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ELMAH with configuration for getting started quickly on a SQLite database as the error log.</description>
     <summary>ELMAH with configuration for getting started quickly on a SQLite database as the error log.</summary>
+    <releaseNotes>This release adds in a Readme.txt in line with the new functionality in NuGet v1.7.</releaseNotes>
     <language>en-US</language>
     <tags>sqlite elmah error logging unhandled exception</tags>
     <dependencies>

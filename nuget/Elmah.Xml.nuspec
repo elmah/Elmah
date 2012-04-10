@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ELMAH with configuration for getting started quickly on an error log in stand-alone XML files.</description>
     <summary>ELMAH with configuration for getting started quickly on an error log in stand-alone XML files.</summary>
+    <releaseNotes>This release adds in a Readme.txt in line with the new functionality in NuGet v1.7.</releaseNotes>
     <language>en-US</language>
     <tags>xml elmah error logging unhandled exception</tags>
     <dependencies>

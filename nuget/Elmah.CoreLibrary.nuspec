@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Core library for ELMAH (Error Logging Modules and Handlers) without any configuration.</description>
     <summary>Core library for ELMAH (Error Logging Modules and Handlers) without any configuration.</summary>
+    <releaseNotes>This release fixes the issues listed here: http://code.google.com/p/elmah/issues/list?q=label%3AMilestone-Release1.2SP2&can=1</releaseNotes>
     <language>en-US</language>
     <tags>elmah error logging unhandled exception</tags>
   </metadata>
