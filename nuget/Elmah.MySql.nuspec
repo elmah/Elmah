@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>elmah.mysql</id>
-    <version>1.2</version>
+    <version>1.2.2</version>
     <title>ELMAH on MySQL (requires manual config)</title>
     <authors>Atif Aziz</authors>
     <owners>Atif Aziz, James Driscoll</owners>
@@ -14,7 +14,7 @@
     <language>en-US</language>
     <tags>mysql elmah error logging unhandled exception</tags>
     <dependencies>
-      <dependency id="elmah" version="1.2" />
+      <dependency id="elmah" version="1.2.2" />
       <dependency id="MySql.Data" version="6.3.6" />
     </dependencies>
   </metadata>
