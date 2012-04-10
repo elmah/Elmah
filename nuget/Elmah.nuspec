@@ -20,6 +20,7 @@
   </metadata>
   <files>
     <file src="Transforms\Elmah.web.config.transform" target="content\web.config.transform" />
+    <file src="App_Readme\Elmah.txt" target="Readme.txt" />
     <file src="App_Readme\Elmah.txt" target="content\App_Readme" />
   </files>
 </package>
