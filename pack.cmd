@@ -15,6 +15,7 @@ call :clean ^
  && call :download %srczip% /od:tmp ^
  && call :unzip tmp\%srczip% -obase -y ^
  && call :unzip tmp\%binzip% -obase -y ^
+ && call :concatreadmeall nuget\App_Readme\ Elmah.*.txt Elmah.txt ^
  && call :autoupdate ^
  && call :packall nuget\*.nuspec
 goto :EOF
@@ -50,6 +51,28 @@ echo %hr%
 echo Making sure that NuGet.exe is up to date...
 "%nuget%" update -self
 goto :EOF
+
+:concatreadmeall
+echo %hr%
+for /f %%F in ('dir /a-d /b "%1%2"') DO (
+CALL :concatreadme %1%%F %1%3 %1Concat.%%F
+IF ERRORLEVEL 1 GOTO :EOF
+)
+GOTO :EOF
+
+:concatreadme
+echo Concatenating %3
+echo Main ELMAH Instructions > %3
+echo %hr% >> %3
+echo. >> %3
+type %2 >> %3
+echo. >> %3
+echo. >> %3
+echo Log Specific Instructions >> %3
+echo %hr% >> %3
+echo. >> %3
+type %1 >> %3
+GOTO :EOF
 
 :packall
 for /f %%F in ('dir /a-d /b "%1"') DO (

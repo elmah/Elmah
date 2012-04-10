@@ -21,7 +21,7 @@
     <file src="..\base\lib\Npgsql.dll" target="lib" />
     <file src="..\base\lib\Mono.Security.dll" target="lib" />
     <file src="Transforms\Elmah.PostgreSQL.web.config.transform" target="content\web.config.transform" />
-    <file src="App_Readme\Elmah.PostgreSQL.txt" target="Readme.txt" />
+    <file src="App_Readme\Concat.Elmah.PostgreSQL.txt" target="Readme.txt" />
     <file src="App_Readme\Elmah.PostgreSQL.txt" target="content\App_Readme" />
     <file src="..\base\src\Elmah\Pgsql.sql" target="content\App_Readme\Elmah.PostgreSQL.sql" />
   </files>

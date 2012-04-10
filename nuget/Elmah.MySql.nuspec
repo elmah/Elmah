@@ -20,7 +20,7 @@
   </metadata>
   <files>
     <file src="Transforms\Elmah.MySql.web.config.transform" target="content\web.config.transform" />
-    <file src="App_Readme\Elmah.MySql.txt" target="Readme.txt" />
+    <file src="App_Readme\Concat.Elmah.MySql.txt" target="Readme.txt" />
     <file src="App_Readme\Elmah.MySql.txt" target="content\App_Readme" />
     <file src="..\base\src\Elmah\MySql.sql" target="content\App_Readme\Elmah.MySql.sql" />
   </files>
