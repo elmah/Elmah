@@ -15,19 +15,25 @@
           // @import System.IO
           // @import System.Web
 
+          // NOTE: For versions of ELMAH 1.2 SP1 and earlier, use the 
+          // undocumented `$context` instead of `$` in the expression below 
+          // to workaround a bug when the expression is evaluated under full 
+          // trust environments. See issue #278[1] for more details.
+          //
+          // [1] http://code.google.com/p/elmah/issues/detail?id=278
+           
           // HTTP Status 404 - File not found
           HttpStatusCode == 404
           // FileNotFoundException or HttpRequestValidationException
           || $.BaseException instanceof FileNotFoundException 
           || $.BaseException instanceof HttpRequestValidationException
-          /* Using RegExp below (see http://msdn.microsoft.com/en-us/library/h6e2eb7w.aspx) */
           // Filter all errors caused by search engine crawlers
-          || Context.Request.UserAgent.match(/crawler/i)                      
-          // Filter out all "local" errors          
-          // || Context.Request.ServerVariables['REMOTE_ADDR'] == '127.0.0.1' // IPv4 only
+          || $.Context.Request.UserAgent.match(/crawler/i)
+          // Filter out all "local" errors 
+          || $.Context.Request.IsLocal
           // Filter out errors related to webresource.axd and scriptresource.axd
-          || Context.Request.ServerVariables['URL'].match(/webresource/i)
-          || Context.Request.ServerVariables['URL'].match(/scriptresource/i)
+          || $.Context.Request.ServerVariables['URL'].match(/webresource/i)
+          || $.Context.Request.ServerVariables['URL'].match(/scriptresource/i)
           ]]>
           </expression>
         </jscript>
