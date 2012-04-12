@@ -14,13 +14,6 @@
           // @assembly System.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
           // @import System.IO
           // @import System.Web
-
-          // NOTE: For versions of ELMAH 1.2 SP1 and earlier, use the 
-          // undocumented `$context` instead of `$` in the expression below 
-          // to workaround a bug when the expression is evaluated under full 
-          // trust environments. See issue #278[1] for more details.
-          //
-          // [1] http://code.google.com/p/elmah/issues/detail?id=278
            
           // HTTP Status 404 - File not found
           HttpStatusCode == 404
