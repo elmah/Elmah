@@ -36,45 +36,19 @@ namespace Elmah
 
     #endregion
 
-    internal sealed class ErrorLogDownloadHandler : IHttpAsyncHandler
+    internal sealed class ErrorLogDownloadHandler : HttpAsyncHandler
     {
         private static readonly TimeSpan _beatPollInterval = TimeSpan.FromSeconds(3);
 
         private const int _pageSize = 100;
 
-        #region IHttpAsyncHandler implementation
-
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-
-        IAsyncResult IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
-        {
-            return BeginProcessRequest(new HttpContextWrapper(context), cb, extraData);
-        }
-
-        void IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)
-        {
-            EndProcessRequest(result);
-        }
-
-        bool IHttpHandler.IsReusable
-        {
-            get { return false; }
-        }
-
-        #endregion
-
-        public static void ProcessRequest(HttpContextBase context)
-        {
-            EndProcessRequest(BeginProcessRequest(context, null, null));
-        }
-
-        public static IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback cb, object extraData)
+        protected override IEnumerable<IAsyncResult> ProcessRequest(
+            HttpContextBase context, 
+            Func<AsyncCallback> getAsyncCallback)
         {
             if (context == null) throw new ArgumentNullException("context");
-            
+            if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
+
             var request = context.Request;
             var query = request.QueryString;
 
@@ -98,106 +72,65 @@ namespace Elmah
             context.Response.BufferOutput = false;
             format.Header();
 
-            var result = new AsyncResult(cb, extraData, typeof(ErrorLogDownloadHandler), "ProcessRequest");
             var log = ErrorLog.GetDefault(context);
-            var pageIndex = 0;
             var lastBeatTime = DateTime.Now;
             var errorEntryList = new List<ErrorLogEntry>(_pageSize);
             var downloadCount = 0;
 
-            var onGetErrors = new AsyncCallback[1];
-            onGetErrors[0] = ar =>
+            for (var pageIndex = 0; ; pageIndex++)
             {
-                try
+                var ar = log.BeginGetErrors(pageIndex, _pageSize, errorEntryList,
+                                            getAsyncCallback(), null);
+                yield return ar;
+
+                var total = log.EndGetErrors(ar);
+                var count = errorEntryList.Count;
+
+                if (maxDownloadCount > 0)
                 {
-                    if (ar == null) throw new ArgumentNullException("ar");
-
-                    var total = log.EndGetErrors(ar);
-                    var count = errorEntryList.Count;
-
-                    if (maxDownloadCount > 0)
-                    {
-                        var remaining = maxDownloadCount - (downloadCount + count);
-                        if (remaining < 0)
-                            count += remaining;
-                    }
-
-                    format.Entries(errorEntryList, 0, count, total);
-                    downloadCount += count;
-
-                    var response = context.Response;
-                    response.Flush();
-
-                    //
-                    // Done if either the end of the list (no more errors found) or
-                    // the requested limit has been reached.
-                    //
-
-                    if (count == 0 || downloadCount == maxDownloadCount)
-                    {
-                        if (count > 0)
-                            format.Entries(new ErrorLogEntry[0], total); // Terminator
-                        result.Complete();
-                        return;
-                    }
-
-                    //
-                    // Poll whether the client is still connected so data is not
-                    // unnecessarily sent to an abandoned connection. This check is 
-                    // only performed at certain intervals.
-                    //
-
-                    if (DateTime.Now - lastBeatTime > _beatPollInterval)
-                    {
-                        if (!response.IsClientConnected)
-                        {
-                            result.Complete();
-                            return;
-                        }
-
-                        lastBeatTime = DateTime.Now;
-                    }
-
-                    //
-                    // Fetch next page of results.
-                    //
-
-                    errorEntryList.Clear();
-
-                    // FIXME!!!
-                    // TODO Don't let the stack get too deep if callbacks complete synchronously!
-
-                    log.BeginGetErrors(++pageIndex, _pageSize, errorEntryList,
-                        onGetErrors[0], null);
+                    var remaining = maxDownloadCount - (downloadCount + count);
+                    if (remaining < 0)
+                        count += remaining;
                 }
-                catch (Exception e)
+
+                format.Entries(errorEntryList, 0, count, total);
+                downloadCount += count;
+
+                var response = context.Response;
+                response.Flush();
+
+                //
+                // Done if either the end of the list (no more errors found) or
+                // the requested limit has been reached.
+                //
+
+                if (count == 0 || downloadCount == maxDownloadCount)
                 {
-                    //
-                    // If anything goes wrong during callback processing then 
-                    // the exception needs to be captured and the raising 
-                    // delayed until EndProcessRequest.Meanwhile, the 
-                    // BeginProcessRequest called is notified immediately of 
-                    // completion.
-                    //
-
-                    result.Complete(e);
+                    if (count > 0)
+                        format.Entries(new ErrorLogEntry[0], total); // Terminator
+                    break;
                 }
-            };
 
-            Debug.Assert(onGetErrors[0] != null);
+                //
+                // Poll whether the client is still connected so data is not
+                // unnecessarily sent to an abandoned connection. This check is 
+                // only performed at certain intervals.
+                //
 
-            log.BeginGetErrors(pageIndex, _pageSize, errorEntryList, 
-                onGetErrors[0], null);
+                if (DateTime.Now - lastBeatTime > _beatPollInterval)
+                {
+                    if (!response.IsClientConnected)
+                        break;
 
-            return result;
-        }
+                    lastBeatTime = DateTime.Now;
+                }
 
-        public static void EndProcessRequest(IAsyncResult result)
-        {
-            if (result == null)
-                throw new ArgumentNullException("result");
-            
-            AsyncResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
+                //
+                // Fetch next page of results.
+                //
+
+                errorEntryList.Clear();
+            }
         }
 
         private static Format GetFormat(HttpContextBase context, string format)

@@ -205,6 +205,7 @@
     </Compile>
     <Compile Include="FuzzyTime.cs" />
     <Compile Include="HelperResult.cs" />
+    <Compile Include="HttpAsyncHandler.cs" />
     <Compile Include="MasterPage.generated.cs">
       <DependentUpon>MasterPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
