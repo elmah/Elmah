@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
     using System.Collections.Generic;
@@ -69,8 +70,13 @@ namespace Elmah
             // Emit format header, initialize and then fetch results.
             //
 
-            context.Response.BufferOutput = false;
-            format.Header();
+            var response = context.Response;
+            response.BufferOutput = false;
+            var output = response.OutputStream;
+            var encoding = response.ContentEncoding;
+            var entries = format.Header();
+            foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
+                yield return iar;
 
             var log = ErrorLog.GetDefault(context);
             var lastBeatTime = DateTime.Now;
@@ -93,10 +99,12 @@ namespace Elmah
                         count += remaining;
                 }
 
-                format.Entries(errorEntryList, 0, count, total);
+                entries = format.Entries(errorEntryList, 0, count, total);
+                foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
+                    yield return iar;
+
                 downloadCount += count;
 
-                var response = context.Response;
                 response.Flush();
 
                 //
@@ -107,7 +115,11 @@ namespace Elmah
                 if (count == 0 || downloadCount == maxDownloadCount)
                 {
                     if (count > 0)
-                        format.Entries(new ErrorLogEntry[0], total); // Terminator
+                    {
+                        entries = format.Entries(new ErrorLogEntry[0], total); // Terminator
+                        foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
+                            yield return iar;
+                    }
                     break;
                 }
 
@@ -131,6 +143,57 @@ namespace Elmah
 
                 errorEntryList.Clear();
             }
+        }
+
+        private static IEnumerable<IAsyncResult> Write(
+            IEnumerable<string> source, 
+            Stream output, Encoding encoding, 
+            Func<AsyncCallback> getAsyncCallback)
+        {
+            Debug.Assert(source != null);
+            Debug.Assert(output != null);
+            Debug.Assert(encoding != null);
+            Debug.Assert(getAsyncCallback != null);
+
+            var encoder = encoding.GetEncoder();
+
+            byte[] bytes = null;
+            char[] chars = null;
+
+            foreach (var text in source)
+            for (var i = 0; i < 2; i++)
+            {
+                var charsRead = i == 0 ? text.Length : 0;
+                if (chars == null || charsRead > chars.Length)
+                {
+                    chars = new char[charsRead];
+                    var maxByteCount = encoding.GetMaxByteCount((int) (chars.Length * 1.25));
+                    bytes = new byte[maxByteCount];
+                }
+
+                text.CopyTo(0, chars, 0, charsRead);
+
+                var completed = false;
+                var charIndex = 0;
+
+                while (!completed)
+                {
+                    var flush = charsRead == 0;
+                    int bytesUsed, charsUsed;
+                    encoder.Convert(chars, charIndex, charsRead - charIndex,
+                                    bytes, 0, bytes.Length, flush,
+                                    out charsUsed, out bytesUsed, 
+                                    out completed);
+
+                    var ar = output.BeginWrite(bytes, 0, bytesUsed, getAsyncCallback(), null);
+                    yield return ar;
+                    output.EndWrite(ar);
+
+                    charIndex += charsUsed;
+                }
+            }
+
+            output.Flush();
         }
 
         private static Format GetFormat(HttpContextBase context, string format)
@@ -158,14 +221,14 @@ namespace Elmah
 
             protected HttpContextBase Context { get { return _context; } }
 
-            public virtual void Header() {}
+            public virtual IEnumerable<string> Header() { yield break; }
 
-            public void Entries(IList<ErrorLogEntry> entries, int total)
+            public IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int total)
             {
-                Entries(entries, 0, entries.Count, total);
+                return Entries(entries, 0, entries.Count, total);
             }
 
-            public abstract void Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
+            public abstract IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
         }
 
         private sealed class CsvFormat : Format
@@ -173,22 +236,22 @@ namespace Elmah
             public CsvFormat(HttpContextBase context) : 
                 base(context) {}
 
-            public override void Header()
+            public override IEnumerable<string> Header()
             {
                 var response = Context.Response;
                 response.AppendHeader("Content-Type", "text/csv; header=present");
                 response.AppendHeader("Content-Disposition", "attachment; filename=errorlog.csv");
-                response.Output.Write("Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n");
+                yield return "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
                 if (count == 0)
-                    return;
+                    yield break;
 
                 //
                 // Setup to emit CSV records.
@@ -228,7 +291,7 @@ namespace Elmah
                         .Record();
                 }
 
-                Context.Response.Output.Write(writer.ToString());
+                yield return writer.ToString();
             }
         }
 
@@ -255,7 +318,7 @@ namespace Elmah
                 _wrapped = wrapped;
             }
 
-            public override void Header()
+            public override IEnumerable<string> Header()
             {
                 string callback = Context.Request.QueryString[Mask.EmptyString(null, "callback")] 
                                   ?? string.Empty;
@@ -279,19 +342,18 @@ namespace Elmah
                 {
                     response.AppendHeader("Content-Type", "text/html");
 
-                    TextWriter output = response.Output;
-                    output.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-                    output.WriteLine(@"
+                    yield return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+                    yield return @"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
                         <title>Error Log in HTML-Wrapped JSONP Format</title>
                     </head>
                     <body>
-                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>");
+                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>";
                 }
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
@@ -359,7 +421,7 @@ namespace Elmah
                         writer.WriteLine(@"</body></html>");
                 }
 
-                Context.Response.Output.Write(writer);
+                yield return writer.ToString();
             }
         }
 
