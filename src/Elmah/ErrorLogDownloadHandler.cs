@@ -257,24 +257,23 @@ namespace Elmah
                 // Setup to emit CSV records.
                 //
 
-                StringWriter writer = new StringWriter();
-                writer.NewLine = "\r\n";
-                CsvWriter csv = new CsvWriter(writer);
+                var writer = new StringWriter { NewLine = "\r\n" };
+                var csv = new CsvWriter(writer);
 
-                CultureInfo culture = CultureInfo.InvariantCulture;
-                DateTime epoch = new DateTime(1970, 1, 1);
+                var culture = CultureInfo.InvariantCulture;
+                var epoch = new DateTime(1970, 1, 1);
 
                 //
                 // For each error, emit a CSV record.
                 //
 
-                for (int i = index; i < count; i++)
+                for (var i = index; i < count; i++)
                 {
-                    ErrorLogEntry entry = entries[i];
-                    Error error = entry.Error;
-                    DateTime time = error.Time.ToUniversalTime();
-                    string query = "?id=" + HttpUtility.UrlEncode(entry.Id);
-                    Uri requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                    var entry = entries[i];
+                    var error = entry.Error;
+                    var time = error.Time.ToUniversalTime();
+                    var query = "?id=" + HttpUtility.UrlEncode(entry.Id);
+                    var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                     csv.Field(error.ApplicationName)
                         .Field(error.HostName)
@@ -359,8 +358,7 @@ namespace Elmah
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
-                StringWriter writer = new StringWriter();
-                writer.NewLine = "\n";
+                var writer = new StringWriter { NewLine = "\n" };
 
                 if (_wrapped)
                 {
@@ -371,21 +369,21 @@ namespace Elmah
                 writer.Write(_callback);
                 writer.Write('(');
 
-                JsonTextWriter json = new JsonTextWriter(writer);
+                var json = new JsonTextWriter(writer);
                 json.Object()
                     .Member("total").Number(total)
                     .Member("errors").Array();
 
-                Uri requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
-                for (int i = index; i < count; i++)
+                for (var i = index; i < count; i++)
                 {
-                    ErrorLogEntry entry = entries[i];
+                    var entry = entries[i];
                     writer.WriteLine();
                     if (i == 0) writer.Write(' ');
                     writer.Write("  ");
 
-                    string urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
+                    var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
                     
                     json.Object();
                         ErrorJson.Encode(entry.Error, json);
@@ -456,7 +454,7 @@ namespace Elmah
                 // need to be enclosed in double-quotes. 
                 //
 
-                int index = value.IndexOfAny(_reserved);
+                var index = value.IndexOfAny(_reserved);
 
                 if (index < 0)
                 {
