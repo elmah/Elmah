@@ -157,40 +157,39 @@ namespace Elmah
 
             var encoder = encoding.GetEncoder();
 
-            byte[] bytes = null;
-            char[] chars = null;
+            var chars = new char[2048];
+            var bytes = new byte[encoding.GetMaxByteCount(2048)];
 
             foreach (var text in source)
-            for (var i = 0; i < 2; i++)
             {
-                var charsRead = i == 0 ? text.Length : 0;
-                if (chars == null || charsRead > chars.Length)
+                int charsRead, textIndex = 0;
+
+                do
                 {
-                    chars = new char[charsRead];
-                    var maxByteCount = encoding.GetMaxByteCount((int) (chars.Length * 1.25));
-                    bytes = new byte[maxByteCount];
+                    charsRead = Math.Min(chars.Length, text.Length - textIndex);
+                    text.CopyTo(textIndex, chars, 0, charsRead);
+                    textIndex += charsRead;
+
+                    var completed = false;
+                    var charIndex = 0;
+
+                    while (!completed)
+                    {
+                        var flush = charsRead == 0;
+                        int bytesUsed, charsUsed;
+                        encoder.Convert(chars, charIndex, charsRead - charIndex,
+                                        bytes, 0, bytes.Length, flush,
+                                        out charsUsed, out bytesUsed,
+                                        out completed);
+
+                        var ar = output.BeginWrite(bytes, 0, bytesUsed, getAsyncCallback(), null);
+                        yield return ar;
+                        output.EndWrite(ar);
+
+                        charIndex += charsUsed;
+                    }
                 }
-
-                text.CopyTo(0, chars, 0, charsRead);
-
-                var completed = false;
-                var charIndex = 0;
-
-                while (!completed)
-                {
-                    var flush = charsRead == 0;
-                    int bytesUsed, charsUsed;
-                    encoder.Convert(chars, charIndex, charsRead - charIndex,
-                                    bytes, 0, bytes.Length, flush,
-                                    out charsUsed, out bytesUsed, 
-                                    out completed);
-
-                    var ar = output.BeginWrite(bytes, 0, bytesUsed, getAsyncCallback(), null);
-                    yield return ar;
-                    output.EndWrite(ar);
-
-                    charIndex += charsUsed;
-                }
+                while (charsRead != 0);
             }
 
             output.Flush();
