@@ -152,4 +152,16 @@ namespace Elmah
             return result;
         }
     }
+    /*
+    class AsyncContext
+    {
+        public Func<AsyncCallback> GetAsyncCallback { get; private set; }
+
+        public AsyncContext(Func<AsyncCallback> getAsyncCallback)
+        {
+            if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
+            GetAsyncCallback = getAsyncCallback;
+        }
+    }
+    */
 }
