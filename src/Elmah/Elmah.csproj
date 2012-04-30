@@ -189,6 +189,7 @@
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
     <Compile Include="AsyncResult.cs" />
+    <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
@@ -208,6 +209,7 @@
     <Compile Include="FuzzyTime.cs" />
     <Compile Include="HelperResult.cs" />
     <Compile Include="HttpAsyncHandler.cs" />
+    <Compile Include="HttpTextAsyncHandler.cs" />
     <Compile Include="MasterPage.generated.cs">
       <DependentUpon>MasterPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>

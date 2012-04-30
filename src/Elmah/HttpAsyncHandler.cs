@@ -26,13 +26,24 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Web;
 
     #endregion
 
-    abstract class HttpAsyncHandler : IHttpAsyncHandler
+    class HttpAsyncHandler : IHttpAsyncHandler
     {
+        private readonly Func<HttpContextBase, Func<AsyncCallback>, IEnumerable<IAsyncResult>> _handler;
+
+        public HttpAsyncHandler() : this(null) {}
+
+        public HttpAsyncHandler(Func<HttpContextBase, Func<AsyncCallback>, IEnumerable<IAsyncResult>> handler)
+        {
+            _handler = handler;
+        }
+
         void IHttpHandler.ProcessRequest(HttpContext context)
         {
             OnProcessRequest(new HttpContextWrapper(context));
@@ -52,7 +63,7 @@ namespace Elmah
             return BeginProcessRequest(new HttpContextWrapper(context), cb, extraData);
         }
 
-        public IAsyncResult BeginProcessRequest(HttpContextBase context, 
+        public virtual IAsyncResult BeginProcessRequest(HttpContextBase context, 
             AsyncCallback cb, object extraData)
         {
             if (context == null) throw new ArgumentNullException("context");
@@ -67,7 +78,12 @@ namespace Elmah
             AsyncResult.End(result, this, "ProcessRequest");
         }
 
-        protected abstract IEnumerable<IAsyncResult> ProcessRequest(
-            HttpContextBase context, Func<AsyncCallback> getAsyncCallback);
+        protected virtual IEnumerable<IAsyncResult> ProcessRequest(
+            HttpContextBase context, Func<AsyncCallback> getAsyncCallback)
+        {
+            return _handler != null 
+                 ? _handler(context, getAsyncCallback)
+                 : Enumerable.Empty<IAsyncResult>();
+        }
     }
 }

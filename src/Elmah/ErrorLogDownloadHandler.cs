@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Collections;
     using System.Globalization;
     using System.IO;
     using System.Text;
@@ -37,13 +38,13 @@ namespace Elmah
 
     #endregion
 
-    internal sealed class ErrorLogDownloadHandler : HttpAsyncHandler
+    static class ErrorLogDownloadHandler
     {
         private static readonly TimeSpan _beatPollInterval = TimeSpan.FromSeconds(3);
 
         private const int _pageSize = 100;
 
-        protected override IEnumerable<IAsyncResult> ProcessRequest(
+        public static IEnumerable<AsyncResultOr<string>> ProcessRequest(
             HttpContextBase context, 
             Func<AsyncCallback> getAsyncCallback)
         {
@@ -70,13 +71,16 @@ namespace Elmah
             // Emit format header, initialize and then fetch results.
             //
 
+            context.Response.BufferOutput = false;
+            return ProcessRequest(context, getAsyncCallback, format, maxDownloadCount);
+        }
+
+        private static IEnumerable<AsyncResultOr<string>> ProcessRequest(HttpContextBase context, Func<AsyncCallback> getAsyncCallback, Format format, int maxDownloadCount)
+        {
             var response = context.Response;
-            response.BufferOutput = false;
-            var output = response.OutputStream;
-            var encoding = response.ContentEncoding;
-            var entries = format.Header();
-            foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
-                yield return iar;
+
+            foreach (var text in format.Header())
+                yield return AsyncResultOr.Value(text);
 
             var log = ErrorLog.GetDefault(context);
             var lastBeatTime = DateTime.Now;
@@ -87,7 +91,7 @@ namespace Elmah
             {
                 var ar = log.BeginGetErrors(pageIndex, _pageSize, errorEntryList,
                                             getAsyncCallback(), null);
-                yield return ar;
+                yield return ar.InsteadOf<string>();
 
                 var total = log.EndGetErrors(ar);
                 var count = errorEntryList.Count;
@@ -99,9 +103,8 @@ namespace Elmah
                         count += remaining;
                 }
 
-                entries = format.Entries(errorEntryList, 0, count, total);
-                foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
-                    yield return iar;
+                foreach (var entry in format.Entries(errorEntryList, 0, count, total))
+                    yield return AsyncResultOr.Value(entry);
 
                 downloadCount += count;
 
@@ -116,9 +119,8 @@ namespace Elmah
                 {
                     if (count > 0)
                     {
-                        entries = format.Entries(new ErrorLogEntry[0], total); // Terminator
-                        foreach (var iar in Write(entries, output, encoding, getAsyncCallback))
-                            yield return iar;
+                        foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
+                            yield return AsyncResultOr.Value(entry);
                     }
                     break;
                 }
@@ -143,56 +145,6 @@ namespace Elmah
 
                 errorEntryList.Clear();
             }
-        }
-
-        private static IEnumerable<IAsyncResult> Write(
-            IEnumerable<string> source, 
-            Stream output, Encoding encoding, 
-            Func<AsyncCallback> getAsyncCallback)
-        {
-            Debug.Assert(source != null);
-            Debug.Assert(output != null);
-            Debug.Assert(encoding != null);
-            Debug.Assert(getAsyncCallback != null);
-
-            var encoder = encoding.GetEncoder();
-
-            var chars = new char[2048];
-            var bytes = new byte[encoding.GetMaxByteCount(2048)];
-
-            foreach (var text in source)
-            {
-                int charsRead, textIndex = 0;
-
-                do
-                {
-                    charsRead = Math.Min(chars.Length, text.Length - textIndex);
-                    text.CopyTo(textIndex, chars, 0, charsRead);
-                    textIndex += charsRead;
-
-                    var completed = false;
-                    var charIndex = 0;
-
-                    while (!completed)
-                    {
-                        var flush = charsRead == 0;
-                        int bytesUsed, charsUsed;
-                        encoder.Convert(chars, charIndex, charsRead - charIndex,
-                                        bytes, 0, bytes.Length, flush,
-                                        out charsUsed, out bytesUsed,
-                                        out completed);
-
-                        var ar = output.BeginWrite(bytes, 0, bytesUsed, getAsyncCallback(), null);
-                        yield return ar;
-                        output.EndWrite(ar);
-
-                        charIndex += charsUsed;
-                    }
-                }
-                while (charsRead != 0);
-            }
-
-            output.Flush();
         }
 
         private static Format GetFormat(HttpContextBase context, string format)
