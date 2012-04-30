@@ -276,18 +276,18 @@ namespace Elmah
                     var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                     csv.Field(error.ApplicationName)
-                        .Field(error.HostName)
-                        .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
-                        .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
-                        .Field(error.Type)
-                        .Field(error.Source)
-                        .Field(error.User)
-                        .Field(error.StatusCode.ToString(culture))
-                        .Field(error.Message)
-                        .Field(new Uri(requestUrl, "detail" + query).ToString())
-                        .Field(new Uri(requestUrl, "xml" + query).ToString())
-                        .Field(new Uri(requestUrl, "json" + query).ToString())
-                        .Record();
+                       .Field(error.HostName)
+                       .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
+                       .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
+                       .Field(error.Type)
+                       .Field(error.Source)
+                       .Field(error.User)
+                       .Field(error.StatusCode.ToString(culture))
+                       .Field(error.Message)
+                       .Field(new Uri(requestUrl, "detail" + query).ToString())
+                       .Field(new Uri(requestUrl, "xml" + query).ToString())
+                       .Field(new Uri(requestUrl, "json" + query).ToString())
+                       .Record();
                 }
 
                 yield return writer.ToString();
@@ -386,20 +386,20 @@ namespace Elmah
                     var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
                     
                     json.Object();
-                        ErrorJson.Encode(entry.Error, json);
-                        json.Member("hrefs")
-                        .Array()
-                            .Object()
-                                .Member("type").String("text/html")
-                                .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
-                            .Object()
-                                .Member("type").String("aplication/json")
-                                .Member("href").String(string.Format(urlTemplate, "json")).Pop()
-                            .Object()
-                                .Member("type").String("application/xml")
-                                .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
-                        .Pop()
-                    .Pop();
+                            ErrorJson.Encode(entry.Error, json);
+                            json.Member("hrefs")
+                            .Array()
+                                .Object()
+                                    .Member("type").String("text/html")
+                                    .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
+                                .Object()
+                                    .Member("type").String("aplication/json")
+                                    .Member("href").String(string.Format(urlTemplate, "json")).Pop()
+                                .Object()
+                                    .Member("type").String("application/xml")
+                                    .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
+                            .Pop()
+                        .Pop();
                 }
 
                 json.Pop();
