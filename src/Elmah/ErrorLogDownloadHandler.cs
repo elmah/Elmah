@@ -28,53 +28,29 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Collections;
     using System.Globalization;
     using System.IO;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
     using System.Collections.Generic;
 
     #endregion
 
-    internal sealed class ErrorLogDownloadHandler : IHttpAsyncHandler
+    static class ErrorLogDownloadHandler
     {
         private static readonly TimeSpan _beatPollInterval = TimeSpan.FromSeconds(3);
 
         private const int _pageSize = 100;
 
-        #region IHttpAsyncHandler implementation
-
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-
-        IAsyncResult IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
-        {
-            return BeginProcessRequest(new HttpContextWrapper(context), cb, extraData);
-        }
-
-        void IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)
-        {
-            EndProcessRequest(result);
-        }
-
-        bool IHttpHandler.IsReusable
-        {
-            get { return false; }
-        }
-
-        #endregion
-
-        public static void ProcessRequest(HttpContextBase context)
-        {
-            EndProcessRequest(BeginProcessRequest(context, null, null));
-        }
-
-        public static IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback cb, object extraData)
+        public static IEnumerable<AsyncResultOr<string>> ProcessRequest(
+            HttpContextBase context, 
+            Func<AsyncCallback> getAsyncCallback)
         {
             if (context == null) throw new ArgumentNullException("context");
-            
+            if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
+
             var request = context.Request;
             var query = request.QueryString;
 
@@ -96,108 +72,79 @@ namespace Elmah
             //
 
             context.Response.BufferOutput = false;
-            format.Header();
+            return ProcessRequest(context, getAsyncCallback, format, maxDownloadCount);
+        }
 
-            var result = new AsyncResult(cb, extraData, typeof(ErrorLogDownloadHandler), "ProcessRequest");
+        private static IEnumerable<AsyncResultOr<string>> ProcessRequest(HttpContextBase context, Func<AsyncCallback> getAsyncCallback, Format format, int maxDownloadCount)
+        {
+            var response = context.Response;
+
+            foreach (var text in format.Header())
+                yield return AsyncResultOr.Value(text);
+
             var log = ErrorLog.GetDefault(context);
-            var pageIndex = 0;
             var lastBeatTime = DateTime.Now;
             var errorEntryList = new List<ErrorLogEntry>(_pageSize);
             var downloadCount = 0;
 
-            var onGetErrors = new AsyncCallback[1];
-            onGetErrors[0] = ar =>
+            for (var pageIndex = 0; ; pageIndex++)
             {
-                try
+                var ar = log.BeginGetErrors(pageIndex, _pageSize, errorEntryList,
+                                            getAsyncCallback(), null);
+                yield return ar.InsteadOf<string>();
+
+                var total = log.EndGetErrors(ar);
+                var count = errorEntryList.Count;
+
+                if (maxDownloadCount > 0)
                 {
-                    if (ar == null) throw new ArgumentNullException("ar");
-
-                    var total = log.EndGetErrors(ar);
-                    var count = errorEntryList.Count;
-
-                    if (maxDownloadCount > 0)
-                    {
-                        var remaining = maxDownloadCount - (downloadCount + count);
-                        if (remaining < 0)
-                            count += remaining;
-                    }
-
-                    format.Entries(errorEntryList, 0, count, total);
-                    downloadCount += count;
-
-                    var response = context.Response;
-                    response.Flush();
-
-                    //
-                    // Done if either the end of the list (no more errors found) or
-                    // the requested limit has been reached.
-                    //
-
-                    if (count == 0 || downloadCount == maxDownloadCount)
-                    {
-                        if (count > 0)
-                            format.Entries(new ErrorLogEntry[0], total); // Terminator
-                        result.Complete();
-                        return;
-                    }
-
-                    //
-                    // Poll whether the client is still connected so data is not
-                    // unnecessarily sent to an abandoned connection. This check is 
-                    // only performed at certain intervals.
-                    //
-
-                    if (DateTime.Now - lastBeatTime > _beatPollInterval)
-                    {
-                        if (!response.IsClientConnected)
-                        {
-                            result.Complete();
-                            return;
-                        }
-
-                        lastBeatTime = DateTime.Now;
-                    }
-
-                    //
-                    // Fetch next page of results.
-                    //
-
-                    errorEntryList.Clear();
-
-                    // FIXME!!!
-                    // TODO Don't let the stack get too deep if callbacks complete synchronously!
-
-                    log.BeginGetErrors(++pageIndex, _pageSize, errorEntryList,
-                        onGetErrors[0], null);
+                    var remaining = maxDownloadCount - (downloadCount + count);
+                    if (remaining < 0)
+                        count += remaining;
                 }
-                catch (Exception e)
+
+                foreach (var entry in format.Entries(errorEntryList, 0, count, total))
+                    yield return AsyncResultOr.Value(entry);
+
+                downloadCount += count;
+
+                response.Flush();
+
+                //
+                // Done if either the end of the list (no more errors found) or
+                // the requested limit has been reached.
+                //
+
+                if (count == 0 || downloadCount == maxDownloadCount)
                 {
-                    //
-                    // If anything goes wrong during callback processing then 
-                    // the exception needs to be captured and the raising 
-                    // delayed until EndProcessRequest.Meanwhile, the 
-                    // BeginProcessRequest called is notified immediately of 
-                    // completion.
-                    //
-
-                    result.Complete(e);
+                    if (count > 0)
+                    {
+                        foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
+                            yield return AsyncResultOr.Value(entry);
+                    }
+                    break;
                 }
-            };
 
-            Debug.Assert(onGetErrors[0] != null);
+                //
+                // Poll whether the client is still connected so data is not
+                // unnecessarily sent to an abandoned connection. This check is 
+                // only performed at certain intervals.
+                //
 
-            log.BeginGetErrors(pageIndex, _pageSize, errorEntryList, 
-                onGetErrors[0], null);
+                if (DateTime.Now - lastBeatTime > _beatPollInterval)
+                {
+                    if (!response.IsClientConnected)
+                        break;
 
-            return result;
-        }
+                    lastBeatTime = DateTime.Now;
+                }
 
-        public static void EndProcessRequest(IAsyncResult result)
-        {
-            if (result == null)
-                throw new ArgumentNullException("result");
-            
-            AsyncResult.End(result, typeof(ErrorLogDownloadHandler), "ProcessRequest");
+                //
+                // Fetch next page of results.
+                //
+
+                errorEntryList.Clear();
+            }
         }
 
         private static Format GetFormat(HttpContextBase context, string format)
@@ -225,14 +172,14 @@ namespace Elmah
 
             protected HttpContextBase Context { get { return _context; } }
 
-            public virtual void Header() {}
+            public virtual IEnumerable<string> Header() { yield break; }
 
-            public void Entries(IList<ErrorLogEntry> entries, int total)
+            public IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int total)
             {
-                Entries(entries, 0, entries.Count, total);
+                return Entries(entries, 0, entries.Count, total);
             }
 
-            public abstract void Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
+            public abstract IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
         }
 
         private sealed class CsvFormat : Format
@@ -240,62 +187,61 @@ namespace Elmah
             public CsvFormat(HttpContextBase context) : 
                 base(context) {}
 
-            public override void Header()
+            public override IEnumerable<string> Header()
             {
                 var response = Context.Response;
                 response.AppendHeader("Content-Type", "text/csv; header=present");
                 response.AppendHeader("Content-Disposition", "attachment; filename=errorlog.csv");
-                response.Output.Write("Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n");
+                yield return "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
                 if (count == 0)
-                    return;
+                    yield break;
 
                 //
                 // Setup to emit CSV records.
                 //
 
-                StringWriter writer = new StringWriter();
-                writer.NewLine = "\r\n";
-                CsvWriter csv = new CsvWriter(writer);
+                var writer = new StringWriter { NewLine = "\r\n" };
+                var csv = new CsvWriter(writer);
 
-                CultureInfo culture = CultureInfo.InvariantCulture;
-                DateTime epoch = new DateTime(1970, 1, 1);
+                var culture = CultureInfo.InvariantCulture;
+                var epoch = new DateTime(1970, 1, 1);
 
                 //
                 // For each error, emit a CSV record.
                 //
 
-                for (int i = index; i < count; i++)
+                for (var i = index; i < count; i++)
                 {
-                    ErrorLogEntry entry = entries[i];
-                    Error error = entry.Error;
-                    DateTime time = error.Time.ToUniversalTime();
-                    string query = "?id=" + HttpUtility.UrlEncode(entry.Id);
-                    Uri requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                    var entry = entries[i];
+                    var error = entry.Error;
+                    var time = error.Time.ToUniversalTime();
+                    var query = "?id=" + HttpUtility.UrlEncode(entry.Id);
+                    var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                     csv.Field(error.ApplicationName)
-                        .Field(error.HostName)
-                        .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
-                        .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
-                        .Field(error.Type)
-                        .Field(error.Source)
-                        .Field(error.User)
-                        .Field(error.StatusCode.ToString(culture))
-                        .Field(error.Message)
-                        .Field(new Uri(requestUrl, "detail" + query).ToString())
-                        .Field(new Uri(requestUrl, "xml" + query).ToString())
-                        .Field(new Uri(requestUrl, "json" + query).ToString())
-                        .Record();
+                       .Field(error.HostName)
+                       .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
+                       .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
+                       .Field(error.Type)
+                       .Field(error.Source)
+                       .Field(error.User)
+                       .Field(error.StatusCode.ToString(culture))
+                       .Field(error.Message)
+                       .Field(new Uri(requestUrl, "detail" + query).ToString())
+                       .Field(new Uri(requestUrl, "xml" + query).ToString())
+                       .Field(new Uri(requestUrl, "json" + query).ToString())
+                       .Record();
                 }
 
-                Context.Response.Output.Write(writer.ToString());
+                yield return writer.ToString();
             }
         }
 
@@ -322,7 +268,7 @@ namespace Elmah
                 _wrapped = wrapped;
             }
 
-            public override void Header()
+            public override IEnumerable<string> Header()
             {
                 string callback = Context.Request.QueryString[Mask.EmptyString(null, "callback")] 
                                   ?? string.Empty;
@@ -346,26 +292,24 @@ namespace Elmah
                 {
                     response.AppendHeader("Content-Type", "text/html");
 
-                    TextWriter output = response.Output;
-                    output.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-                    output.WriteLine(@"
+                    yield return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+                    yield return @"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
                         <title>Error Log in HTML-Wrapped JSONP Format</title>
                     </head>
                     <body>
-                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>");
+                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>";
                 }
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
-                StringWriter writer = new StringWriter();
-                writer.NewLine = "\n";
+                var writer = new StringWriter { NewLine = "\n" };
 
                 if (_wrapped)
                 {
@@ -376,37 +320,37 @@ namespace Elmah
                 writer.Write(_callback);
                 writer.Write('(');
 
-                JsonTextWriter json = new JsonTextWriter(writer);
+                var json = new JsonTextWriter(writer);
                 json.Object()
                     .Member("total").Number(total)
                     .Member("errors").Array();
 
-                Uri requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
-                for (int i = index; i < count; i++)
+                for (var i = index; i < count; i++)
                 {
-                    ErrorLogEntry entry = entries[i];
+                    var entry = entries[i];
                     writer.WriteLine();
                     if (i == 0) writer.Write(' ');
                     writer.Write("  ");
 
-                    string urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
+                    var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
                     
                     json.Object();
-                        ErrorJson.Encode(entry.Error, json);
-                        json.Member("hrefs")
-                        .Array()
-                            .Object()
-                                .Member("type").String("text/html")
-                                .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
-                            .Object()
-                                .Member("type").String("aplication/json")
-                                .Member("href").String(string.Format(urlTemplate, "json")).Pop()
-                            .Object()
-                                .Member("type").String("application/xml")
-                                .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
-                        .Pop()
-                    .Pop();
+                            ErrorJson.Encode(entry.Error, json);
+                            json.Member("hrefs")
+                            .Array()
+                                .Object()
+                                    .Member("type").String("text/html")
+                                    .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
+                                .Object()
+                                    .Member("type").String("aplication/json")
+                                    .Member("href").String(string.Format(urlTemplate, "json")).Pop()
+                                .Object()
+                                    .Member("type").String("application/xml")
+                                    .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
+                            .Pop()
+                        .Pop();
                 }
 
                 json.Pop();
@@ -426,7 +370,7 @@ namespace Elmah
                         writer.WriteLine(@"</body></html>");
                 }
 
-                Context.Response.Output.Write(writer);
+                yield return writer.ToString();
             }
         }
 
@@ -461,7 +405,7 @@ namespace Elmah
                 // need to be enclosed in double-quotes. 
                 //
 
-                int index = value.IndexOfAny(_reserved);
+                var index = value.IndexOfAny(_reserved);
 
                 if (index < 0)
                 {

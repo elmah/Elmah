@@ -127,7 +127,7 @@ namespace Elmah
                     return new DelegatingHttpHandler(ErrorDigestRssHandler.ProcessRequest);
 
                 case "download":
-                    return new ErrorLogDownloadHandler();
+                    return new HttpAsyncHandler((context, getAsyncCallback) => HttpTextAsyncHandler.Create(ErrorLogDownloadHandler.ProcessRequest)(context, getAsyncCallback));
 
                 case "stylesheet":
                     return new DelegatingHttpHandler(ManifestResourceHandler.Create("ErrorLog.css",
