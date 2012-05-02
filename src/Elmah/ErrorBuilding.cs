@@ -71,15 +71,15 @@ namespace Elmah
         }
     }
 
-    public sealed class ExceptionFilterEvent : Event<ExceptionFilterEventArgs, bool>
+    public sealed class ExceptionFilterMessage : Message<ExceptionFilterEventArgs, bool>
     {
-        public static bool Fire(ExtensionHub ehub, object sender, Exception exception, object context)
+        public static bool Send(ExtensionHub ehub, object sender, Exception exception, object context)
         {
-            var handler = ehub.Find<ExceptionFilterEvent>();
+            var handler = ehub.Find<ExceptionFilterMessage>();
             if (handler == null) 
                 return false;
             var args = new ExceptionFilterEventArgs(exception, context);
-            return handler.Fire(sender, args);
+            return handler.Send(sender, args);
         }
     }
 
@@ -107,7 +107,7 @@ namespace Elmah
 
                 public InitializedModule LoadInitialized()
                 {
-                    return Load((m, s) => InitializedModule.Initialize(m, m.Initialize(s)));
+                    return Load(InitializedModule.Initialize);
                 }
 
                 public virtual T Load<T>(Func<Module, object, T> resultor)
@@ -282,7 +282,7 @@ namespace Elmah
                 return ehub => ehub.OnException((sender, args) =>
                 {
                     var exception = args.Exception;
-                    if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
+                    if (exception == null || !ExceptionFilterMessage.Send(ehub, this, exception, args.ExceptionContext))
                     {
                         var log = ErrorLog.GetDefault(null);
                         var error = args.CreateError(ehub);
@@ -342,7 +342,7 @@ namespace Elmah
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ExceptionFilterEvent>().AddHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
+                ehub.Get<ExceptionFilterMessage>().AddHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
             }
 
             public static void OnErrorMailing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
@@ -442,7 +442,7 @@ namespace Elmah
                 return ehub => ehub.OnException((sender, args) =>
                 {
                     var exception = args.Exception;
-                    if (exception == null || !ExceptionFilterEvent.Fire(ehub, this, exception, args.ExceptionContext))
+                    if (exception == null || !ExceptionFilterMessage.Send(ehub, this, exception, args.ExceptionContext))
                     {
                         var error = args.CreateError(ehub);
 
@@ -708,7 +708,7 @@ namespace Elmah
         }
     }
 
-    public class Event<TInput, TOutput>
+    public class Message<TInput, TOutput>
     {
         private Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> _binder;
         private Func<object, TInput, TOutput> _cachedHandler;
@@ -730,12 +730,12 @@ namespace Elmah
             _cachedHandler = null;
         }
 
-        public TOutput Fire(TInput input)
+        public TOutput Send(TInput input)
         {
-            return Fire(null, input);
+            return Send(null, input);
         }
 
-        public virtual TOutput Fire(object sender, TInput input)
+        public virtual TOutput Send(object sender, TInput input)
         {
             var handler = _cachedHandler;
             if (handler == null)
@@ -762,31 +762,31 @@ namespace Elmah
         }
     }
 
-    public class Event<TInput> : Event<TInput, Unit>
+    public class Event<TInput> : Message<TInput, Unit>
     {
-        public new void Fire(TInput input)
+        public void Fire(TInput input)
         {
             Fire(null, input);
         }
 
-        public new void Fire(object sender, TInput input)
+        public void Fire(object sender, TInput input)
         {
-            base.Fire(sender, input);
+            base.Send(sender, input);
         }
     }
 
     public sealed class ExtensionHub
     {
-        private readonly Dictionary<Type, object> _events = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> _messageByType = new Dictionary<Type, object>();
 
         public T Get<T>() where T : class, new()
         {
-            return (Find<T>() ?? (T) (_events[typeof(T)] = new T()));
+            return (Find<T>() ?? (T) (_messageByType[typeof(T)] = new T()));
         }
 
         public T Find<T>() where T : class
         {
-            return (T) _events.Find(typeof(T));
+            return (T) _messageByType.Find(typeof(T));
         }
 
         private static ICollection<InitializedModule> _modules = Array.AsReadOnly(new[]
