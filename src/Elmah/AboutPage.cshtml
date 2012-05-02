@@ -1,7 +1,9 @@
 @* Generator: Template TypeVisibility: Internal *@
+@using System.ComponentModel
 @using System.IO
 @using System.Reflection
 @using Elmah
+@using Mannex.Collections.Generic
 @inherits WebTemplateBase
 @{
     var basePageName = Request.ServerVariables["URL"];
@@ -62,13 +64,24 @@
     build was compiled from the following sources for CLR @Build.ImageRuntimeVersion:
 </p>
 
-@foreach (var entry in Elmah.Modules.Configuration.Parse())
+@foreach (var module in from m in Elmah.ExtensionHub.Modules
+                        let mm = m.Module
+                        let settings = m.Settings
+                        select new
+                        {
+                            Name = mm.Name,
+                            Settings = 
+                                mm.HasSettingsSupport && settings != null
+                                ? from PropertyDescriptor property in mm.SettingsDescriptor.GetProperties()
+                                  select property.Name.AsKeyTo(property.GetValue(settings))
+                                : null
+                        })
 {
-    <h2>@entry.Name</h2>
-    @if (entry.Settings.Any())
+    <h2>@module.Name</h2>
+    @if (module.Settings != null)
     {
         <dl>
-        @foreach (var pair in entry.Settings)
+        @foreach (var pair in module.Settings)
         {
             <dt>@pair.Key</dt><dd>@pair.Value</dd>
         }

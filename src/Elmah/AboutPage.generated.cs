@@ -15,21 +15,33 @@ namespace Elmah
     using System.Collections.Generic;
     
     #line 2 "..\..\AboutPage.cshtml"
+    using System.ComponentModel;
+    
+    #line default
+    #line hidden
+    
+    #line 3 "..\..\AboutPage.cshtml"
     using System.IO;
     
     #line default
     #line hidden
     using System.Linq;
     
-    #line 3 "..\..\AboutPage.cshtml"
+    #line 4 "..\..\AboutPage.cshtml"
     using System.Reflection;
     
     #line default
     #line hidden
     using System.Text;
     
-    #line 4 "..\..\AboutPage.cshtml"
+    #line 5 "..\..\AboutPage.cshtml"
     using Elmah;
+    
+    #line default
+    #line hidden
+    
+    #line 6 "..\..\AboutPage.cshtml"
+    using Mannex.Collections.Generic;
     
     #line default
     #line hidden
@@ -39,7 +51,7 @@ namespace Elmah
     {
 #line hidden
 
-        #line 86 "..\..\AboutPage.cshtml"
+        #line 99 "..\..\AboutPage.cshtml"
 
     private Version GetVersion()
     {
@@ -66,8 +78,10 @@ WriteLiteral("\r\n");
 
 
 
+
+
             
-            #line 6 "..\..\AboutPage.cshtml"
+            #line 8 "..\..\AboutPage.cshtml"
   
     var basePageName = Request.ServerVariables["URL"];
 
@@ -111,7 +125,7 @@ WriteLiteral(@"
 
 
             
-            #line 41 "..\..\AboutPage.cshtml"
+            #line 43 "..\..\AboutPage.cshtml"
                  Write(GetVersion());
 
             
@@ -121,7 +135,7 @@ WriteLiteral("\',\r\n            fileVersion: \'");
 
 
             
-            #line 42 "..\..\AboutPage.cshtml"
+            #line 44 "..\..\AboutPage.cshtml"
                      Write(GetFileVersion());
 
             
@@ -131,7 +145,7 @@ WriteLiteral("\',\r\n            type: \'");
 
 
             
-            #line 43 "..\..\AboutPage.cshtml"
+            #line 45 "..\..\AboutPage.cshtml"
               Write(Build.TypeLowercase);
 
             
@@ -141,7 +155,7 @@ WriteLiteral("\',\r\n            status: \'");
 
 
             
-            #line 44 "..\..\AboutPage.cshtml"
+            #line 46 "..\..\AboutPage.cshtml"
                 Write(Build.Status);
 
             
@@ -151,7 +165,7 @@ WriteLiteral("\',\r\n            framework: \'");
 
 
             
-            #line 45 "..\..\AboutPage.cshtml"
+            #line 47 "..\..\AboutPage.cshtml"
                    Write(Build.Framework);
 
             
@@ -161,7 +175,7 @@ WriteLiteral("\',\r\n            imageRuntime: \'");
 
 
             
-            #line 46 "..\..\AboutPage.cshtml"
+            #line 48 "..\..\AboutPage.cshtml"
                       Write(Build.ImageRuntimeVersion);
 
             
@@ -171,7 +185,7 @@ WriteLiteral("\'\r\n        }\r\n    };\r\n</script>\r\n\r\n<h1 id=\"PageTitle\"
 
 
             
-            #line 51 "..\..\AboutPage.cshtml"
+            #line 53 "..\..\AboutPage.cshtml"
               Write(title);
 
             
@@ -183,7 +197,7 @@ WriteLiteral("</h1>\r\n\r\n<p>\r\n    <button class=\"btn\"\r\n        onclick=\
 
 
             
-            #line 60 "..\..\AboutPage.cshtml"
+            #line 62 "..\..\AboutPage.cshtml"
             Write(Build.TypeLowercase);
 
             
@@ -193,7 +207,7 @@ WriteLiteral("</strong>\r\n    ");
 
 
             
-            #line 61 "..\..\AboutPage.cshtml"
+            #line 63 "..\..\AboutPage.cshtml"
 Write(stamps.Any() ? "(SCC #" + stamps.First().Revision.ToString("N0") + ")" : null);
 
             
@@ -203,7 +217,7 @@ WriteLiteral("\r\n    build was compiled from the following sources for CLR ");
 
 
             
-            #line 62 "..\..\AboutPage.cshtml"
+            #line 64 "..\..\AboutPage.cshtml"
                                                      Write(Build.ImageRuntimeVersion);
 
             
@@ -213,8 +227,19 @@ WriteLiteral(":\r\n</p>\r\n\r\n");
 
 
             
-            #line 65 "..\..\AboutPage.cshtml"
- foreach (var entry in Elmah.Modules.Configuration.Parse())
+            #line 67 "..\..\AboutPage.cshtml"
+ foreach (var module in from m in Elmah.ExtensionHub.Modules
+                        let mm = m.Module
+                        let settings = m.Settings
+                        select new
+                        {
+                            Name = mm.Name,
+                            Settings = 
+                                mm.HasSettingsSupport && settings != null
+                                ? from PropertyDescriptor property in mm.SettingsDescriptor.GetProperties()
+                                  select property.Name.AsKeyTo(property.GetValue(settings))
+                                : null
+                        })
 {
 
             
@@ -224,8 +249,8 @@ WriteLiteral("    <h2>");
 
 
             
-            #line 67 "..\..\AboutPage.cshtml"
-   Write(entry.Name);
+            #line 80 "..\..\AboutPage.cshtml"
+   Write(module.Name);
 
             
             #line default
@@ -234,14 +259,14 @@ WriteLiteral("</h2>\r\n");
 
 
             
-            #line 68 "..\..\AboutPage.cshtml"
+            #line 81 "..\..\AboutPage.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 68 "..\..\AboutPage.cshtml"
-     if (entry.Settings.Any())
+            #line 81 "..\..\AboutPage.cshtml"
+     if (module.Settings != null)
     {
 
             
@@ -251,8 +276,8 @@ WriteLiteral("        <dl>\r\n");
 
 
             
-            #line 71 "..\..\AboutPage.cshtml"
-         foreach (var pair in entry.Settings)
+            #line 84 "..\..\AboutPage.cshtml"
+         foreach (var pair in module.Settings)
         {
 
             
@@ -262,7 +287,7 @@ WriteLiteral("            <dt>");
 
 
             
-            #line 73 "..\..\AboutPage.cshtml"
+            #line 86 "..\..\AboutPage.cshtml"
            Write(pair.Key);
 
             
@@ -276,7 +301,7 @@ WriteLiteral("<dd>");
 
 
             
-            #line 73 "..\..\AboutPage.cshtml"
+            #line 86 "..\..\AboutPage.cshtml"
                              Write(pair.Value);
 
             
@@ -286,7 +311,7 @@ WriteLiteral("</dd>\r\n");
 
 
             
-            #line 74 "..\..\AboutPage.cshtml"
+            #line 87 "..\..\AboutPage.cshtml"
         }
 
             
@@ -296,13 +321,13 @@ WriteLiteral("        </dl>\r\n");
 
 
             
-            #line 76 "..\..\AboutPage.cshtml"
+            #line 89 "..\..\AboutPage.cshtml"
     }
             
             #line default
             #line hidden
             
-            #line 76 "..\..\AboutPage.cshtml"
+            #line 89 "..\..\AboutPage.cshtml"
      
 }
 
@@ -313,7 +338,7 @@ WriteLiteral("\r\n<ul>\r\n");
 
 
             
-            #line 80 "..\..\AboutPage.cshtml"
+            #line 93 "..\..\AboutPage.cshtml"
      foreach (var stamp in stamps)
     {
 
@@ -324,7 +349,7 @@ WriteLiteral("        <li><code>");
 
 
             
-            #line 82 "..\..\AboutPage.cshtml"
+            #line 95 "..\..\AboutPage.cshtml"
              Write(stamp.Id);
 
             
@@ -334,7 +359,7 @@ WriteLiteral("</code></li>        \r\n");
 
 
             
-            #line 83 "..\..\AboutPage.cshtml"
+            #line 96 "..\..\AboutPage.cshtml"
     }
 
             
