@@ -486,10 +486,10 @@ namespace Elmah
                 AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType).Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
-                errorXml = command.Parameters["v_AllXml"].Value as string;
+                errorXml = parameters["v_AllXml"].Value as string;
                 if (errorXml == null)
                 {
-                    var xmlLob = (Stream) command.Parameters["v_AllXml"].Value;
+                    var xmlLob = (Stream) parameters["v_AllXml"].Value;
 
                     var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
                     var cbuffer = new char[1000];
