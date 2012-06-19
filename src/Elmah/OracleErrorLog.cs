@@ -360,6 +360,7 @@ namespace Elmah
                     else
                     {
                         // now we can get a handle to the NClob
+                        // TODO Review where Stream needs disposing
                         var xmlLob = (Stream)parameters[0].Value;
                         // create a temporary buffer in which to store the XML
                         var tempbuff = Encoding.Unicode.GetBytes(errorXml);
@@ -491,6 +492,7 @@ namespace Elmah
                 errorXml = allXml.Value as string;
                 if (errorXml == null)
                 {
+                    // TODO Review whether Stream needs disposing
                     var xmlLob = (Stream) allXml.Value;
 
                     var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
