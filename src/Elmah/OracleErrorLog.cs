@@ -76,6 +76,12 @@ namespace Elmah
             }
         }
 
+        // TODO Provider info must be bound to instance
+        // The provider info is stored in a static field, which means that
+        // the first instance of this object to initialize it wins! All
+        // other instances will pick the wrong info if their provider is
+        // not the same!
+
         private static ProviderInfo _providerInfo;
 
         private static DbParameter AddParameter(DbCommand command, string parameterName)
