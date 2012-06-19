@@ -53,14 +53,34 @@ namespace Elmah
         private const int _maxAppNameLength = 60;
         private const int _maxSchemaNameLength = 30;
 
-        private static DbProviderFactory _dbProviderFactory;
-        private static PropertyInfo _providerSpecificTypeProperty;
-        private static object _clobDbType;
-        private static object _refCursorDbType;
+        sealed class ProviderInfo
+        {
+            public DbProviderFactory DbProviderFactory { get; private set; }
+            public PropertyInfo ProviderSpecificTypeProperty { get; private set; }
+            public object ClobDbType { get; private set; }
+            public object RefCursorDbType { get; private set; }
+
+            public ProviderInfo(DbProviderFactory dbProviderFactory, 
+                                PropertyInfo providerSpecificTypeProperty, 
+                                object clobDbType, object refCursorDbType)
+            {
+                Debug.Assert(dbProviderFactory != null);
+                Debug.Assert(providerSpecificTypeProperty != null);
+                Debug.Assert(clobDbType != null);
+                Debug.Assert(refCursorDbType != null);
+
+                DbProviderFactory = dbProviderFactory;
+                ProviderSpecificTypeProperty = providerSpecificTypeProperty;
+                ClobDbType = clobDbType;
+                RefCursorDbType = refCursorDbType;
+            }
+        }
+
+        private static ProviderInfo _providerInfo;
 
         private static DbParameter AddParameter(DbCommand command, string parameterName)
         {
-            Debug.Assert(_providerSpecificTypeProperty != null);
+            Debug.Assert(_providerInfo != null);
             var parameter = command.CreateParameter();
             parameter.ParameterName = parameterName;
             command.Parameters.Add(parameter);
@@ -77,55 +97,44 @@ namespace Elmah
         private static DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
         {
             var parameter = AddParameter(command, parameterName);
-            _providerSpecificTypeProperty.SetValue(parameter, dbType, null);
+            _providerInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
             return parameter;
         }
 
-        private static bool TryAndCreateDbProviderFactory(string providerInvariantName)
+        private static DbProviderFactory TryCreateDbProviderFactory(string providerInvariantName)
         {
             try
             {
-                _dbProviderFactory = DbProviderFactories.GetFactory(providerInvariantName);
-                return true;
+                return DbProviderFactories.GetFactory(providerInvariantName);
             }
             catch (ArgumentException)
             {
-                return false;
+                return null;
             }
         }
 
-        static void GetProviderSpecificType()
+        static object GetEnumValueOfAny(Type enumType, params string[] candidates)
         {
-            Debug.Assert(_dbProviderFactory != null);
+            Debug.Assert(enumType != null);
+            Debug.Assert(enumType.IsEnum);
+            Debug.Assert(candidates != null);
 
-            var parameter = _dbProviderFactory.CreateParameter();
-            Debug.Assert(parameter != null);
-            var parameterType = parameter.GetType();
-            _providerSpecificTypeProperty = (from property in parameterType.GetProperties() 
-                                            let attributes = property.GetCustomAttributes(typeof (DbProviderSpecificTypePropertyAttribute), false) 
-                                            from attribute in attributes
-                                            where ((DbProviderSpecificTypePropertyAttribute) attribute).IsProviderSpecificTypeProperty 
-                                            select property).FirstOrDefault();
+            var names = Enum.GetNames(enumType);
+            var pairs = Enum.GetValues(enumType)
+                            .Cast<object>()
+                            .Select((v, i) => new KeyValuePair<string, object>(names[i], v))
+                            .ToArray();
 
-            Debug.Assert(_providerSpecificTypeProperty != null);
-        }
-
-        static object GetProviderSpecificDbType(params string[] dbTypes)
-        {
-            Debug.Assert(_providerSpecificTypeProperty != null);
-            var enumValues = Enum.GetValues(_providerSpecificTypeProperty.PropertyType);
-
-            foreach (var dbType in dbTypes)
-                foreach (var enumValue in enumValues)
-                    if (enumValue.ToString().Equals(dbType, StringComparison.OrdinalIgnoreCase))
-                        return enumValue;
-
-            return null;
+            var matches = 
+                from dbType in candidates 
+                select pairs.FirstOrDefault(p => p.Key.Equals(dbType, StringComparison.OrdinalIgnoreCase));
+            
+            return matches.First(m => m.Key != null).Value;
         }
         
-        private static void InitializeProviderFactory(string providerName)
+        private static ProviderInfo GetProviderInfo(string providerName)
         {
-            Debug.Assert(_dbProviderFactory == null);
+            DbProviderFactory dbProviderFactory;
 
             if (!string.IsNullOrEmpty(providerName))
             {
@@ -134,8 +143,7 @@ namespace Elmah
                 // we must use.
                 //
 
-                if (!TryAndCreateDbProviderFactory(providerName))
-                    throw new ArgumentException("providerName");
+                dbProviderFactory = DbProviderFactories.GetFactory(providerName);
             }
             else
             {
@@ -144,23 +152,34 @@ namespace Elmah
                 // and then fallback to the Microsoft client.
                 //
 
-                if (!TryAndCreateDbProviderFactory("Oracle.DataAccess.Client"))
-                    TryAndCreateDbProviderFactory("System.Data.OracleClient");
+                dbProviderFactory = TryCreateDbProviderFactory("Oracle.DataAccess.Client") 
+                                    ?? DbProviderFactories.GetFactory("System.Data.OracleClient");
             }
 
-            Debug.Assert(_dbProviderFactory != null);
+            var parameter = dbProviderFactory.CreateParameter();
+            if (parameter == null)
+                throw new NotSupportedException();
 
-            GetProviderSpecificType();
-            _clobDbType = GetProviderSpecificDbType("NClob");
-            Debug.Assert(_clobDbType != null);
-            _refCursorDbType = GetProviderSpecificDbType("Cursor", "RefCursor");
-            Debug.Assert(_refCursorDbType != null);
+            var specificTypeProperties = 
+                from property in parameter.GetType().GetProperties()
+                let attribute = (DbProviderSpecificTypePropertyAttribute) Attribute.GetCustomAttribute(property, typeof(DbProviderSpecificTypePropertyAttribute), false)
+                where attribute != null
+                   && attribute.IsProviderSpecificTypeProperty
+                select property;
+            
+            var specificTypeProperty = specificTypeProperties.Single();
+            var specificType = specificTypeProperty.PropertyType;
+            var clobDbType = GetEnumValueOfAny(specificType, "NClob");
+            var refCursorDbType = GetEnumValueOfAny(specificType, "Cursor", "RefCursor");
+
+            return new ProviderInfo(dbProviderFactory, specificTypeProperty, clobDbType, refCursorDbType);
         }
 
         private DbConnection CreateOpenConnection()
         {
-            Debug.Assert(_dbProviderFactory != null);
-            var connection = _dbProviderFactory.CreateConnection();
+            var providerInfo = _providerInfo;
+            Debug.Assert(providerInfo != null);
+            var connection = providerInfo.DbProviderFactory.CreateConnection();
             Debug.Assert(connection != null);
             connection.ConnectionString = ConnectionString;
             connection.Open();
@@ -193,9 +212,9 @@ namespace Elmah
             // Initialize the provider factory if it hasn't already been done.
             //
 
-            if (_dbProviderFactory == null)
+            if (_providerInfo == null)
             {
-                InitializeProviderFactory(ConnectionStringHelper.GetConnectionStringProviderName(config));
+                _providerInfo = _providerInfo ?? GetProviderInfo(ConnectionStringHelper.GetConnectionStringProviderName(config));
             }
 
             //
@@ -323,7 +342,7 @@ namespace Elmah
                     command.CommandType = CommandType.Text;
 
                     var parameters = command.Parameters;
-                    AddProviderSpecificTypeParameter(command, "tempblob", _clobDbType).Direction = ParameterDirection.Output;
+                    AddProviderSpecificTypeParameter(command, "tempblob", _providerInfo.ClobDbType).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
                     object xmlValue;
@@ -354,7 +373,7 @@ namespace Elmah
                     AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
                     AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
                     AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
-                    AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Value = xmlValue;
+                    AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType).Value = xmlValue;
                     AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
                     AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
 
@@ -390,7 +409,7 @@ namespace Elmah
                 AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
                 AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
                 AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32).Direction = ParameterDirection.Output;
-                AddProviderSpecificTypeParameter(command, "v_Results", _refCursorDbType).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_Results", _providerInfo.RefCursorDbType).Direction = ParameterDirection.Output;
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -459,7 +478,7 @@ namespace Elmah
                 var parameters = command.Parameters;
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
-                AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType).Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
                 errorXml = command.Parameters["v_AllXml"].Value as string;
