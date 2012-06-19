@@ -361,12 +361,12 @@ namespace Elmah
                     {
                         // now we can get a handle to the NClob
                         // TODO Review where Stream needs disposing
-                        var xmlLob = (Stream)parameters[0].Value;
+                        var stream = (Stream)parameters[0].Value;
                         // create a temporary buffer in which to store the XML
-                        var tempbuff = Encoding.Unicode.GetBytes(errorXml);
+                        var bytes = Encoding.Unicode.GetBytes(errorXml);
                         // and finally we can write to it!
-                        xmlLob.Write(tempbuff, 0, tempbuff.Length);
-                        xmlValue = xmlLob;
+                        stream.Write(bytes, 0, bytes.Length);
+                        xmlValue = stream;
                     }
 
                     command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
@@ -493,14 +493,13 @@ namespace Elmah
                 if (errorXml == null)
                 {
                     // TODO Review whether Stream needs disposing
-                    var xmlLob = (Stream) allXml.Value;
-
-                    var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
-                    var cbuffer = new char[1000];
+                    var stream = (Stream) allXml.Value;
+                    var reader = new StreamReader(stream, Encoding.Unicode);
+                    var chars = new char[1000];
                     int actual;
                     var sb = new StringBuilder();
-                    while ((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) > 0)
-                        sb.Append(cbuffer, 0, actual);
+                    while ((actual = reader.Read(chars, 0, chars.Length)) > 0)
+                        sb.Append(chars, 0, actual);
                     errorXml = sb.ToString();
                 }
             }
