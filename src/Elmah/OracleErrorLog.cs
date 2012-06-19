@@ -31,10 +31,11 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.OracleClient;
+    using System.Data.Common;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using System.Text;
-
     using IDictionary = System.Collections.IDictionary;
 
     #endregion
@@ -52,6 +53,120 @@ namespace Elmah
         private const int _maxAppNameLength = 60;
         private const int _maxSchemaNameLength = 30;
 
+        private static DbProviderFactory _dbProviderFactory;
+        private static PropertyInfo _providerSpecificTypeProperty;
+        private static object _clobDbType;
+        private static object _refCursorDbType;
+
+        private static DbParameter AddParameter(DbCommand command, string parameterName)
+        {
+            Debug.Assert(_providerSpecificTypeProperty != null);
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = parameterName;
+            command.Parameters.Add(parameter);
+            return parameter;
+        }
+
+        private static DbParameter AddGenericTypeParameter(DbCommand command, string parameterName, DbType dbType)
+        {
+            var parameter = AddParameter(command, parameterName);
+            parameter.DbType = dbType;
+            return parameter;
+        }
+
+        private static DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
+        {
+            var parameter = AddParameter(command, parameterName);
+            _providerSpecificTypeProperty.SetValue(parameter, dbType, null);
+            return parameter;
+        }
+
+        private static bool TryAndCreateDbProviderFactory(string providerInvariantName)
+        {
+            try
+            {
+                _dbProviderFactory = DbProviderFactories.GetFactory(providerInvariantName);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
+        static void GetProviderSpecificType()
+        {
+            Debug.Assert(_dbProviderFactory != null);
+
+            var parameter = _dbProviderFactory.CreateParameter();
+            Debug.Assert(parameter != null);
+            var parameterType = parameter.GetType();
+            _providerSpecificTypeProperty = (from property in parameterType.GetProperties() 
+                                            let attributes = property.GetCustomAttributes(typeof (DbProviderSpecificTypePropertyAttribute), false) 
+                                            from attribute in attributes
+                                            where ((DbProviderSpecificTypePropertyAttribute) attribute).IsProviderSpecificTypeProperty 
+                                            select property).FirstOrDefault();
+
+            Debug.Assert(_providerSpecificTypeProperty != null);
+        }
+
+        static object GetProviderSpecificDbType(params string[] dbTypes)
+        {
+            Debug.Assert(_providerSpecificTypeProperty != null);
+            var enumValues = Enum.GetValues(_providerSpecificTypeProperty.PropertyType);
+
+            foreach (var dbType in dbTypes)
+                foreach (var enumValue in enumValues)
+                    if (enumValue.ToString().Equals(dbType, StringComparison.OrdinalIgnoreCase))
+                        return enumValue;
+
+            return null;
+        }
+        
+        private static void InitializeProviderFactory(string providerName)
+        {
+            Debug.Assert(_dbProviderFactory == null);
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                //
+                // If the user has supplied a provider name, that's the one
+                // we must use.
+                //
+
+                if (!TryAndCreateDbProviderFactory(providerName))
+                    throw new ArgumentException("providerName");
+            }
+            else
+            {
+                //
+                // Otherwise, we try to use ODP.Net in the first instance
+                // and then fallback to the Microsoft client.
+                //
+
+                if (!TryAndCreateDbProviderFactory("Oracle.DataAccess.Client"))
+                    TryAndCreateDbProviderFactory("System.Data.OracleClient");
+            }
+
+            Debug.Assert(_dbProviderFactory != null);
+
+            GetProviderSpecificType();
+            _clobDbType = GetProviderSpecificDbType("NClob");
+            Debug.Assert(_clobDbType != null);
+            _refCursorDbType = GetProviderSpecificDbType("Cursor", "RefCursor");
+            Debug.Assert(_refCursorDbType != null);
+        }
+
+        private DbConnection CreateOpenConnection()
+        {
+            Debug.Assert(_dbProviderFactory != null);
+            var connection = _dbProviderFactory.CreateConnection();
+            Debug.Assert(connection != null);
+            connection.ConnectionString = ConnectionString;
+            connection.Open();
+            return connection;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
         /// using a dictionary of configured settings.
@@ -62,7 +177,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config);
 
             //
             // If there is no connection string to use then throw an 
@@ -75,11 +190,20 @@ namespace Elmah
             _connectionString = connectionString;
 
             //
+            // Initialize the provider factory if it hasn't already been done.
+            //
+
+            if (_dbProviderFactory == null)
+            {
+                InitializeProviderFactory(ConnectionStringHelper.GetConnectionStringProviderName(config));
+            }
+
+            //
             // Set the application name as this implementation provides
             // per-application isolation over a single store.
             //
 
-            string appName = (string) config["applicationName"] ?? string.Empty;
+            var appName = (string) config["applicationName"] ?? string.Empty;
 
             if (appName.Length > _maxAppNameLength)
             {
@@ -182,14 +306,13 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
-            Guid id = Guid.NewGuid();
+            var errorXml = ErrorXml.EncodeString(error);
+            var id = Guid.NewGuid();
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = CreateOpenConnection())
+            using (var command = connection.CreateCommand())
             {
-                connection.Open();
-                using (OracleTransaction transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction())
                 {
                     // because we are storing the XML data in a NClob, we need to jump through a few hoops!!
                     // so first we've got to operate within a transaction
@@ -199,33 +322,41 @@ namespace Elmah
                     command.CommandText = "declare xx nclob; begin dbms_lob.createtemporary(xx, false, 0); :tempblob := xx; end;";
                     command.CommandType = CommandType.Text;
 
-                    OracleParameterCollection parameters = command.Parameters;
-                    parameters.Add("tempblob", OracleType.NClob).Direction = ParameterDirection.Output;
+                    var parameters = command.Parameters;
+                    AddProviderSpecificTypeParameter(command, "tempblob", _clobDbType).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
-                    // now we can get a handle to the NClob
-                    OracleLob xmlLob = (OracleLob)parameters[0].Value;
-                    // create a temporary buffer in which to store the XML
-                    byte[] tempbuff = Encoding.Unicode.GetBytes(errorXml);
-                    // and finally we can write to it!
-                    xmlLob.BeginBatch(OracleLobOpenMode.ReadWrite);
-                    xmlLob.Write(tempbuff,0,tempbuff.Length);
-                    xmlLob.EndBatch();
+                    object xmlValue;
+
+                    if (parameters[0].Value is string)
+                    {
+                        xmlValue = errorXml;
+                    }
+                    else
+                    {
+                        // now we can get a handle to the NClob
+                        var xmlLob = (Stream)parameters[0].Value;
+                        // create a temporary buffer in which to store the XML
+                        var tempbuff = Encoding.Unicode.GetBytes(errorXml);
+                        // and finally we can write to it!
+                        xmlLob.Write(tempbuff, 0, tempbuff.Length);
+                        xmlValue = xmlLob;
+                    }
 
                     command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
                     command.CommandType = CommandType.StoredProcedure;
 
                     parameters.Clear();
-                    parameters.Add("v_ErrorId", OracleType.NVarChar, 32).Value = id.ToString("N");
-                    parameters.Add("v_Application", OracleType.NVarChar, _maxAppNameLength).Value = ApplicationName;
-                    parameters.Add("v_Host", OracleType.NVarChar, 30).Value = error.HostName;
-                    parameters.Add("v_Type", OracleType.NVarChar, 100).Value = error.Type;
-                    parameters.Add("v_Source", OracleType.NVarChar, 60).Value = error.Source;
-                    parameters.Add("v_Message", OracleType.NVarChar, 500).Value = error.Message;
-                    parameters.Add("v_User", OracleType.NVarChar, 50).Value = error.User;
-                    parameters.Add("v_AllXml", OracleType.NClob).Value = xmlLob;
-                    parameters.Add("v_StatusCode", OracleType.Int32).Value = error.StatusCode;
-                    parameters.Add("v_TimeUtc", OracleType.DateTime).Value = error.Time.ToUniversalTime();
+                    AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = id.ToString("N");
+                    AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
+                    AddGenericTypeParameter(command, "v_Host", DbType.String).Value = error.HostName;
+                    AddGenericTypeParameter(command, "v_Type", DbType.String).Value = error.Type;
+                    AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
+                    AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
+                    AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
+                    AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Value = xmlValue;
+                    AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
+                    AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
 
                     command.ExecuteNonQuery();
                     transaction.Commit();
@@ -247,23 +378,21 @@ namespace Elmah
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = CreateOpenConnection())
+            using (var command = connection.CreateCommand())
             {
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorsXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                OracleParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
-                parameters.Add("v_Application", OracleType.NVarChar, _maxAppNameLength).Value = ApplicationName;
-                parameters.Add("v_PageIndex", OracleType.Int32).Value = pageIndex;
-                parameters.Add("v_PageSize", OracleType.Int32).Value = pageSize;
-                parameters.Add("v_TotalCount", OracleType.Int32).Direction = ParameterDirection.Output;
-                parameters.Add("v_Results", OracleType.Cursor).Direction = ParameterDirection.Output;
+                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
+                AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
+                AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
+                AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_Results", _refCursorDbType).Direction = ParameterDirection.Output;
 
-                connection.Open();
-
-                using (OracleDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     Debug.Assert(reader != null);
 
@@ -271,10 +400,10 @@ namespace Elmah
                     {
                         while (reader.Read())
                         {
-                            string id = reader["ErrorId"].ToString();
-                            Guid guid = new Guid(id);
+                            var id = reader["ErrorId"].ToString();
+                            var guid = new Guid(id);
 
-                            Error error = new Error();
+                            var error = new Error();
 
                             error.ApplicationName = reader["Application"].ToString();
                             error.HostName = reader["Host"].ToString();
@@ -321,34 +450,34 @@ namespace Elmah
 
             string errorXml;
 
-            using (OracleConnection connection = new OracleConnection(this.ConnectionString))
-            using (OracleCommand command = connection.CreateCommand())
+            using (var connection = CreateOpenConnection())
+            using (var command = connection.CreateCommand())
             {
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                OracleParameterCollection parameters = command.Parameters;
-                parameters.Add("v_Application", OracleType.NVarChar, _maxAppNameLength).Value = ApplicationName;
-                parameters.Add("v_ErrorId", OracleType.NVarChar, 32).Value = errorGuid.ToString("N");
-                parameters.Add("v_AllXml", OracleType.NClob).Direction = ParameterDirection.Output;
+                var parameters = command.Parameters;
+                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
+                AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
+                AddProviderSpecificTypeParameter(command, "v_AllXml", _clobDbType).Direction = ParameterDirection.Output;
 
-                connection.Open();
                 command.ExecuteNonQuery();
-                OracleLob xmlLob = (OracleLob)command.Parameters["v_AllXml"].Value;
+                errorXml = command.Parameters["v_AllXml"].Value as string;
+                if (errorXml == null)
+                {
+                    var xmlLob = (Stream) command.Parameters["v_AllXml"].Value;
 
-                StreamReader streamreader = new StreamReader(xmlLob, Encoding.Unicode);
-                char[] cbuffer = new char[1000];
-                int actual;
-                StringBuilder sb = new StringBuilder();
-                while((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) >0)
-                    sb.Append(cbuffer, 0, actual);
-                errorXml = sb.ToString();
+                    var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
+                    var cbuffer = new char[1000];
+                    int actual;
+                    var sb = new StringBuilder();
+                    while ((actual = streamreader.Read(cbuffer, 0, cbuffer.Length)) > 0)
+                        sb.Append(cbuffer, 0, actual);
+                    errorXml = sb.ToString();
+                }
             }
 
-            if (errorXml == null)
-                return null;
-
-            Error error = ErrorXml.DecodeString(errorXml);
+            var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
     }
