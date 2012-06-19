@@ -412,7 +412,8 @@ namespace Elmah
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
                 AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
-                AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32).Direction = ParameterDirection.Output;
+                var totalCount = AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32);
+                totalCount.Direction = ParameterDirection.Output;
                 AddProviderSpecificTypeParameter(command, "v_Results", _providerInfo.RefCursorDbType).Direction = ParameterDirection.Output;
 
                 using (var reader = command.ExecuteReader())
@@ -444,7 +445,7 @@ namespace Elmah
                     reader.Close();
                 }
 
-                return (int)command.Parameters["v_TotalCount"].Value;
+                return (int) totalCount.Value;
             }
         }
 
@@ -483,13 +484,14 @@ namespace Elmah
                 var parameters = command.Parameters;
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
-                AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType).Direction = ParameterDirection.Output;
+                var allXml = AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType);
+                allXml.Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
-                errorXml = parameters["v_AllXml"].Value as string;
+                errorXml = allXml.Value as string;
                 if (errorXml == null)
                 {
-                    var xmlLob = (Stream) parameters["v_AllXml"].Value;
+                    var xmlLob = (Stream) allXml.Value;
 
                     var streamreader = new StreamReader(xmlLob, Encoding.Unicode);
                     var cbuffer = new char[1000];
