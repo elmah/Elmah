@@ -409,8 +409,6 @@ namespace Elmah
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorsXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                var parameters = command.Parameters;
-
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
                 AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
