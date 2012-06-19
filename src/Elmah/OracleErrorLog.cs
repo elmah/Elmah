@@ -495,12 +495,7 @@ namespace Elmah
                     // TODO Review whether Stream needs disposing
                     var stream = (Stream) allXml.Value;
                     var reader = new StreamReader(stream, Encoding.Unicode);
-                    var chars = new char[1000];
-                    int actual;
-                    var sb = new StringBuilder();
-                    while ((actual = reader.Read(chars, 0, chars.Length)) > 0)
-                        sb.Append(chars, 0, actual);
-                    errorXml = sb.ToString();
+                    errorXml = reader.ReadToEnd();
                 }
             }
 
