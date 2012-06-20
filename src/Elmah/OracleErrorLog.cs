@@ -327,57 +327,55 @@ namespace Elmah
 
             using (var connection = CreateOpenConnection())
             using (var command = connection.CreateCommand())
+            using (var transaction = connection.BeginTransaction())
             {
-                using (var transaction = connection.BeginTransaction())
+                // because we are storing the XML data in a NClob, we need to jump through a few hoops!!
+                // so first we've got to operate within a transaction
+                command.Transaction = transaction;
+
+                // then we need to create a temporary lob on the database server
+                command.CommandText = "declare xx nclob; begin dbms_lob.createtemporary(xx, false, 0); :tempblob := xx; end;";
+                command.CommandType = CommandType.Text;
+
+                var parameters = command.Parameters;
+                AddProviderSpecificTypeParameter(command, "tempblob", ThisProviderInfo.ClobDbType).Direction = ParameterDirection.Output;
+                command.ExecuteNonQuery();
+
+                object xmlValue;
+
+                if (parameters[0].Value is string)
                 {
-                    // because we are storing the XML data in a NClob, we need to jump through a few hoops!!
-                    // so first we've got to operate within a transaction
-                    command.Transaction = transaction;
-
-                    // then we need to create a temporary lob on the database server
-                    command.CommandText = "declare xx nclob; begin dbms_lob.createtemporary(xx, false, 0); :tempblob := xx; end;";
-                    command.CommandType = CommandType.Text;
-
-                    var parameters = command.Parameters;
-                    AddProviderSpecificTypeParameter(command, "tempblob", ThisProviderInfo.ClobDbType).Direction = ParameterDirection.Output;
-                    command.ExecuteNonQuery();
-
-                    object xmlValue;
-
-                    if (parameters[0].Value is string)
-                    {
-                        xmlValue = errorXml;
-                    }
-                    else
-                    {
-                        // now we can get a handle to the NClob
-                        // TODO Review where Stream needs disposing
-                        var stream = (Stream)parameters[0].Value;
-                        // create a temporary buffer in which to store the XML
-                        var bytes = Encoding.Unicode.GetBytes(errorXml);
-                        // and finally we can write to it!
-                        stream.Write(bytes, 0, bytes.Length);
-                        xmlValue = stream;
-                    }
-
-                    command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
-                    command.CommandType = CommandType.StoredProcedure;
-
-                    parameters.Clear();
-                    AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = id.ToString("N");
-                    AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
-                    AddGenericTypeParameter(command, "v_Host", DbType.String).Value = error.HostName;
-                    AddGenericTypeParameter(command, "v_Type", DbType.String).Value = error.Type;
-                    AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
-                    AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
-                    AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
-                    AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType).Value = xmlValue;
-                    AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
-                    AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
-
-                    command.ExecuteNonQuery();
-                    transaction.Commit();
+                    xmlValue = errorXml;
                 }
+                else
+                {
+                    // now we can get a handle to the NClob
+                    // TODO Review where Stream needs disposing
+                    var stream = (Stream)parameters[0].Value;
+                    // create a temporary buffer in which to store the XML
+                    var bytes = Encoding.Unicode.GetBytes(errorXml);
+                    // and finally we can write to it!
+                    stream.Write(bytes, 0, bytes.Length);
+                    xmlValue = stream;
+                }
+
+                command.CommandText = SchemaOwner + "pkg_elmah$log_error.LogError";
+                command.CommandType = CommandType.StoredProcedure;
+
+                parameters.Clear();
+                AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = id.ToString("N");
+                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
+                AddGenericTypeParameter(command, "v_Host", DbType.String).Value = error.HostName;
+                AddGenericTypeParameter(command, "v_Type", DbType.String).Value = error.Type;
+                AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
+                AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
+                AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
+                AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType).Value = xmlValue;
+                AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
+                AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
+
+                command.ExecuteNonQuery();
+                transaction.Commit();
                 return id.ToString();
             }
         }
