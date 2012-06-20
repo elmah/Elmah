@@ -352,6 +352,7 @@
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Memoization.cs" />
     <Compile Include="SpeedBar.cs">
     </Compile>
     <Compile Include="SqlErrorLog.cs">

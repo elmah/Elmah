@@ -47,6 +47,7 @@ namespace Elmah
     public class OracleErrorLog : ErrorLog
     {
         private readonly string _connectionString;
+        private readonly string _providerName;
         private string _schemaOwner;
         private bool _schemaOwnerInitialized;
 
@@ -76,17 +77,12 @@ namespace Elmah
             }
         }
 
-        // TODO Provider info must be bound to instance
-        // The provider info is stored in a static field, which means that
-        // the first instance of this object to initialize it wins! All
-        // other instances will pick the wrong info if their provider is
-        // not the same!
+        private static readonly Func<string, ProviderInfo> _providerInfo = Memoization.MemoizeLast(GetProviderInfo, StringComparer.OrdinalIgnoreCase);
 
-        private static ProviderInfo _providerInfo;
+        private ProviderInfo ThisProviderInfo { get { return _providerInfo(_providerName); } }
 
         private static DbParameter AddParameter(DbCommand command, string parameterName)
         {
-            Debug.Assert(_providerInfo != null);
             var parameter = command.CreateParameter();
             parameter.ParameterName = parameterName;
             command.Parameters.Add(parameter);
@@ -100,10 +96,10 @@ namespace Elmah
             return parameter;
         }
 
-        private static DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
+        private DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
         {
             var parameter = AddParameter(command, parameterName);
-            _providerInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
+            ThisProviderInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
             return parameter;
         }
 
@@ -183,9 +179,7 @@ namespace Elmah
 
         private DbConnection CreateOpenConnection()
         {
-            var providerInfo = _providerInfo;
-            Debug.Assert(providerInfo != null);
-            var connection = providerInfo.DbProviderFactory.CreateConnection();
+            var connection = ThisProviderInfo.DbProviderFactory.CreateConnection();
             Debug.Assert(connection != null);
             connection.ConnectionString = ConnectionString;
             connection.Open();
@@ -218,10 +212,7 @@ namespace Elmah
             // Initialize the provider factory if it hasn't already been done.
             //
 
-            if (_providerInfo == null)
-            {
-                _providerInfo = _providerInfo ?? GetProviderInfo(ConnectionStringHelper.GetConnectionStringProviderName(config));
-            }
+            _providerName = ConnectionStringHelper.GetConnectionStringProviderName(config);
 
             //
             // Set the application name as this implementation provides
@@ -348,7 +339,7 @@ namespace Elmah
                     command.CommandType = CommandType.Text;
 
                     var parameters = command.Parameters;
-                    AddProviderSpecificTypeParameter(command, "tempblob", _providerInfo.ClobDbType).Direction = ParameterDirection.Output;
+                    AddProviderSpecificTypeParameter(command, "tempblob", ThisProviderInfo.ClobDbType).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
                     object xmlValue;
@@ -380,7 +371,7 @@ namespace Elmah
                     AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
                     AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
                     AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
-                    AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType).Value = xmlValue;
+                    AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType).Value = xmlValue;
                     AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
                     AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
 
@@ -415,7 +406,7 @@ namespace Elmah
                 AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
                 var totalCount = AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32);
                 totalCount.Direction = ParameterDirection.Output;
-                AddProviderSpecificTypeParameter(command, "v_Results", _providerInfo.RefCursorDbType).Direction = ParameterDirection.Output;
+                AddProviderSpecificTypeParameter(command, "v_Results", ThisProviderInfo.RefCursorDbType).Direction = ParameterDirection.Output;
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -485,7 +476,7 @@ namespace Elmah
                 var parameters = command.Parameters;
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
-                var allXml = AddProviderSpecificTypeParameter(command, "v_AllXml", _providerInfo.ClobDbType);
+                var allXml = AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType);
                 allXml.Direction = ParameterDirection.Output;
 
                 command.ExecuteNonQuery();
