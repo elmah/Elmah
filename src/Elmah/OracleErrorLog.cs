@@ -238,16 +238,8 @@ namespace Elmah
         /// to use a specific connection string for connecting to the database.
         /// </summary>
 
-        public OracleErrorLog(string connectionString)
-        {
-            if (connectionString == null)
-                throw new ArgumentNullException("connectionString");
-
-            if (connectionString.Length == 0)
-                throw new ArgumentException(null, "connectionString");
-
-            _connectionString = connectionString;
-        }
+        public OracleErrorLog(string connectionString) :
+            this(connectionString, null) {}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
@@ -256,8 +248,14 @@ namespace Elmah
         /// </summary>
 
         public OracleErrorLog(string connectionString, string schemaOwner)
-            : this(connectionString)
         {
+            if (connectionString == null)
+                throw new ArgumentNullException("connectionString");
+
+            if (connectionString.Length == 0)
+                throw new ArgumentException(null, "connectionString");
+
+            _connectionString = connectionString;
             SchemaOwner = schemaOwner;
         }
 
