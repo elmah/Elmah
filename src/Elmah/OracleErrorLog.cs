@@ -47,7 +47,7 @@ namespace Elmah
     public class OracleErrorLog : ErrorLog
     {
         private readonly string _connectionString;
-        private readonly string _providerName;
+        private readonly DbProviderFactory _dbProviderFactory;
         private string _schemaOwner;
         private bool _schemaOwnerInitialized;
 
@@ -56,30 +56,26 @@ namespace Elmah
 
         sealed class ProviderInfo
         {
-            public DbProviderFactory DbProviderFactory { get; private set; }
             public PropertyInfo ProviderSpecificTypeProperty { get; private set; }
             public object ClobDbType { get; private set; }
             public object RefCursorDbType { get; private set; }
 
-            public ProviderInfo(DbProviderFactory dbProviderFactory, 
-                                PropertyInfo providerSpecificTypeProperty, 
+            public ProviderInfo(PropertyInfo providerSpecificTypeProperty, 
                                 object clobDbType, object refCursorDbType)
             {
-                Debug.Assert(dbProviderFactory != null);
                 Debug.Assert(providerSpecificTypeProperty != null);
                 Debug.Assert(clobDbType != null);
                 Debug.Assert(refCursorDbType != null);
 
-                DbProviderFactory = dbProviderFactory;
                 ProviderSpecificTypeProperty = providerSpecificTypeProperty;
                 ClobDbType = clobDbType;
                 RefCursorDbType = refCursorDbType;
             }
         }
 
-        private static readonly Func<string, ProviderInfo> _providerInfo = Memoization.MemoizeLast(GetProviderInfo, StringComparer.OrdinalIgnoreCase);
+        private static readonly Func<DbProviderFactory, ProviderInfo> _providerInfo = Memoization.MemoizeLast<DbProviderFactory, ProviderInfo>(GetProviderInfo);
 
-        private ProviderInfo ThisProviderInfo { get { return _providerInfo(_providerName); } }
+        private ProviderInfo ThisProviderInfo { get { return _providerInfo(_dbProviderFactory); } }
 
         private static DbParameter AddParameter(DbCommand command, string parameterName)
         {
@@ -133,8 +129,31 @@ namespace Elmah
             
             return matches.First(m => m.Key != null).Value;
         }
-        
-        private static ProviderInfo GetProviderInfo(string providerName)
+
+        private static ProviderInfo GetProviderInfo(DbProviderFactory dbProviderFactory)
+        {
+            Debug.Assert(dbProviderFactory != null);
+
+            var parameter = dbProviderFactory.CreateParameter();
+            if (parameter == null)
+                throw new NotSupportedException();
+
+            var specificTypeProperties = 
+                from property in parameter.GetType().GetProperties()
+                let attribute = (DbProviderSpecificTypePropertyAttribute) Attribute.GetCustomAttribute(property, typeof(DbProviderSpecificTypePropertyAttribute), false)
+                where attribute != null
+                   && attribute.IsProviderSpecificTypeProperty
+                select property;
+
+            var specificTypeProperty = specificTypeProperties.Single();
+            var specificType = specificTypeProperty.PropertyType;
+            var clobDbType = GetEnumValueOfAny(specificType, "NClob");
+            var refCursorDbType = GetEnumValueOfAny(specificType, "Cursor", "RefCursor");
+
+            return new ProviderInfo(specificTypeProperty, clobDbType, refCursorDbType);
+        }
+
+        private static DbProviderFactory GetDbProviderFactory(string providerName)
         {
             DbProviderFactory dbProviderFactory;
 
@@ -157,30 +176,13 @@ namespace Elmah
                 dbProviderFactory = TryCreateDbProviderFactory("Oracle.DataAccess.Client") 
                                     ?? DbProviderFactories.GetFactory("System.Data.OracleClient");
             }
-
-            var parameter = dbProviderFactory.CreateParameter();
-            if (parameter == null)
-                throw new NotSupportedException();
-
-            var specificTypeProperties = 
-                from property in parameter.GetType().GetProperties()
-                let attribute = (DbProviderSpecificTypePropertyAttribute) Attribute.GetCustomAttribute(property, typeof(DbProviderSpecificTypePropertyAttribute), false)
-                where attribute != null
-                   && attribute.IsProviderSpecificTypeProperty
-                select property;
-            
-            var specificTypeProperty = specificTypeProperties.Single();
-            var specificType = specificTypeProperty.PropertyType;
-            var clobDbType = GetEnumValueOfAny(specificType, "NClob");
-            var refCursorDbType = GetEnumValueOfAny(specificType, "Cursor", "RefCursor");
-
-            return new ProviderInfo(dbProviderFactory, specificTypeProperty, clobDbType, refCursorDbType);
+            return dbProviderFactory;
         }
 
         private DbConnection CreateOpenConnection()
         {
-            var connection = ThisProviderInfo.DbProviderFactory.CreateConnection();
-            Debug.Assert(connection != null);
+            var connection = _dbProviderFactory.CreateConnection();
+            Debug.Assert(connection != null); // TODO convert to run-time exception
             connection.ConnectionString = ConnectionString;
             connection.Open();
             return connection;
@@ -212,7 +214,8 @@ namespace Elmah
             // Initialize the provider factory if it hasn't already been done.
             //
 
-            _providerName = ConnectionStringHelper.GetConnectionStringProviderName(config);
+            var providerName = Mask.EmptyString(ConnectionStringHelper.GetConnectionStringProviderName(config), "");
+            _dbProviderFactory = GetDbProviderFactory(providerName);
 
             //
             // Set the application name as this implementation provides
@@ -246,15 +249,45 @@ namespace Elmah
         /// </summary>
 
         public OracleErrorLog(string connectionString) :
-            this(connectionString, null) {}
+            this(connectionString, (DbProviderFactory) null) {}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
-        /// to use a specific connection string for connecting to the database and
-        /// a specific schema owner.
+        /// to use a specific connection string and provider for connecting 
+        /// to the database.
+        /// </summary>
+        /// <remarks>
+        /// The only supported <see cref="DbProviderFactory"/> instances are
+        /// those of <c>Oracle.DataAccess.Client</c> (ODP.NET) and
+        /// <c>System.Data.OracleClient</c>. The supplied instance is not
+        /// validated so any other provider will yield undefined behavior.
+        /// </remarks>
+
+        public OracleErrorLog(string connectionString, DbProviderFactory dbProviderFactory) : 
+            this(connectionString, null, dbProviderFactory) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
+        /// to use a specific connection string for connecting  to the database. 
+        /// An additional parameter specifies the schema owner.
         /// </summary>
 
-        public OracleErrorLog(string connectionString, string schemaOwner)
+        public OracleErrorLog(string connectionString, string schemaOwner) : 
+            this(connectionString, schemaOwner, null) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
+        /// to use a specific connection string and provider  for connecting 
+        /// to the database. An additional parameter specifies the schema owner.
+        /// </summary>
+        /// <remarks>
+        /// The only supported <see cref="DbProviderFactory"/> instances are
+        /// those of <c>Oracle.DataAccess.Client</c> (ODP.NET) and
+        /// <c>System.Data.OracleClient</c>. The supplied instance is not
+        /// validated so any other provider will yield undefined behavior.
+        /// </remarks>
+
+        public OracleErrorLog(string connectionString, string schemaOwner, DbProviderFactory dbProviderFactory)
         {
             if (connectionString == null)
                 throw new ArgumentNullException("connectionString");
@@ -263,6 +296,7 @@ namespace Elmah
                 throw new ArgumentException(null, "connectionString");
 
             _connectionString = connectionString;
+            _dbProviderFactory = dbProviderFactory ?? GetDbProviderFactory(null);
             SchemaOwner = schemaOwner;
         }
 
