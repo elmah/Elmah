@@ -236,13 +236,6 @@ namespace Elmah
             SchemaOwner = (string)config["schemaOwner"];
         }
 
-        // TODO Missing constructor overload to specify provider name?
-        // While the constructor taking config dictionary allows setting
-        // provider name via connection strings config section, there seems
-        // to be no way to do the same programmatically. Consequently, 
-        // consider adding overloads to specify provider name with 
-        // connection string, and with connection string and schema owner.
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
         /// to use a specific connection string for connecting to the database.
