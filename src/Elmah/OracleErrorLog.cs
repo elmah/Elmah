@@ -373,7 +373,6 @@ namespace Elmah
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                var parameters = command.Parameters;
                 AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
                 AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
                 var allXml = AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType);
