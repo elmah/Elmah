@@ -82,7 +82,7 @@ namespace Elmah
             // Initialize the provider factory if it hasn't already been done.
             //
 
-            var providerName = Mask.EmptyString(ConnectionStringHelper.GetConnectionStringProviderName(config), "");
+            var providerName = ConnectionStringHelper.GetConnectionStringProviderName(config);
             _dbProviderFactory = GetDbProviderFactory(providerName);
 
             //
