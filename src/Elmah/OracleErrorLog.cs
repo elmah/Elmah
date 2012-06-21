@@ -46,6 +46,8 @@ namespace Elmah
 
     public class OracleErrorLog : ErrorLog
     {
+        private static readonly Func<DbProviderFactory, ProviderInfo> _providerInfo = Memoization.MemoizeLast<DbProviderFactory, ProviderInfo>(GetProviderInfo);
+
         private readonly string _connectionString;
         private readonly DbProviderFactory _dbProviderFactory;
         private string _schemaOwner;
@@ -53,141 +55,7 @@ namespace Elmah
 
         private const int _maxAppNameLength = 60;
         private const int _maxSchemaNameLength = 30;
-
-        sealed class ProviderInfo
-        {
-            public PropertyInfo ProviderSpecificTypeProperty { get; private set; }
-            public object ClobDbType { get; private set; }
-            public object RefCursorDbType { get; private set; }
-
-            public ProviderInfo(PropertyInfo providerSpecificTypeProperty, 
-                                object clobDbType, object refCursorDbType)
-            {
-                Debug.Assert(providerSpecificTypeProperty != null);
-                Debug.Assert(clobDbType != null);
-                Debug.Assert(refCursorDbType != null);
-
-                ProviderSpecificTypeProperty = providerSpecificTypeProperty;
-                ClobDbType = clobDbType;
-                RefCursorDbType = refCursorDbType;
-            }
-        }
-
-        private static readonly Func<DbProviderFactory, ProviderInfo> _providerInfo = Memoization.MemoizeLast<DbProviderFactory, ProviderInfo>(GetProviderInfo);
-
-        private ProviderInfo ThisProviderInfo { get { return _providerInfo(_dbProviderFactory); } }
-
-        private static DbParameter AddParameter(DbCommand command, string parameterName)
-        {
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = parameterName;
-            command.Parameters.Add(parameter);
-            return parameter;
-        }
-
-        private static DbParameter AddGenericTypeParameter(DbCommand command, string parameterName, DbType dbType)
-        {
-            var parameter = AddParameter(command, parameterName);
-            parameter.DbType = dbType;
-            return parameter;
-        }
-
-        private DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
-        {
-            var parameter = AddParameter(command, parameterName);
-            ThisProviderInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
-            return parameter;
-        }
-
-        private static DbProviderFactory TryCreateDbProviderFactory(string providerInvariantName)
-        {
-            try
-            {
-                return DbProviderFactories.GetFactory(providerInvariantName);
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
-        }
-
-        static object GetEnumValueOfAny(Type enumType, params string[] candidates)
-        {
-            Debug.Assert(enumType != null);
-            Debug.Assert(enumType.IsEnum);
-            Debug.Assert(candidates != null);
-
-            var names = Enum.GetNames(enumType);
-            var pairs = Enum.GetValues(enumType)
-                            .Cast<object>()
-                            .Select((v, i) => new KeyValuePair<string, object>(names[i], v))
-                            .ToArray();
-
-            var matches = 
-                from dbType in candidates 
-                select pairs.FirstOrDefault(p => p.Key.Equals(dbType, StringComparison.OrdinalIgnoreCase));
-            
-            return matches.First(m => m.Key != null).Value;
-        }
-
-        private static ProviderInfo GetProviderInfo(DbProviderFactory dbProviderFactory)
-        {
-            Debug.Assert(dbProviderFactory != null);
-
-            var parameter = dbProviderFactory.CreateParameter();
-            if (parameter == null)
-                throw new NotSupportedException();
-
-            var specificTypeProperties = 
-                from property in parameter.GetType().GetProperties()
-                let attribute = (DbProviderSpecificTypePropertyAttribute) Attribute.GetCustomAttribute(property, typeof(DbProviderSpecificTypePropertyAttribute), false)
-                where attribute != null
-                   && attribute.IsProviderSpecificTypeProperty
-                select property;
-
-            var specificTypeProperty = specificTypeProperties.Single();
-            var specificType = specificTypeProperty.PropertyType;
-            var clobDbType = GetEnumValueOfAny(specificType, "NClob");
-            var refCursorDbType = GetEnumValueOfAny(specificType, "Cursor", "RefCursor");
-
-            return new ProviderInfo(specificTypeProperty, clobDbType, refCursorDbType);
-        }
-
-        private static DbProviderFactory GetDbProviderFactory(string providerName)
-        {
-            DbProviderFactory dbProviderFactory;
-
-            if (!string.IsNullOrEmpty(providerName))
-            {
-                //
-                // If the user has supplied a provider name, that's the one
-                // we must use.
-                //
-
-                dbProviderFactory = DbProviderFactories.GetFactory(providerName);
-            }
-            else
-            {
-                //
-                // Otherwise, we try to use ODP.Net in the first instance
-                // and then fallback to the Microsoft client.
-                //
-
-                dbProviderFactory = TryCreateDbProviderFactory("Oracle.DataAccess.Client") 
-                                    ?? DbProviderFactories.GetFactory("System.Data.OracleClient");
-            }
-            return dbProviderFactory;
-        }
-
-        private DbConnection CreateOpenConnection()
-        {
-            var connection = _dbProviderFactory.CreateConnection();
-            Debug.Assert(connection != null); // TODO convert to run-time exception
-            connection.ConnectionString = ConnectionString;
-            connection.Open();
-            return connection;
-        }
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="OracleErrorLog"/> class
         /// using a dictionary of configured settings.
@@ -292,6 +160,8 @@ namespace Elmah
             _dbProviderFactory = dbProviderFactory ?? GetDbProviderFactory(null);
             SchemaOwner = schemaOwner;
         }
+
+        private ProviderInfo ThisProviderInfo { get { return _providerInfo(_dbProviderFactory); } }
 
         /// <summary>
         /// Gets the name of the schema owner where the errors are being stored.
@@ -522,6 +392,137 @@ namespace Elmah
 
             var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
+        }
+
+        private DbConnection CreateOpenConnection()
+        {
+            var connection = _dbProviderFactory.CreateConnection();
+            Debug.Assert(connection != null); // TODO convert to run-time exception
+            connection.ConnectionString = ConnectionString;
+            connection.Open();
+            return connection;
+        }
+
+        private static DbProviderFactory GetDbProviderFactory(string providerName)
+        {
+            DbProviderFactory dbProviderFactory;
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                //
+                // If the user has supplied a provider name, that's the one
+                // we must use.
+                //
+
+                dbProviderFactory = DbProviderFactories.GetFactory(providerName);
+            }
+            else
+            {
+                //
+                // Otherwise, we try to use ODP.Net in the first instance
+                // and then fallback to the Microsoft client.
+                //
+
+                dbProviderFactory = TryCreateDbProviderFactory("Oracle.DataAccess.Client")
+                                    ?? DbProviderFactories.GetFactory("System.Data.OracleClient");
+            }
+
+            return dbProviderFactory;
+        }
+
+        private static DbProviderFactory TryCreateDbProviderFactory(string providerInvariantName)
+        {
+            try
+            {
+                return DbProviderFactories.GetFactory(providerInvariantName);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
+        sealed class ProviderInfo
+        {
+            public PropertyInfo ProviderSpecificTypeProperty { get; private set; }
+            public object ClobDbType { get; private set; }
+            public object RefCursorDbType { get; private set; }
+
+            public ProviderInfo(PropertyInfo providerSpecificTypeProperty,
+                                object clobDbType, object refCursorDbType)
+            {
+                Debug.Assert(providerSpecificTypeProperty != null);
+                Debug.Assert(clobDbType != null);
+                Debug.Assert(refCursorDbType != null);
+
+                ProviderSpecificTypeProperty = providerSpecificTypeProperty;
+                ClobDbType = clobDbType;
+                RefCursorDbType = refCursorDbType;
+            }
+        }
+
+        private static ProviderInfo GetProviderInfo(DbProviderFactory dbProviderFactory)
+        {
+            Debug.Assert(dbProviderFactory != null);
+
+            var parameter = dbProviderFactory.CreateParameter();
+            if (parameter == null)
+                throw new NotSupportedException();
+
+            var specificTypeProperties =
+                from property in parameter.GetType().GetProperties()
+                let attribute = (DbProviderSpecificTypePropertyAttribute)Attribute.GetCustomAttribute(property, typeof(DbProviderSpecificTypePropertyAttribute), false)
+                where attribute != null
+                   && attribute.IsProviderSpecificTypeProperty
+                select property;
+
+            var specificTypeProperty = specificTypeProperties.Single();
+            var specificType = specificTypeProperty.PropertyType;
+            var clobDbType = GetEnumValueOfAny(specificType, "NClob");
+            var refCursorDbType = GetEnumValueOfAny(specificType, "Cursor", "RefCursor");
+
+            return new ProviderInfo(specificTypeProperty, clobDbType, refCursorDbType);
+        }
+
+        static object GetEnumValueOfAny(Type enumType, params string[] candidates)
+        {
+            Debug.Assert(enumType != null);
+            Debug.Assert(enumType.IsEnum);
+            Debug.Assert(candidates != null);
+
+            var names = Enum.GetNames(enumType);
+            var pairs = Enum.GetValues(enumType)
+                            .Cast<object>()
+                            .Select((v, i) => new KeyValuePair<string, object>(names[i], v))
+                            .ToArray();
+
+            var matches =
+                from dbType in candidates
+                select pairs.FirstOrDefault(p => p.Key.Equals(dbType, StringComparison.OrdinalIgnoreCase));
+
+            return matches.First(m => m.Key != null).Value;
+        }
+
+        private static DbParameter AddParameter(DbCommand command, string parameterName)
+        {
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = parameterName;
+            command.Parameters.Add(parameter);
+            return parameter;
+        }
+
+        private static DbParameter AddGenericTypeParameter(DbCommand command, string parameterName, DbType dbType)
+        {
+            var parameter = AddParameter(command, parameterName);
+            parameter.DbType = dbType;
+            return parameter;
+        }
+
+        private DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
+        {
+            var parameter = AddParameter(command, parameterName);
+            ThisProviderInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
+            return parameter;
         }
     }
 }
