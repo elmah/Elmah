@@ -265,16 +265,17 @@ namespace Elmah
                 command.CommandType = CommandType.StoredProcedure;
 
                 parameters.Clear();
-                AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = id.ToString("N");
-                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
-                AddGenericTypeParameter(command, "v_Host", DbType.String).Value = error.HostName;
-                AddGenericTypeParameter(command, "v_Type", DbType.String).Value = error.Type;
-                AddGenericTypeParameter(command, "v_Source", DbType.String).Value = error.Source;
-                AddGenericTypeParameter(command, "v_Message", DbType.String).Value = error.Message;
-                AddGenericTypeParameter(command, "v_User", DbType.String).Value = error.User;
+                var addParameter = command.ParameterAdder();
+                addParameter("v_ErrorId", DbType.String, id.ToString("N"));
+                addParameter("v_Application", DbType.String, ApplicationName);
+                addParameter("v_Host", DbType.String, error.HostName);
+                addParameter("v_Type", DbType.String, error.Type);
+                addParameter("v_Source", DbType.String, error.Source);
+                addParameter("v_Message", DbType.String, error.Message);
+                addParameter("v_User", DbType.String, error.User);
                 AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType).Value = xmlValue;
-                AddGenericTypeParameter(command, "v_StatusCode", DbType.Int32).Value = error.StatusCode;
-                AddGenericTypeParameter(command, "v_TimeUtc", DbType.DateTime).Value = error.Time.ToUniversalTime();
+                addParameter("v_StatusCode", DbType.Int32, error.StatusCode);
+                addParameter("v_TimeUtc", DbType.DateTime, error.Time.ToUniversalTime());
 
                 command.ExecuteNonQuery();
                 transaction.Commit();
@@ -301,10 +302,11 @@ namespace Elmah
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorsXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
-                AddGenericTypeParameter(command, "v_PageIndex", DbType.Int32).Value = pageIndex;
-                AddGenericTypeParameter(command, "v_PageSize", DbType.Int32).Value = pageSize;
-                var totalCount = AddGenericTypeParameter(command, "v_TotalCount", DbType.Int32);
+                var addParameter = command.ParameterAdder();
+                addParameter("v_Application", DbType.String, ApplicationName);
+                addParameter("v_PageIndex", DbType.Int32, pageIndex);
+                addParameter("v_PageSize", DbType.Int32, pageSize);
+                var totalCount = addParameter("v_TotalCount", DbType.Int32, Missing.Value);
                 totalCount.Direction = ParameterDirection.Output;
                 AddProviderSpecificTypeParameter(command, "v_Results", ThisProviderInfo.RefCursorDbType).Direction = ParameterDirection.Output;
 
@@ -373,8 +375,9 @@ namespace Elmah
                 command.CommandText = SchemaOwner + "pkg_elmah$get_error.GetErrorXml";
                 command.CommandType = CommandType.StoredProcedure;
 
-                AddGenericTypeParameter(command, "v_Application", DbType.String).Value = ApplicationName;
-                AddGenericTypeParameter(command, "v_ErrorId", DbType.String).Value = errorGuid.ToString("N");
+                var addParameter = command.ParameterAdder();
+                addParameter("v_Application", DbType.String, ApplicationName);
+                addParameter("v_ErrorId", DbType.String, errorGuid.ToString("N"));
                 var allXml = AddProviderSpecificTypeParameter(command, "v_AllXml", ThisProviderInfo.ClobDbType);
                 allXml.Direction = ParameterDirection.Output;
 
@@ -489,37 +492,16 @@ namespace Elmah
             Debug.Assert(enumType.IsEnum);
             Debug.Assert(candidates != null);
 
-            var names = Enum.GetNames(enumType);
-            var pairs = Enum.GetValues(enumType)
-                            .Cast<object>()
-                            .Select((v, i) => new KeyValuePair<string, object>(names[i], v))
-                            .ToArray();
-
-            var matches =
-                from dbType in candidates
-                select pairs.FirstOrDefault(p => p.Key.Equals(dbType, StringComparison.OrdinalIgnoreCase));
+            var enumMembers = enumType.GetEnumMembers().ToArray();
+            var matches = from dbType in candidates
+                          select enumMembers.FirstOrDefault(p => p.Key.Equals(dbType, StringComparison.OrdinalIgnoreCase));
 
             return matches.First(m => m.Key != null).Value;
         }
 
-        private static DbParameter AddParameter(DbCommand command, string parameterName)
+        private IDbDataParameter AddProviderSpecificTypeParameter(IDbCommand command, string parameterName, object dbType)
         {
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = parameterName;
-            command.Parameters.Add(parameter);
-            return parameter;
-        }
-
-        private static DbParameter AddGenericTypeParameter(DbCommand command, string parameterName, DbType dbType)
-        {
-            var parameter = AddParameter(command, parameterName);
-            parameter.DbType = dbType;
-            return parameter;
-        }
-
-        private DbParameter AddProviderSpecificTypeParameter(DbCommand command, string parameterName, object dbType)
-        {
-            var parameter = AddParameter(command, parameterName);
+            var parameter = command.ParameterAdder()(parameterName, null, null);
             ThisProviderInfo.ProviderSpecificTypeProperty.SetValue(parameter, dbType, null);
             return parameter;
         }

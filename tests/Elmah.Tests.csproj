@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="MemoizationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeExtensionsTests.cs" />
     <Compile Include="XmlFileErrorLogTests.cs">
       <SubType>Code</SubType>
     </Compile>
