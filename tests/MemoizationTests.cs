@@ -26,7 +26,6 @@ namespace Elmah.Tests
     #region Imports
 
     using System;
-    using System.Collections.Generic;
     using Xunit;
 
     #endregion
