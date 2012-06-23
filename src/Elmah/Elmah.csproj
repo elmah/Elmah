@@ -201,6 +201,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="DbCommandExtensions.cs" />
+    <Compile Include="DbProviderFactoryQuery.cs" />
     <Compile Include="DelegatingDisposable.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="TypeExtensions.cs" />

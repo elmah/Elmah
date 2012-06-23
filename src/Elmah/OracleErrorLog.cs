@@ -417,7 +417,7 @@ namespace Elmah
                 // we must use.
                 //
 
-                dbProviderFactory = DbProviderFactories.GetFactory(providerName);
+                dbProviderFactory = DbProviderFactoryQuery.GetFactory(providerName);
             }
             else
             {
@@ -426,23 +426,11 @@ namespace Elmah
                 // and then fallback to the Microsoft client.
                 //
 
-                dbProviderFactory = TryCreateDbProviderFactory("Oracle.DataAccess.Client")
-                                    ?? DbProviderFactories.GetFactory("System.Data.OracleClient");
+                dbProviderFactory = DbProviderFactoryQuery.FindFactory("Oracle.DataAccess.Client")
+                                    ?? DbProviderFactoryQuery.GetFactory("System.Data.OracleClient");
             }
 
             return dbProviderFactory;
-        }
-
-        private static DbProviderFactory TryCreateDbProviderFactory(string providerInvariantName)
-        {
-            try
-            {
-                return DbProviderFactories.GetFactory(providerInvariantName);
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
         }
 
         sealed class ProviderInfo
