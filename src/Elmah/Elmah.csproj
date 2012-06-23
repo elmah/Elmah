@@ -201,6 +201,8 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="DbCommandExtensions.cs" />
+    <Compile Include="DelegatingDisposable.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="ErrorDetailPage.generated.cs">
       <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
