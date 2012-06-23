@@ -50,6 +50,7 @@ namespace Elmah
 
         private readonly string _connectionString;
         private readonly DbProviderFactory _dbProviderFactory;
+        private string _name;
         private string _schemaOwner;
         private bool _schemaOwnerInitialized;
 
@@ -198,7 +199,7 @@ namespace Elmah
 
         public override string Name
         {
-            get { return "Oracle Error Log"; }
+            get { return _name ?? (_name = string.Format("Oracle Error Log ({0})", _dbProviderFactory.GetType().Namespace)); }
         }
 
         /// <summary>
