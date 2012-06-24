@@ -31,9 +31,13 @@ namespace Elmah.Tests
         [Fact]
         public void NameReflectsDbProviderName()
         {
-            var dbProvider = DbProviderFactories.GetFactory("System.Data.OracleClient");
+            var dbProvider = new TestDbProviderFactory();
             var log = new OracleErrorLog("...", dbProvider);
-            Assert.Equal("Oracle Error Log (System.Data.OracleClient)", log.Name);
+            Assert.Equal("Oracle Error Log (Elmah.Tests)", log.Name);
+        }
+
+        sealed class TestDbProviderFactory : DbProviderFactory
+        {
         }
     }
 }
