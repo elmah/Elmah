@@ -23,6 +23,8 @@
 
 namespace Elmah.Tests
 {
+    using System;
+    using System.Collections.Generic;
     using System.Data.Common;
     using Xunit;
 
@@ -34,6 +36,32 @@ namespace Elmah.Tests
             var dbProvider = new TestDbProviderFactory();
             var log = new OracleErrorLog("...", dbProvider);
             Assert.Equal("Oracle Error Log (Elmah.Tests)", log.Name);
+        }
+
+        [Fact]
+        public void InitializationDefaultsToOracleThenMicrosoftProvider()
+        {
+            var lookups = new Queue<string>(2);
+            using (DbProviderFactoryQuery.PushGetFactoryHandler(next => (sender, name) =>
+            {
+                lookups.Enqueue(name);
+                throw new ArgumentException();
+            }))
+            {
+                Assert.Throws<ArgumentException>(() => new OracleErrorLog("..."));
+                Assert.Equal(2, lookups.Count);
+                Assert.Equal("Oracle.DataAccess.Client", lookups.Dequeue());
+                Assert.Equal("System.Data.OracleClient", lookups.Dequeue());
+
+                var config = new Dictionary<string, string>
+                {
+                    { "connectionString", "..." },
+                };
+                Assert.Throws<ArgumentException>(() => new OracleErrorLog(config));
+                Assert.Equal(2, lookups.Count);
+                Assert.Equal("Oracle.DataAccess.Client", lookups.Dequeue());
+                Assert.Equal("System.Data.OracleClient", lookups.Dequeue());
+            }
         }
 
         sealed class TestDbProviderFactory : DbProviderFactory
