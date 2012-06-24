@@ -36,7 +36,7 @@ namespace Elmah.Tests
         [Fact]
         public void AddHandlerThrowsWithNullBinder()
         {
-            var e = Assert.Throws<ArgumentNullException>(() => new Message<object, object>().AddHandler(null));
+            var e = Assert.Throws<ArgumentNullException>(() => new Message<object, object>().PushHandler(null));
             Assert.Equal("binder", e.ParamName);
         }
 
@@ -51,7 +51,7 @@ namespace Elmah.Tests
         public void SendWithSingleHandler()
         {
             var msg = new Message<object, Capture<object>>();
-            msg.AddHandler(next => (sender, input) => new Capture<object>(sender, input));
+            msg.PushHandler(next => (sender, input) => new Capture<object>(sender, input));
             var arg = new object();
             var capture = msg.Send(this, arg);
             Assert.NotNull(capture);
@@ -64,7 +64,7 @@ namespace Elmah.Tests
         {
             var msg = new Message<object, object>();
             var called = false;
-            var registration = msg.AddHandler(next => (sender, input) => { called = true; return null; });
+            var registration = msg.PushHandler(next => (sender, input) => { called = true; return null; });
             Assert.NotNull(registration);
             registration.Dispose();
             msg.Send(this, new object());
@@ -76,36 +76,20 @@ namespace Elmah.Tests
         {
             var msg = new Message<object, object>();
             var queue = new Queue<object>();
-            var registration = msg.AddHandler(next => (sender, input) => { queue.Enqueue(1); return next(sender, input); });
+            var registration = msg.PushHandler(next => (sender, input) => { queue.Enqueue(1); return next(sender, input); });
             Assert.NotNull(registration);
             msg.Send(this, new object());
             Assert.Equal(1, queue.Count);
             Assert.Equal(1, queue.Dequeue());
-            msg.AddHandler(next => (sender, input) => { queue.Enqueue(2); return next(sender, input); });
+            msg.PushHandler(next => (sender, input) => { queue.Enqueue(2); return next(sender, input); });
             msg.Send(this, new object());
             Assert.Equal(2, queue.Count);
-            Assert.Equal(1, queue.Dequeue());
             Assert.Equal(2, queue.Dequeue());
+            Assert.Equal(1, queue.Dequeue());
             registration.Dispose();
             msg.Send(this, new object());
             Assert.Equal(1, queue.Count);
             Assert.Equal(2, queue.Dequeue());
-        }
-
-        [Fact]
-        public void SendCallsHandlersWithCustomOrder()
-        {
-            var msg = new Message<object, object>(b => b);
-            var queue = new Queue<object>();
-            msg.AddHandler(next => (sender, input) => { queue.Enqueue(1); return next(sender, input); });
-            msg.Send(this, new object());
-            Assert.Equal(1, queue.Count);
-            Assert.Equal(1, queue.Dequeue());
-            msg.AddHandler(next => (sender, input) => { queue.Enqueue(2); return next(sender, input); });
-            msg.Send(this, new object());
-            Assert.Equal(2, queue.Count);
-            Assert.Equal(2, queue.Dequeue());
-            Assert.Equal(1, queue.Dequeue());
         }
 
         class Capture<T>

@@ -69,14 +69,14 @@ namespace Elmah
     {
         static readonly Message<TypeResolutionArgs, Type> _message = new Message<TypeResolutionArgs, Type>(); 
 
-        public static IDisposable AddHandler(Func<Func<object, TypeResolutionArgs, Type>, Func<object, TypeResolutionArgs, Type>> binder)
+        public static IDisposable PushHandler(Func<Func<object, TypeResolutionArgs, Type>, Func<object, TypeResolutionArgs, Type>> binder)
         {
-            return _message.AddHandler(binder);
+            return _message.PushHandler(binder);
         }
         
         static TypeResolution()
         {
-            AddHandler(next => (sender, input) => Type.GetType(input.TypeName, input.ThrowOnError, input.IgnoreCase));
+            PushHandler(next => (sender, input) => Type.GetType(input.TypeName, input.ThrowOnError, input.IgnoreCase));
         }
 
         public static Type FindType(string typeName)

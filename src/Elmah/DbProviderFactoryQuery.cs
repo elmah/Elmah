@@ -36,12 +36,12 @@ namespace Elmah
 
         static DbProviderFactoryQuery()
         {
-            _message.AddHandler(next => (sender, name) => DbProviderFactories.GetFactory(name));
+            _message.PushHandler(next => (sender, name) => DbProviderFactories.GetFactory(name));
         }
 
-        public static IDisposable AddGetFactoryHandler(Func<Func<object, string, DbProviderFactory>, Func<object, string, DbProviderFactory>> binder)
+        public static IDisposable PushGetFactoryHandler(Func<Func<object, string, DbProviderFactory>, Func<object, string, DbProviderFactory>> binder)
         {
-            return _message.AddHandler(binder);
+            return _message.PushHandler(binder);
         }
 
         public static DbProviderFactory GetFactory(string providerInvariantName)

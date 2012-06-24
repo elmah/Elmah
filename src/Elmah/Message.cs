@@ -26,7 +26,6 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
 
@@ -47,21 +46,13 @@ namespace Elmah
         }
 
         private State _state = new State(null, null);
-        private readonly Func<IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>>, IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>>> _bindersSelector;
-
-        public Message() : this(null) {}
-
-        public Message(Func<IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>>, IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>>> bindersSelector)
-        {
-            _bindersSelector = bindersSelector ?? (binders => binders.Reverse());
-        }
 
         bool TryUpdateState(State replacement, State current)
         {
             return current == Interlocked.CompareExchange(ref _state, replacement, current);
         }
 
-        public IDisposable AddHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
+        public IDisposable PushHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
         {
             if (binder == null) throw new ArgumentNullException("binder");
 
@@ -108,7 +99,7 @@ namespace Elmah
                     from Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> d
                         in delegates
                     select d;
-                handler = _bindersSelector(binders).Aggregate((Func<object, TInput, TOutput>)delegate { return default(TOutput); }, (next, b) => b(next));
+                handler = binders.Aggregate((Func<object, TInput, TOutput>) delegate { return default(TOutput); }, (next, b) => b(next));
                 updated = TryUpdateState(new State(state.Binder, handler), state);
             }
 
