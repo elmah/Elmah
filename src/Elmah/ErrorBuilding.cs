@@ -335,49 +335,49 @@ namespace Elmah
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ExceptionEvent>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ExceptionEvent>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
             public static void OnExceptionFilter(this ExtensionHub ehub, Func<object, ExceptionFilterEventArgs, bool> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ExceptionFilterMessage>().AddHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
+                ehub.Get<ExceptionFilterMessage>().PushHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
             }
 
             public static void OnErrorMailing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Mailing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ErrorMailEvents.Mailing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
             public static void OnErrorMailed(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Mailed>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ErrorMailEvents.Mailed>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
             public static void OnErrorMailDisposing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Disposing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ErrorMailEvents.Disposing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
             public static void OnErrorInitializing(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorInitialization.Initializing>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ErrorInitialization.Initializing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
             public static void OnErrorInitialized(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorInitialization.Initialized>().AddHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                ehub.Get<ErrorInitialization.Initialized>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
         }
 
@@ -686,80 +686,6 @@ namespace Elmah
         public bool Equals(Unit other) { return true; }
         public override bool Equals(object obj) { return obj is Unit; }
         public override int GetHashCode() { return 0; }
-    }
-
-    sealed class DelegatingDisposable : IDisposable
-    {
-        private Action _disposer;
-
-        public DelegatingDisposable(Action disposer)
-        {
-            if (disposer == null) throw new ArgumentNullException("disposer");
-            _disposer = disposer;
-        }
-
-        public void Dispose()
-        {
-            var disposer = _disposer;
-            if (disposer == null)
-                return;
-            _disposer = null;
-            disposer();
-        }
-    }
-
-    public class Message<TInput, TOutput>
-    {
-        private Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> _binder;
-        private Func<object, TInput, TOutput> _cachedHandler;
-
-        public IDisposable AddHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
-        {
-            if (binder == null) throw new ArgumentNullException("binder");
-            
-            _binder += binder;
-            _cachedHandler = null;
-            return new DelegatingDisposable(() => RemoveHandler(binder));
-        }
-
-        private void RemoveHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
-        {
-            if (binder == null) throw new ArgumentNullException("binder");
-
-            _binder -= binder;
-            _cachedHandler = null;
-        }
-
-        public TOutput Send(TInput input)
-        {
-            return Send(null, input);
-        }
-
-        public virtual TOutput Send(object sender, TInput input)
-        {
-            var handler = _cachedHandler;
-            if (handler == null)
-            {
-                var binder = _binder;
-                if (binder == null)
-                    return default(TOutput);
-
-                handler = _cachedHandler = GetBinders().Aggregate((Func<object, TInput, TOutput>)delegate { return default(TOutput); }, (next, b) => b(next));
-            }
-
-            return handler(sender, input);
-        }
-
-        protected virtual IEnumerable<Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>> GetBinders()
-        {
-            var delegates = _binder.GetInvocationList();
-            Array.Reverse(delegates);
-            var binders =
-                from Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> d 
-                    in delegates 
-                select d;
-            return binders;
-        }
     }
 
     public class Event<TInput> : Message<TInput, Unit>

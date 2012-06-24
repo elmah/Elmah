@@ -49,7 +49,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DelegatingDisposableTests.cs" />
+    <Compile Include="MemoizationTests.cs" />
+    <Compile Include="MessageTests.cs" />
+    <Compile Include="OracleErrorLogTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeExtensionsTests.cs" />
     <Compile Include="XmlFileErrorLogTests.cs">
       <SubType>Code</SubType>
     </Compile>

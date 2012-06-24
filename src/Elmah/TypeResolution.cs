@@ -51,38 +51,58 @@ namespace Elmah
 
     #endregion
 
-    public delegate Type TypeResolutionHandler(string typeName, bool throwOnError, bool ignoreCase);
+    public class TypeResolutionArgs
+    {
+        public string TypeName { get; private set; }
+        public bool ThrowOnError { get; private set; }
+        public bool IgnoreCase { get; private set; }
+
+        public TypeResolutionArgs(string typeName, bool throwOnError, bool ignoreCase)
+        {
+            TypeName = typeName;
+            ThrowOnError = throwOnError;
+            IgnoreCase = ignoreCase;
+        }
+    }
 
     public static class TypeResolution
     {
-        private static TypeResolutionHandler _current;
+        static readonly Message<TypeResolutionArgs, Type> _message = new Message<TypeResolutionArgs, Type>(); 
 
+        public static IDisposable PushHandler(Func<Func<object, TypeResolutionArgs, Type>, Func<object, TypeResolutionArgs, Type>> binder)
+        {
+            return _message.PushHandler(binder);
+        }
+        
         static TypeResolution()
         {
-            _current = Default = Type.GetType;
-        }
-
-        public static TypeResolutionHandler Default { get; private set; }
-
-        public static TypeResolutionHandler Current
-        {
-            get { return _current; }
-
-            set
-            {
-                if (value == null) throw new ArgumentNullException("value");
-                _current = value;
-            }
+            PushHandler(next => (sender, input) => Type.GetType(input.TypeName, input.ThrowOnError, input.IgnoreCase));
         }
 
         public static Type FindType(string typeName)
         {
-            return Current(typeName, /* throwOnError = */ false, /* ignoreCase = */ false);
+            return FindType(typeName, false);
+        }
+
+        public static Type FindType(string typeName, bool ignoreCase)
+        {
+            return Send(new TypeResolutionArgs(typeName, false, ignoreCase));
         }
 
         public static Type GetType(string typeName)
         {
-            return Current(typeName, /* throwOnError = */ true, /* ignoreCase = */ false);
+            return GetType(typeName, false);
+        }
+
+        public static Type GetType(string typeName, bool ignoreCase)
+        {
+            return Send(new TypeResolutionArgs(typeName, true, ignoreCase));
+        }
+
+        static Type Send(TypeResolutionArgs args)
+        {
+            Debug.Assert(args != null);
+            return _message.Send(args);
         }
     }
 }
