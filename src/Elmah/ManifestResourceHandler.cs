@@ -42,15 +42,15 @@ namespace Elmah
 
     static class ManifestResourceHandler
     {
-        public static Action<HttpContextBase> Create(string resourceName, string contentType)
+        public static Action<HttpContextBase> Create(string resourceName, string mediaType)
         {
-            return Create(resourceName, contentType, null);
+            return Create(resourceName, mediaType, null);
         }
 
-        public static Action<HttpContextBase> Create(string resourceName, string contentType, Encoding responseEncoding)
+        public static Action<HttpContextBase> Create(string resourceName, string mediaType, Encoding responseEncoding)
         {
             Debug.AssertStringNotEmpty(resourceName);
-            Debug.AssertStringNotEmpty(contentType);
+            Debug.AssertStringNotEmpty(mediaType);
 
             return context =>
             {
@@ -60,7 +60,7 @@ namespace Elmah
                 //
 
                 var response = context.Response;
-                response.ContentType = contentType;
+                response.ContentType = mediaType;
 
                 if (responseEncoding != null)
                     response.ContentEncoding = responseEncoding;
