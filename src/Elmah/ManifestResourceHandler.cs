@@ -29,10 +29,7 @@ namespace Elmah
 
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Web;
-
-    using Stream = System.IO.Stream;
     using Encoding = System.Text.Encoding;
 
     #endregion
