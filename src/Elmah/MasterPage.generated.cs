@@ -107,6 +107,14 @@ WriteLiteral("</title>\r\n");
             
             #line 36 "..\..\MasterPage.cshtml"
         }
+        
+            
+            #line default
+            #line hidden
+
+            
+            #line 37 "..\..\MasterPage.cshtml"
+                                                  
 
             
             #line default
@@ -119,7 +127,7 @@ WriteLiteral(@"        <!-- Le HTML5 shim, for IE6-8 support of HTML elements --
 
 
             
-            #line 41 "..\..\MasterPage.cshtml"
+            #line 42 "..\..\MasterPage.cshtml"
                                                 Write(basePageName);
 
             
@@ -130,7 +138,7 @@ WriteLiteral("/stylesheet\" />\r\n        <style type=\"text/css\">\r\n         
 
 
             
-            #line 49 "..\..\MasterPage.cshtml"
+            #line 50 "..\..\MasterPage.cshtml"
          if (speedBarItems.Any())
         {
 
@@ -145,7 +153,7 @@ WriteLiteral(@"            <div id=""topnavbar"" class=""navbar navbar-fixed-top
 
 
             
-            #line 55 "..\..\MasterPage.cshtml"
+            #line 56 "..\..\MasterPage.cshtml"
                    Write(SpeedBar.Render(Request.Browser, speedBarItems));
 
             
@@ -155,7 +163,7 @@ WriteLiteral("\r\n                    </div>\r\n                </div>\r\n      
 
 
             
-            #line 59 "..\..\MasterPage.cshtml"
+            #line 60 "..\..\MasterPage.cshtml"
         }
 
             
@@ -165,7 +173,7 @@ WriteLiteral("        <div class=\"container-fluid\">\r\n            \r\n       
 
 
             
-            #line 62 "..\..\MasterPage.cshtml"
+            #line 63 "..\..\MasterPage.cshtml"
        Write(RenderBody());
 
             
@@ -176,7 +184,7 @@ WriteLiteral("\r\n            \r\n            <footer id=\"Footer\">\r\n        
 
 
             
-            #line 65 "..\..\MasterPage.cshtml"
+            #line 66 "..\..\MasterPage.cshtml"
                                                                    Write(about.Product);
 
             
@@ -186,7 +194,7 @@ WriteLiteral("</a>, \r\n                    version ");
 
 
             
-            #line 66 "..\..\MasterPage.cshtml"
+            #line 67 "..\..\MasterPage.cshtml"
                        Write(about.Version);
 
             
@@ -196,7 +204,7 @@ WriteLiteral(".\r\n                    ");
 
 
             
-            #line 67 "..\..\MasterPage.cshtml"
+            #line 68 "..\..\MasterPage.cshtml"
                Write(about.Copyright);
 
             
@@ -208,7 +216,7 @@ WriteLiteral(" \r\n                    Licensed under <a href=\"http://www.apach
 
 
             
-            #line 70 "..\..\MasterPage.cshtml"
+            #line 71 "..\..\MasterPage.cshtml"
                           Write(now.ToString("D", CultureInfo.InvariantCulture));
 
             
@@ -218,7 +226,7 @@ WriteLiteral(". \r\n                Server time is ");
 
 
             
-            #line 71 "..\..\MasterPage.cshtml"
+            #line 72 "..\..\MasterPage.cshtml"
                           Write(now.ToString("T", CultureInfo.InvariantCulture));
 
             
@@ -228,7 +236,7 @@ WriteLiteral(". \r\n                All dates and times displayed are in the \r\
 
 
             
-            #line 73 "..\..\MasterPage.cshtml"
+            #line 74 "..\..\MasterPage.cshtml"
             Write(tz.IsDaylightSavingTime(now) ? tz.DaylightName : tz.StandardName);
 
             
@@ -238,7 +246,7 @@ WriteLiteral(" zone. \r\n                ");
 
 
             
-            #line 74 "..\..\MasterPage.cshtml"
+            #line 75 "..\..\MasterPage.cshtml"
            Write(Footnote);
 
             
