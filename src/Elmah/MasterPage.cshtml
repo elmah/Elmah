@@ -48,9 +48,9 @@
     <body>
         @if (speedBarItems.Any())
         {
-            <div class="topbar">
-                <div class="fill">
-                    <div class="container-fluid">
+            <div id="topnavbar" class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
                         <a class="brand" href="http://elmah.googlecode.com/">ELMAH</a>
                         @SpeedBar.Render(Request.Browser, speedBarItems)
                     </div>
