@@ -32,7 +32,7 @@ namespace Elmah
 
     #endregion
 
-    public class ManifestResourceHelper
+    public static class ManifestResourceHelper
     {
         public static void WriteResourceToStream(Stream outputStream, string resourceName)
         {
