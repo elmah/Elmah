@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Collections.ObjectModel;
     using System.Web;
 
     using CultureInfo = System.Globalization.CultureInfo;
@@ -130,8 +131,7 @@ namespace Elmah
                     return new HttpAsyncHandler((context, getAsyncCallback) => HttpTextAsyncHandler.Create(ErrorLogDownloadHandler.ProcessRequest)(context, getAsyncCallback));
 
                 case "stylesheet":
-                    return new DelegatingHttpHandler(ManifestResourceHandler.Create("ErrorLog.css",
-                        "text/css", Encoding.GetEncoding("Windows-1252")));
+                    return new DelegatingHttpHandler(ManifestResourceHandler.Create(new[] { "Bootstrap.css", "ErrorLog.css" }, "text/css", Encoding.GetEncoding("Windows-1252")));
 
                 case "test":
                     throw new TestException();

@@ -383,6 +383,7 @@
     </Compile>
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
+    <EmbeddedResource Include="ErrorLog.css" />
     <Content Include="SQLServer.sql">
     </Content>
     <EmbeddedResource Include="mkmdb.vbs">
@@ -391,7 +392,7 @@
     </Content>
     <EmbeddedResource Include="RemoteAccessError.htm">
     </EmbeddedResource>
-    <EmbeddedResource Include="ErrorLog.css">
+    <EmbeddedResource Include="Bootstrap.css">
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

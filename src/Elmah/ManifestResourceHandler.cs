@@ -28,6 +28,8 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Web;
 
     using Stream = System.IO.Stream;
@@ -49,7 +51,17 @@ namespace Elmah
 
         public static Action<HttpContextBase> Create(string resourceName, string mediaType, Encoding responseEncoding)
         {
-            Debug.AssertStringNotEmpty(resourceName);
+            return Create(new[] { resourceName }, mediaType, responseEncoding);
+        }
+
+        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType)
+        {
+            return Create(resourceNames, mediaType, null);
+        }
+
+        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding)
+        {
+            Debug.Assert(resourceNames != null);
             Debug.AssertStringNotEmpty(mediaType);
 
             return context =>
@@ -65,7 +77,8 @@ namespace Elmah
                 if (responseEncoding != null)
                     response.ContentEncoding = responseEncoding;
 
-                ManifestResourceHelper.WriteResourceToStream(response.OutputStream, resourceName);
+                foreach (var resourceName in resourceNames)
+                    ManifestResourceHelper.WriteResourceToStream(response.OutputStream, resourceName);
             };
         }
     }
