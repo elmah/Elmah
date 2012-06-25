@@ -40,10 +40,6 @@ namespace Elmah
             if (resourceName == null) throw new ArgumentNullException("resourceName");
             if (resourceName.Length == 0) throw new ArgumentException(null, "resourceName");
 
-            //
-            // Grab the resource stream from the manifest.
-            //
-
             var thisType = typeof(ManifestResourceHelper);
             var thisAssembly = thisType.Assembly;
 
@@ -56,19 +52,8 @@ namespace Elmah
                         thisType.Namespace, resourceName, thisAssembly));
                 }
 
-                //
-                // Allocate a buffer for reading the stream. The maximum size
-                // of this buffer is fixed to 4 KB.
-                //
-
                 var buffer = new byte[Math.Min(inputStream.Length, 4096)];
-
-                //
-                // Finally, write out the bytes!
-                //
-
                 var readLength = inputStream.Read(buffer, 0, buffer.Length);
-
                 while (readLength > 0)
                 {
                     outputStream.Write(buffer, 0, readLength);
