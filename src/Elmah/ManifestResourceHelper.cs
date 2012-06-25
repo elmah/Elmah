@@ -36,14 +36,25 @@ namespace Elmah
     {
         public static void WriteResourceToStream(Stream outputStream, string resourceName)
         {
+            if (outputStream == null) throw new ArgumentNullException("outputStream");
+            if (resourceName == null) throw new ArgumentNullException("resourceName");
+            if (resourceName.Length == 0) throw new ArgumentException(null, "resourceName");
+
             //
             // Grab the resource stream from the manifest.
             //
 
             var thisType = typeof(ManifestResourceHelper);
+            var thisAssembly = thisType.Assembly;
 
-            using (var inputStream = thisType.Assembly.GetManifestResourceStream(thisType, resourceName))
+            using (var inputStream = thisAssembly.GetManifestResourceStream(thisType, resourceName))
             {
+                if (inputStream == null)
+                {
+                    throw new Exception(string.Format(
+                        @"Resource named {0}.{1} not found in assembly {2}.", 
+                        thisType.Namespace, resourceName, thisAssembly));
+                }
 
                 //
                 // Allocate a buffer for reading the stream. The maximum size
