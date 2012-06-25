@@ -40,9 +40,9 @@ namespace Elmah
             // Grab the resource stream from the manifest.
             //
 
-            Type thisType = typeof(ManifestResourceHelper);
+            var thisType = typeof(ManifestResourceHelper);
 
-            using (Stream inputStream = thisType.Assembly.GetManifestResourceStream(thisType, resourceName))
+            using (var inputStream = thisType.Assembly.GetManifestResourceStream(thisType, resourceName))
             {
 
                 //
@@ -50,13 +50,13 @@ namespace Elmah
                 // of this buffer is fixed to 4 KB.
                 //
 
-                byte[] buffer = new byte[Math.Min(inputStream.Length, 4096)];
+                var buffer = new byte[Math.Min(inputStream.Length, 4096)];
 
                 //
                 // Finally, write out the bytes!
                 //
 
-                int readLength = inputStream.Read(buffer, 0, buffer.Length);
+                var readLength = inputStream.Read(buffer, 0, buffer.Length);
 
                 while (readLength > 0)
                 {
