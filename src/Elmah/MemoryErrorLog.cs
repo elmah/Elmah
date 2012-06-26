@@ -28,13 +28,12 @@ namespace Elmah
     #region Imports
 
     using System;
-
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using ReaderWriterLock = System.Threading.ReaderWriterLock;
     using Timeout = System.Threading.Timeout;
-    using NameObjectCollectionBase = System.Collections.Specialized.NameObjectCollectionBase;
     using IDictionary = System.Collections.IDictionary;
     using CultureInfo = System.Globalization.CultureInfo;
-    using System.Collections.Generic;
 
     #endregion
 
@@ -152,18 +151,16 @@ namespace Elmah
             //
 
             error = (Error) ((ICloneable) error).Clone();
-            error.ApplicationName = this.ApplicationName;
-            Guid newId = Guid.NewGuid();
-            ErrorLogEntry entry = new ErrorLogEntry(this, newId.ToString(), error);
+            error.ApplicationName = ApplicationName;
+            var newId = Guid.NewGuid();
+            var entry = new ErrorLogEntry(this, newId.ToString(), error);
 
             _lock.AcquireWriterLock(Timeout.Infinite); 
 
             try
             {
-                if (_entries == null)
-                    _entries = new EntryCollection(_size);
-
-                _entries.Add(entry);
+                var entries = _entries ?? (_entries = new EntryCollection(_size));
+                entries.Add(entry);
             }
             finally
             {
@@ -203,7 +200,7 @@ namespace Elmah
             // Return a copy that the caller can party on.
             //
 
-            Error error = (Error) ((ICloneable) entry.Error).Clone();
+            var error = (Error) ((ICloneable) entry.Error).Clone();
             return new ErrorLogEntry(this, entry.Id, error);
         }
 
@@ -214,11 +211,8 @@ namespace Elmah
 
         public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0)
-                throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
-
-            if (pageSize < 0)
-                throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
+            if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
             //
             // To minimize the time for which we hold the lock, we'll first
@@ -240,16 +234,16 @@ namespace Elmah
 
                 totalCount = _entries.Count;
 
-                int startIndex = pageIndex * pageSize;
-                int endIndex = Math.Min(startIndex + pageSize, totalCount);
-                int count = Math.Max(0, endIndex - startIndex);
+                var startIndex = pageIndex * pageSize;
+                var endIndex = Math.Min(startIndex + pageSize, totalCount);
+                var count = Math.Max(0, endIndex - startIndex);
                 
                 if (count > 0)
                 {
                     selectedEntries = new ErrorLogEntry[count];
 
-                    int sourceIndex = endIndex;
-                    int targetIndex = 0;
+                    var sourceIndex = endIndex;
+                    var targetIndex = 0;
 
                     while (sourceIndex > startIndex)
                         selectedEntries[targetIndex++] = _entries[--sourceIndex];
@@ -269,7 +263,7 @@ namespace Elmah
 
                 foreach (ErrorLogEntry entry in selectedEntries)
                 {
-                    Error error = (Error)((ICloneable)entry.Error).Clone();
+                    var error = (Error)((ICloneable)entry.Error).Clone();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
                 }
             }
@@ -277,41 +271,25 @@ namespace Elmah
             return totalCount;
         }
 
-        private class EntryCollection : NameObjectCollectionBase
+        sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
         {
             private readonly int _size;
 
-            public EntryCollection(int size) : base(size)
+            public EntryCollection(int size)
             {
                 _size = size;
             }
 
-            public ErrorLogEntry this[int index]
+            protected override string GetKeyForItem(ErrorLogEntry item)
             {
-                get { return (ErrorLogEntry) BaseGet(index); }
+                return item.Id;
             }
 
-            public ErrorLogEntry this[Guid id]
+            protected override void InsertItem(int index, ErrorLogEntry item)
             {
-                get { return (ErrorLogEntry) BaseGet(id.ToString()); }
-            }
-
-            public ErrorLogEntry this[string id]
-            {
-                get { return this[new Guid(id)]; }
-            }
-
-            public void Add(ErrorLogEntry entry)
-            {
-                Debug.Assert(entry != null);
-                Debug.AssertStringNotEmpty(entry.Id);
-
-                Debug.Assert(this.Count <= _size);
-
-                if (this.Count == _size)
-                    BaseRemoveAt(0);
-
-                BaseAdd(entry.Id, entry);
+                if (Count == _size)
+                    RemoveAt(0);
+                base.InsertItem(index, item);
             }
         }
     }
