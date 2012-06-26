@@ -30,8 +30,7 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using ReaderWriterLock = System.Threading.ReaderWriterLock;
-    using Timeout = System.Threading.Timeout;
+    using System.Threading;
     using IDictionary = System.Collections.IDictionary;
     using CultureInfo = System.Globalization.CultureInfo;
 
@@ -54,7 +53,7 @@ namespace Elmah
         //
 
         private static EntryCollection _entries;
-        private readonly static ReaderWriterLock _lock = new ReaderWriterLock();
+        private readonly static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         //
         // IMPORTANT! The size must be the same for all instances
@@ -155,7 +154,7 @@ namespace Elmah
             var newId = Guid.NewGuid();
             var entry = new ErrorLogEntry(this, newId.ToString(), error);
 
-            _lock.AcquireWriterLock(Timeout.Infinite); 
+            _lock.EnterWriteLock(); 
 
             try
             {
@@ -164,7 +163,7 @@ namespace Elmah
             }
             finally
             {
-                _lock.ReleaseWriterLock();
+                _lock.ExitWriteLock();
             }
             
             return newId.ToString();
@@ -177,7 +176,7 @@ namespace Elmah
 
         public override ErrorLogEntry GetError(string id)
         {
-            _lock.AcquireReaderLock(Timeout.Infinite);
+            _lock.EnterReadLock();
 
             ErrorLogEntry entry;
 
@@ -190,7 +189,7 @@ namespace Elmah
             }
             finally
             {
-                _lock.ReleaseReaderLock();
+                _lock.ExitReadLock();
             }
 
             if (entry == null)
@@ -225,7 +224,7 @@ namespace Elmah
             ErrorLogEntry[] selectedEntries = null;
             int totalCount;
 
-            _lock.AcquireReaderLock(Timeout.Infinite);
+            _lock.EnterReadLock();
 
             try
             {
@@ -251,7 +250,7 @@ namespace Elmah
             }
             finally
             {
-                _lock.ReleaseReaderLock();
+                _lock.ExitReadLock();
             }
 
             if (errorEntryList != null && selectedEntries != null)
@@ -261,7 +260,7 @@ namespace Elmah
                 // be immutable then this step wouldn't be necessary.
                 //
 
-                foreach (ErrorLogEntry entry in selectedEntries)
+                foreach (var entry in selectedEntries)
                 {
                     var error = (Error)((ICloneable)entry.Error).Clone();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
