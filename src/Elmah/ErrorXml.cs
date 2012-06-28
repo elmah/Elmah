@@ -40,7 +40,6 @@ namespace Elmah
     /// an <see cref="Error"/> object.
     /// </summary>
 
-    [ Serializable ]
     public static class ErrorXml
     {
         /// <summary>
