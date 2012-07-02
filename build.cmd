@@ -30,4 +30,4 @@ if not exist "%MSBUILDEXE%" (
     echo solution.
     exit /b 1
 )
-for %%i in (debug release) do if exist "%MSBUILDEXE%" "%MSBUILDEXE%" Elmah.sln /p:Configuration=%%i %*
+for %%i in (debug release) do if exist "%MSBUILDEXE%" "%MSBUILDEXE%" Elmah.sln /p:Configuration=%%i /p:DownloadNuGetExe=true %*
