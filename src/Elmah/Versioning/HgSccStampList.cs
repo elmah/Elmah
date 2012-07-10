@@ -25,7 +25,11 @@ namespace Elmah.Versioning
 {
     partial class HgSccStampList : BaseHgSccStampList
     {
-        // deliberately contains nothing
-        // a partial class will be created in HgSccStampList.Populate.cs by a pre-build event
+        public static HgSccStampList GetList ()
+        {
+            var list = new HgSccStampList();
+            list.PopulateList();
+            return list;
+        }
     }
 }

@@ -37,22 +37,17 @@ namespace Elmah.Versioning
             SccStamps = new List<HgSccStamp>();
         }
 
-        private string RemoveWhitespace(string value)
-        {
-            return value.Trim();
-        }
-
         private string _localChangeSet;
         public string LocalChangeset
         { 
             get { return _localChangeSet; }
-            protected set { _localChangeSet = RemoveWhitespace(value); } 
+            protected set { _localChangeSet = value.Trim(); } 
         }
         private string _remoteChangeSet;
         public string RemoteChangeset
         { 
             get { return _remoteChangeSet; }
-            protected set { _remoteChangeSet = RemoveWhitespace(value); } 
+            protected set { _remoteChangeSet = value.Trim(); } 
         }
 
         public bool HasUncommittedLocalChanges
