@@ -21,3 +21,5 @@ samples/Demo/Web.config
 packages/**
 .nuget/NuGet.exe
 .nuget/nuget.exe
+src/Elmah/Versioning/hgscc.*
+src/Elmah/Versioning/HgSccStampList.Populate.cs

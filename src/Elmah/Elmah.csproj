@@ -377,6 +377,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TypeResolution.cs" />
+    <Compile Include="Versioning\BaseHgSccStampList.cs" />
+    <Compile Include="Versioning\HgSccStamp.cs" />
+    <Compile Include="Versioning\HgSccStampList.cs" />
+    <Compile Include="Versioning\HgSccStampList.Populate.cs" />
     <Compile Include="WebTemplateBase.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>
@@ -437,8 +441,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>call "$(ProjectDir)Versioning\buildhgstamplist.bat"</PreBuildEvent>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
