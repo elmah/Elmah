@@ -476,7 +476,6 @@ namespace Elmah
                 }
             }
 
-            MailAttachment ysodAttachment = null;
             var args = new ErrorMailEventArgs(error, mail);
 
             try
@@ -488,7 +487,7 @@ namespace Elmah
 
                 if (!NoYsod && error.WebHostHtmlMessage.Length > 0)
                 {
-                    ysodAttachment = CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
+                    var ysodAttachment = CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
 
                     if (ysodAttachment != null)
                         mail.Attachments.Add(ysodAttachment);
