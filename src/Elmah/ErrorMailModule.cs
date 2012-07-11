@@ -113,7 +113,7 @@ namespace Elmah
             // In this case, the module is as good as mute.
             //
 
-            IDictionary config = (IDictionary) GetConfig();
+            var config = (IDictionary) GetConfig();
 
             if (config == null)
                 return;
@@ -122,18 +122,18 @@ namespace Elmah
             // Extract the settings.
             //
 
-            string mailRecipient = GetSetting(config, "to");
-            string mailSender = GetSetting(config, "from", mailRecipient);
-            string mailCopyRecipient = GetSetting(config, "cc", string.Empty);
-            string mailSubjectFormat = GetSetting(config, "subject", string.Empty);
-            MailPriority mailPriority = (MailPriority) Enum.Parse(typeof(MailPriority), GetSetting(config, "priority", MailPriority.Normal.ToString()), true);
-            bool reportAsynchronously = Convert.ToBoolean(GetSetting(config, "async", bool.TrueString));
-            string smtpServer = GetSetting(config, "smtpServer", string.Empty);
-            int smtpPort = Convert.ToUInt16(GetSetting(config, "smtpPort", "0"), CultureInfo.InvariantCulture);
-            string authUserName = GetSetting(config, "userName", string.Empty);
-            string authPassword = GetSetting(config, "password", string.Empty);
-            bool sendYsod = Convert.ToBoolean(GetSetting(config, "noYsod", bool.FalseString));
-            bool useSsl = Convert.ToBoolean(GetSetting(config, "useSsl", bool.FalseString));
+            var mailRecipient = GetSetting(config, "to");
+            var mailSender = GetSetting(config, "from", mailRecipient);
+            var mailCopyRecipient = GetSetting(config, "cc", string.Empty);
+            var mailSubjectFormat = GetSetting(config, "subject", string.Empty);
+            var mailPriority = (MailPriority) Enum.Parse(typeof(MailPriority), GetSetting(config, "priority", MailPriority.Normal.ToString()), true);
+            var reportAsynchronously = Convert.ToBoolean(GetSetting(config, "async", bool.TrueString));
+            var smtpServer = GetSetting(config, "smtpServer", string.Empty);
+            var smtpPort = Convert.ToUInt16(GetSetting(config, "smtpPort", "0"), CultureInfo.InvariantCulture);
+            var authUserName = GetSetting(config, "userName", string.Empty);
+            var authPassword = GetSetting(config, "password", string.Empty);
+            var sendYsod = Convert.ToBoolean(GetSetting(config, "noYsod", bool.FalseString));
+            var useSsl = Convert.ToBoolean(GetSetting(config, "useSsl", bool.FalseString));
             //
             // Hook into the Error event of the application.
             //
@@ -329,7 +329,7 @@ namespace Elmah
             // reporting of the uncaught exception.
             //
 
-            ExceptionFilterEventArgs args = new ExceptionFilterEventArgs(e, context);
+            var args = new ExceptionFilterEventArgs(e, context);
             OnFiltering(args);
 
             if (args.Dismissed)
@@ -340,7 +340,7 @@ namespace Elmah
             // asynchronously based on the configuration.
             //
 
-            Error error = new Error(e, context);
+            var error = new Error(e, context);
 
             if (_reportAsynchronously)
                 ReportErrorAsync(error);
@@ -354,7 +354,7 @@ namespace Elmah
 
         protected virtual void OnFiltering(ExceptionFilterEventArgs args)
         {
-            ExceptionFilterEventHandler handler = Filtering;
+            var handler = Filtering;
             
             if (handler != null)
                 handler(this, args);
@@ -425,9 +425,9 @@ namespace Elmah
             // MailSender and MailRecipient properties.
             //
 
-            string sender = this.MailSender ?? string.Empty;
-            string recipient = this.MailRecipient ?? string.Empty;
-            string copyRecipient = this.MailCopyRecipient ?? string.Empty;
+            var sender = this.MailSender ?? string.Empty;
+            var recipient = this.MailRecipient ?? string.Empty;
+            var copyRecipient = this.MailCopyRecipient ?? string.Empty;
 
             if (recipient.Length == 0)
                 return;
@@ -436,7 +436,7 @@ namespace Elmah
             // Create the mail, setting up the sender and recipient and priority.
             //
 
-            MailMessage mail = new MailMessage();
+            var mail = new MailMessage();
             mail.Priority = this.MailPriority;
 
             mail.From = new MailAddress(sender);
@@ -449,7 +449,7 @@ namespace Elmah
             // Format the mail subject.
             // 
 
-            string subjectFormat = Mask.EmptyString(this.MailSubjectFormat, "Error ({1}): {0}");
+            var subjectFormat = Mask.EmptyString(this.MailSubjectFormat, "Error ({1}): {0}");
             mail.Subject = string.Format(subjectFormat, error.Message, error.Type).
                 Replace('\r', ' ').Replace('\n', ' ');
 
@@ -457,9 +457,9 @@ namespace Elmah
             // Format the mail body.
             //
 
-            ErrorTextFormatter formatter = CreateErrorFormatter();
+            var formatter = CreateErrorFormatter();
 
-            StringWriter bodyWriter = new StringWriter();
+            var bodyWriter = new StringWriter();
             formatter.Format(bodyWriter, error);
             mail.Body = bodyWriter.ToString();
 
@@ -477,7 +477,7 @@ namespace Elmah
             }
 
             MailAttachment ysodAttachment = null;
-            ErrorMailEventArgs args = new ErrorMailEventArgs(error, mail);
+            var args = new ErrorMailEventArgs(error, mail);
 
             try
             {
@@ -544,9 +544,9 @@ namespace Elmah
             // so these have to be set up here.
             //
 
-            SmtpClient client = new SmtpClient();
+            var client = new SmtpClient();
 
-            string host = SmtpServer ?? string.Empty;
+            var host = SmtpServer ?? string.Empty;
 
             if (host.Length > 0)
             {
@@ -554,12 +554,12 @@ namespace Elmah
                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
             }
 
-            int port = SmtpPort;
+            var port = SmtpPort;
             if (port > 0)
                 client.Port = port;
 
-            string userName = AuthUserName ?? string.Empty;
-            string password = AuthPassword ?? string.Empty;
+            var userName = AuthUserName ?? string.Empty;
+            var password = AuthPassword ?? string.Empty;
 
             if (userName.Length > 0 && password.Length > 0)
                 client.Credentials = new NetworkCredential(userName, password);
@@ -578,7 +578,7 @@ namespace Elmah
             if (args == null)
                 throw new ArgumentNullException("args");
 
-            ErrorMailEventHandler handler = Mailing;
+            var handler = Mailing;
 
             if (handler != null)
                 handler(this, args);
@@ -593,7 +593,7 @@ namespace Elmah
             if (args == null)
                 throw new ArgumentNullException("args");
 
-            ErrorMailEventHandler handler = Mailed;
+            var handler = Mailed;
 
             if (handler != null)
                 handler(this, args);
@@ -608,7 +608,7 @@ namespace Elmah
             if (args == null)
                 throw new ArgumentNullException("args");
 
-            ErrorMailEventHandler handler = DisposingMail;
+            var handler = DisposingMail;
 
             if (handler != null)
                 handler(this, args);
@@ -634,7 +634,7 @@ namespace Elmah
             Debug.Assert(config != null);
             Debug.AssertStringNotEmpty(name);
 
-            string value = ((string) config[name]) ?? string.Empty;
+            var value = ((string) config[name]) ?? string.Empty;
 
             if (value.Length == 0)
             {
