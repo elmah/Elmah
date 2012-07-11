@@ -25,7 +25,11 @@
     <head>
         <title>Error: @error.Message</title>
         <style type="text/css">
-            body { font-family: verdana, arial, helvetic; font-size: x-small; } 
+            body { font-family: verdana, arial, helvetic; font-size: x-small; }
+            table.collection { border-collapse: collapse; border-spacing: 0; border: 1px solid black; width: 100% }
+            table.collection tr { vertical-align: top; }
+            table.collection th { text-align: left; border: 1px solid black; padding: 4px; font-weight: bold; }
+            table.collection td { border: 1px solid black; padding: 4px; }
             td, th, pre { font-size: x-small; } 
             #errorDetail { padding: 1em; background-color: #FFFFCC; } 
             #errorMessage { font-size: medium; font-style: italic; color: maroon; }
@@ -58,14 +62,14 @@
 
             <div id="@collection.Id">
                 <h1>@collection.Title</h1>
-                <table cellpadding="5" cellspacing="0" border="1" width="100%">
-                    <tr valign="top">
-                        <th align="left">Name</th>            
-                        <th align="left">Value</th>
+                <table class="collection">
+                    <tr>
+                        <th>Name</th>            
+                        <th>Value</th>
                     </tr>
                     @foreach (var item in items)
                     {
-                        <tr valign="top">
+                        <tr>
                             <td>@item.Key</td>
                             <td>@item.Value</td>                
                         </tr>
