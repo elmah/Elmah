@@ -1,0 +1,81 @@
+@* Generator: Template TypeVisibility: Internal *@
+@using System.Collections.Specialized
+@using System.Globalization
+@using System.IO
+@using System.Web
+@using Elmah
+@inherits WebTemplateBase
+@{
+    // NB cast is not really required, but aids with intellisense!
+    var error = (Error)this.Error;
+
+    var about = PoweredBy.GetAbout(Context.Cache, (version, fileVersion, product, copyright) => new
+    {
+        Version = version != null
+                  ? version.ToString()
+                  : fileVersion != null
+                  ? fileVersion.ToString()
+                  : "?.?.?.?",
+        Product = Mask.EmptyString(product, "(product)"),
+        Copyright = copyright,
+    });
+}
+<html>
+    <head>
+        <title>Error: @error.Message</title>
+        <style type="text/css">
+            body { font-family: verdana, arial, helvetic; font-size: x-small; } 
+            td, th, pre { font-size: x-small; } 
+            #errorDetail { padding: 1em; background-color: #FFFFCC; } 
+            #errorMessage { font-size: medium; font-style: italic; color: maroon; }
+            h1 { font-size: small; }
+        </style>
+    </head>
+    <body>
+        <p id="errorMessage">@error.Type: @error.Message</p>
+        @if (error.Time != DateTime.MinValue)
+        {
+            <p>Generated: @error.Time.ToUniversalTime().ToString("r")</p>
+        }
+        @if (error.Detail.Length != 0)
+        {
+            <pre id="errorDetail">@error.Detail</pre>
+        }
+        @{
+            var collection = new
+                                 {
+                                     Data = error.ServerVariables,
+                                     Id = "ServerVariables",
+                                     Title = "Server Variables",
+                                 };
+        }
+        @if (collection.Data != null && collection.Data.Count > 0)
+        {
+            var items = Enumerable.Range(0, collection.Data.Count)
+                .Select(i => new { Key = collection.Data.GetKey(i), Value = collection.Data[i] })
+                .OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
+
+            <div id="@collection.Id">
+                <h1>@collection.Title</h1>
+                <table cellpadding="5" cellspacing="0" border="1" width="100%">
+                    <tr valign="top">
+                        <th align="left">Name</th>            
+                        <th align="left">Value</th>
+                    </tr>
+                    @foreach (var item in items)
+                    {
+                        <tr valign="top">
+                            <td>@item.Key</td>
+                            <td>@item.Value</td>                
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+        <p>Powered by <a href="http://elmah.googlecode.com/">@about.Product</a>, 
+            version @about.Version
+            @about.Copyright 
+            Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
+        </p>
+    </body>
+</html>
