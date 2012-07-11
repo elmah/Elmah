@@ -47,15 +47,15 @@ WriteLiteral("\r\n");
             #line 5 "..\..\ErrorMailHtmlPage.cshtml"
   
     // NB cast is not really required, but aids with intellisense!
-    var error = (Error)this.Error;
+    var error = (Error) this.Error;
 
     var about = PoweredBy.GetAbout(HttpRuntime.Cache, (version, fileVersion, product, copyright) => new
     {
         Version = version != null
-                  ? version.ToString()
-                  : fileVersion != null
-                  ? fileVersion.ToString()
-                  : "?.?.?.?",
+                ? version.ToString()
+                : fileVersion != null
+                ? fileVersion.ToString()
+                : "?.?.?.?",
         Product = Mask.EmptyString(product, "(product)"),
         Copyright = copyright,
     });
@@ -173,11 +173,11 @@ WriteLiteral("</pre>\r\n");
             #line 45 "..\..\ErrorMailHtmlPage.cshtml"
           
             var collection = new
-                                 {
-                                     Data = error.ServerVariables,
-                                     Id = "ServerVariables",
-                                     Title = "Server Variables",
-                                 };
+            {
+                Data  = error.ServerVariables,
+                Id    = "ServerVariables",
+                Title = "Server Variables",
+            };
         
 
             
@@ -188,9 +188,12 @@ WriteLiteral("</pre>\r\n");
             #line 53 "..\..\ErrorMailHtmlPage.cshtml"
          if (collection.Data != null && collection.Data.Count > 0)
         {
-            var items = Enumerable.Range(0, collection.Data.Count)
-                .Select(i => new { Key = collection.Data.GetKey(i), Value = collection.Data[i] })
-                .OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
+            var items = 
+                from i in Enumerable.Range(0, collection.Data.Count)
+                select new { Key   = collection.Data.GetKey(i), 
+                             Value = collection.Data[i] };
+            
+            items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
 
 
             
@@ -200,7 +203,7 @@ WriteLiteral("            <div id=\"");
 
 
             
-            #line 59 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 62 "..\..\ErrorMailHtmlPage.cshtml"
                 Write(collection.Id);
 
             
@@ -210,26 +213,25 @@ WriteLiteral("\">\r\n                <h1>");
 
 
             
-            #line 60 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 63 "..\..\ErrorMailHtmlPage.cshtml"
                Write(collection.Title);
 
             
             #line default
             #line hidden
-WriteLiteral("</h1>\r\n                <table class=\"collection\">\r\n                    <tr>\r\n    " +
-"                    <th>Name</th>            \r\n                        <th>Value" +
-"</th>\r\n                    </tr>\r\n");
+WriteLiteral("</h1>\r\n                <table class=\"collection\">\r\n                    <tr><th>Na" +
+"me</th>            \r\n                        <th>Value</th></tr>\r\n");
 
 
             
-            #line 66 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 67 "..\..\ErrorMailHtmlPage.cshtml"
                      foreach (var item in items)
                     {
 
             
             #line default
             #line hidden
-WriteLiteral("                        <tr>\r\n                            <td>");
+WriteLiteral("                        <tr><td>");
 
 
             
@@ -249,11 +251,11 @@ WriteLiteral("</td>\r\n                            <td>");
             
             #line default
             #line hidden
-WriteLiteral("</td>                \r\n                        </tr>\r\n");
+WriteLiteral("</td></tr>\r\n");
 
 
             
-            #line 72 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 71 "..\..\ErrorMailHtmlPage.cshtml"
                     }
 
             
@@ -263,7 +265,7 @@ WriteLiteral("                </table>\r\n            </div>\r\n");
 
 
             
-            #line 75 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 74 "..\..\ErrorMailHtmlPage.cshtml"
         }
 
             
@@ -273,7 +275,7 @@ WriteLiteral("        <p>Powered by <a href=\"http://elmah.googlecode.com/\">");
 
 
             
-            #line 76 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 75 "..\..\ErrorMailHtmlPage.cshtml"
                                                         Write(about.Product);
 
             
@@ -283,7 +285,7 @@ WriteLiteral("</a>, \r\n            version ");
 
 
             
-            #line 77 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 76 "..\..\ErrorMailHtmlPage.cshtml"
                Write(about.Version);
 
             
@@ -293,7 +295,7 @@ WriteLiteral("\r\n            ");
 
 
             
-            #line 78 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 77 "..\..\ErrorMailHtmlPage.cshtml"
        Write(about.Copyright);
 
             

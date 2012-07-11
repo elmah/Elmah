@@ -4,15 +4,15 @@
 @inherits RazorTemplateBase
 @{
     // NB cast is not really required, but aids with intellisense!
-    var error = (Error)this.Error;
+    var error = (Error) this.Error;
 
     var about = PoweredBy.GetAbout(HttpRuntime.Cache, (version, fileVersion, product, copyright) => new
     {
         Version = version != null
-                  ? version.ToString()
-                  : fileVersion != null
-                  ? fileVersion.ToString()
-                  : "?.?.?.?",
+                ? version.ToString()
+                : fileVersion != null
+                ? fileVersion.ToString()
+                : "?.?.?.?",
         Product = Mask.EmptyString(product, "(product)"),
         Copyright = copyright,
     });
@@ -44,31 +44,30 @@
         }
         @{
             var collection = new
-                                 {
-                                     Data = error.ServerVariables,
-                                     Id = "ServerVariables",
-                                     Title = "Server Variables",
-                                 };
+            {
+                Data  = error.ServerVariables,
+                Id    = "ServerVariables",
+                Title = "Server Variables",
+            };
         }
         @if (collection.Data != null && collection.Data.Count > 0)
         {
-            var items = Enumerable.Range(0, collection.Data.Count)
-                .Select(i => new { Key = collection.Data.GetKey(i), Value = collection.Data[i] })
-                .OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
+            var items = 
+                from i in Enumerable.Range(0, collection.Data.Count)
+                select new { Key   = collection.Data.GetKey(i), 
+                             Value = collection.Data[i] };
+            
+            items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
 
             <div id="@collection.Id">
                 <h1>@collection.Title</h1>
                 <table class="collection">
-                    <tr>
-                        <th>Name</th>            
-                        <th>Value</th>
-                    </tr>
+                    <tr><th>Name</th>            
+                        <th>Value</th></tr>
                     @foreach (var item in items)
                     {
-                        <tr>
-                            <td>@item.Key</td>
-                            <td>@item.Value</td>                
-                        </tr>
+                        <tr><td>@item.Key</td>
+                            <td>@item.Value</td></tr>
                     }
                 </table>
             </div>
