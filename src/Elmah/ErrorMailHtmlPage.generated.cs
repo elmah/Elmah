@@ -13,34 +13,10 @@ namespace Elmah
 {
     using System;
     using System.Collections.Generic;
-    
-    #line 2 "..\..\ErrorMailHtmlPage.cshtml"
-    using System.Collections.Specialized;
-    
-    #line default
-    #line hidden
-    
-    #line 3 "..\..\ErrorMailHtmlPage.cshtml"
-    using System.Globalization;
-    
-    #line default
-    #line hidden
-    
-    #line 4 "..\..\ErrorMailHtmlPage.cshtml"
-    using System.IO;
-    
-    #line default
-    #line hidden
     using System.Linq;
     using System.Text;
     
-    #line 5 "..\..\ErrorMailHtmlPage.cshtml"
-    using System.Web;
-    
-    #line default
-    #line hidden
-    
-    #line 6 "..\..\ErrorMailHtmlPage.cshtml"
+    #line 2 "..\..\ErrorMailHtmlPage.cshtml"
     using Elmah;
     
     #line default
@@ -60,12 +36,8 @@ WriteLiteral("\r\n");
 
 
 
-
-
-
-
             
-            #line 8 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 4 "..\..\ErrorMailHtmlPage.cshtml"
   
     // NB cast is not really required, but aids with intellisense!
     var error = (Error)this.Error;
@@ -90,7 +62,7 @@ WriteLiteral("<html>\r\n    <head>\r\n        <title>Error: ");
 
 
             
-            #line 26 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 22 "..\..\ErrorMailHtmlPage.cshtml"
                  Write(error.Message);
 
             
@@ -114,7 +86,7 @@ WriteLiteral(@"</title>
 
 
             
-            #line 40 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 36 "..\..\ErrorMailHtmlPage.cshtml"
                         Write(error.Type);
 
             
@@ -124,7 +96,7 @@ WriteLiteral(": ");
 
 
             
-            #line 40 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 36 "..\..\ErrorMailHtmlPage.cshtml"
                                      Write(error.Message);
 
             
@@ -134,7 +106,7 @@ WriteLiteral("</p>\r\n");
 
 
             
-            #line 41 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 37 "..\..\ErrorMailHtmlPage.cshtml"
          if (error.Time != DateTime.MinValue)
         {
 
@@ -145,13 +117,42 @@ WriteLiteral("            <p>Generated: ");
 
 
             
-            #line 43 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 39 "..\..\ErrorMailHtmlPage.cshtml"
                      Write(error.Time.ToUniversalTime().ToString("r"));
 
             
             #line default
             #line hidden
 WriteLiteral("</p>\r\n");
+
+
+            
+            #line 40 "..\..\ErrorMailHtmlPage.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+
+            
+            #line 41 "..\..\ErrorMailHtmlPage.cshtml"
+         if (error.Detail.Length != 0)
+        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <pre id=\"errorDetail\">");
+
+
+            
+            #line 43 "..\..\ErrorMailHtmlPage.cshtml"
+                             Write(error.Detail);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</pre>\r\n");
 
 
             
@@ -164,35 +165,6 @@ WriteLiteral("</p>\r\n");
 
             
             #line 45 "..\..\ErrorMailHtmlPage.cshtml"
-         if (error.Detail.Length != 0)
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <pre id=\"errorDetail\">");
-
-
-            
-            #line 47 "..\..\ErrorMailHtmlPage.cshtml"
-                             Write(error.Detail);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</pre>\r\n");
-
-
-            
-            #line 48 "..\..\ErrorMailHtmlPage.cshtml"
-        }
-
-            
-            #line default
-            #line hidden
-
-            
-            #line 49 "..\..\ErrorMailHtmlPage.cshtml"
           
             var collection = new
                                  {
@@ -207,7 +179,7 @@ WriteLiteral("</pre>\r\n");
             #line hidden
 
             
-            #line 57 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 53 "..\..\ErrorMailHtmlPage.cshtml"
          if (collection.Data != null && collection.Data.Count > 0)
         {
             var items = Enumerable.Range(0, collection.Data.Count)
@@ -222,7 +194,7 @@ WriteLiteral("            <div id=\"");
 
 
             
-            #line 63 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 59 "..\..\ErrorMailHtmlPage.cshtml"
                 Write(collection.Id);
 
             
@@ -232,7 +204,7 @@ WriteLiteral("\">\r\n                <h1>");
 
 
             
-            #line 64 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 60 "..\..\ErrorMailHtmlPage.cshtml"
                Write(collection.Title);
 
             
@@ -244,7 +216,7 @@ WriteLiteral("</h1>\r\n                <table class=\"collection\">\r\n         
 
 
             
-            #line 70 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 66 "..\..\ErrorMailHtmlPage.cshtml"
                      foreach (var item in items)
                     {
 
@@ -255,7 +227,7 @@ WriteLiteral("                        <tr>\r\n                            <td>")
 
 
             
-            #line 73 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 69 "..\..\ErrorMailHtmlPage.cshtml"
                            Write(item.Key);
 
             
@@ -265,7 +237,7 @@ WriteLiteral("</td>\r\n                            <td>");
 
 
             
-            #line 74 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 70 "..\..\ErrorMailHtmlPage.cshtml"
                            Write(item.Value);
 
             
@@ -275,7 +247,7 @@ WriteLiteral("</td>                \r\n                        </tr>\r\n");
 
 
             
-            #line 76 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 72 "..\..\ErrorMailHtmlPage.cshtml"
                     }
 
             
@@ -285,7 +257,7 @@ WriteLiteral("                </table>\r\n            </div>\r\n");
 
 
             
-            #line 79 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 75 "..\..\ErrorMailHtmlPage.cshtml"
         }
 
             
@@ -295,7 +267,7 @@ WriteLiteral("        <p>Powered by <a href=\"http://elmah.googlecode.com/\">");
 
 
             
-            #line 80 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 76 "..\..\ErrorMailHtmlPage.cshtml"
                                                         Write(about.Product);
 
             
@@ -305,7 +277,7 @@ WriteLiteral("</a>, \r\n            version ");
 
 
             
-            #line 81 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 77 "..\..\ErrorMailHtmlPage.cshtml"
                Write(about.Version);
 
             
@@ -315,7 +287,7 @@ WriteLiteral("\r\n            ");
 
 
             
-            #line 82 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 78 "..\..\ErrorMailHtmlPage.cshtml"
        Write(about.Copyright);
 
             
