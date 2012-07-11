@@ -190,8 +190,8 @@ WriteLiteral("</pre>\r\n");
         {
             var items = 
                 from i in Enumerable.Range(0, collection.Data.Count)
-                select new { Key   = collection.Data.GetKey(i), 
-                             Value = collection.Data[i] };
+                select KeyValuePair.Create(collection.Data.GetKey(i), 
+                                           collection.Data[i]);
             
             items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
 

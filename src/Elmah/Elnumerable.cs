@@ -36,7 +36,7 @@ namespace Elmah
         public static IEnumerable<KeyValuePair<int, T>> Index<T>(this IEnumerable<T> source)
         {
             if (source == null) throw new ArgumentNullException("source");
-            return source.Select((item, index) => new KeyValuePair<int, T>(index, item));
+            return source.Select((item, index) => KeyValuePair.Create(index, item));
         }
     }
 }

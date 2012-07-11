@@ -23,25 +23,13 @@
 
 namespace Elmah
 {
-    #region Imports
-
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
 
-    #endregion
-
-    static class TypeExtensions
+    static class KeyValuePair
     {
-        public static IEnumerable<KeyValuePair<string, object>> GetEnumMembers(this Type type)
+        public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value)
         {
-            if (type == null) throw new ArgumentNullException("type");
-            if (!type.IsEnum) throw new ArgumentException(null, "type");
-
-            var names = Enum.GetNames(type);
-            return Enum.GetValues(type)
-                       .Cast<object>()
-                       .Select((v, i) => KeyValuePair.Create(names[i], v));
+            return new KeyValuePair<TKey, TValue>(key, value);
         }
     }
 }
