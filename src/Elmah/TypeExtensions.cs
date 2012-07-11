@@ -39,9 +39,8 @@ namespace Elmah
             if (!type.IsEnum) throw new ArgumentException(null, "type");
 
             var names = Enum.GetNames(type);
-            return Enum.GetValues(type)
-                       .Cast<object>()
-                       .Select((v, i) => KeyValuePair.Create(names[i], v));
+            return from v in Enum.GetValues(type).Cast<object>().Index()
+                   select KeyValuePair.Create(names[v.Key], v.Value);
         }
     }
 }
