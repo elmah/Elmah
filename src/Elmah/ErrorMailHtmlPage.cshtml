@@ -1,12 +1,12 @@
 @* Generator: Template TypeVisibility: Internal *@
+@using System.Web
 @using Elmah
 @inherits RazorTemplateBase
 @{
     // NB cast is not really required, but aids with intellisense!
     var error = (Error)this.Error;
 
-    // TODO: see if there's a way to pass a cache into here rather than sending null!
-    var about = PoweredBy.GetAbout(null, (version, fileVersion, product, copyright) => new
+    var about = PoweredBy.GetAbout(HttpRuntime.Cache, (version, fileVersion, product, copyright) => new
     {
         Version = version != null
                   ? version.ToString()

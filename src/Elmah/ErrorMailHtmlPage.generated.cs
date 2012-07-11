@@ -17,6 +17,12 @@ namespace Elmah
     using System.Text;
     
     #line 2 "..\..\ErrorMailHtmlPage.cshtml"
+    using System.Web;
+    
+    #line default
+    #line hidden
+    
+    #line 3 "..\..\ErrorMailHtmlPage.cshtml"
     using Elmah;
     
     #line default
@@ -36,14 +42,14 @@ WriteLiteral("\r\n");
 
 
 
+
             
-            #line 4 "..\..\ErrorMailHtmlPage.cshtml"
+            #line 5 "..\..\ErrorMailHtmlPage.cshtml"
   
     // NB cast is not really required, but aids with intellisense!
     var error = (Error)this.Error;
 
-    // TODO: see if there's a way to pass a cache into here rather than sending null!
-    var about = PoweredBy.GetAbout(null, (version, fileVersion, product, copyright) => new
+    var about = PoweredBy.GetAbout(HttpRuntime.Cache, (version, fileVersion, product, copyright) => new
     {
         Version = version != null
                   ? version.ToString()
