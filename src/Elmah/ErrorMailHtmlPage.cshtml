@@ -4,12 +4,13 @@
 @using System.IO
 @using System.Web
 @using Elmah
-@inherits WebTemplateBase
+@inherits RazorTemplateBase
 @{
     // NB cast is not really required, but aids with intellisense!
     var error = (Error)this.Error;
 
-    var about = PoweredBy.GetAbout(Context.Cache, (version, fileVersion, product, copyright) => new
+    // TODO: see if there's a way to pass a cache into here rather than sending null!
+    var about = PoweredBy.GetAbout(null, (version, fileVersion, product, copyright) => new
     {
         Version = version != null
                   ? version.ToString()
