@@ -40,7 +40,10 @@
         }
         @if (error.Detail.Length != 0)
         {
-            <pre id="errorDetail">@error.Detail</pre>
+@* NOTE! DO NOT REMOVE this comment
+   Eliminates white space literal prior to pre tag in generated 
+   code and is important for correct formatting
+            *@<pre id="errorDetail">@error.Detail</pre>
         }
         @foreach (var collection in 
             from collection in new[] 
