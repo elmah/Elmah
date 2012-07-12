@@ -72,59 +72,5 @@ namespace Elmah
                 return parameter;
             };
         }
-
-        /*
-        [Serializable]
-        struct PrecisionScale : IEquatable<PrecisionScale>
-        {
-            // ReSharper disable RedundantDefaultFieldInitializer
-            public static readonly PrecisionScale None = new PrecisionScale(); // ReSharper restore RedundantDefaultFieldInitializer
-
-            public byte? Precision { get; private set; }
-            public byte? Scale { get; private set; }
-
-            public PrecisionScale(byte? precision, byte? scale) : this()
-            {
-                Precision = precision;
-                Scale = scale;
-            }
-
-            public bool Equals(PrecisionScale other) { return other.Precision.Equals(Precision) && other.Scale.Equals(Scale); }
-            public override bool Equals(object obj)  { return obj is PrecisionScale && Equals((PrecisionScale) obj); }
-            public override int GetHashCode() { unchecked { return (Precision.GetHashCode() * 397) ^ Scale.GetHashCode(); } }
-            public override string ToString() { return string.Format("Precision: {0}, Scale: {1}", Precision, Scale); }
-        }
-
-        delegate TParameter ParameterAdder<out TParameter>(string name, DbType? dbType, int? size, PrecisionScale precisionScale, object value);
-
-        static class DataExtensions
-        {
-            public static ParameterAdder<IDbDataParameter> ParameterAdder(this IDbCommand command)
-            {
-                return ParameterAdder(command, cmd => cmd.CreateParameter());
-            }
-
-            public static ParameterAdder<TParameter> ParameterAdder<TCommand, TParameter>(this TCommand command, Func<TCommand, TParameter> parameterCreator)
-                where TCommand : IDbCommand
-                where TParameter : IDbDataParameter
-            {
-                // ReSharper disable CompareNonConstrainedGenericWithNull
-                if (command == null) throw new ArgumentNullException("command"); // ReSharper restore CompareNonConstrainedGenericWithNull
-                if (parameterCreator == null) throw new ArgumentNullException("parameterCreator");
-            
-                return (name, dbType, size, ps, value) =>
-                {
-                    var parameter = parameterCreator(command);
-                    parameter.ParameterName = name;
-                    if (dbType != null) parameter.DbType = dbType.Value;
-                    if (Missing.Value != value) parameter.Value = value;
-                    if (ps.Precision != null) parameter.Precision = ps.Precision.Value;
-                    if (ps.Scale != null) parameter.Scale = ps.Scale.Value;
-                    command.Parameters.Add(parameter);
-                    return parameter;
-                };
-            }
-        }
-        */
     }
 }
