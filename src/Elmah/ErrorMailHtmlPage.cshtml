@@ -42,29 +42,34 @@
         {
             <pre id="errorDetail">@error.Detail</pre>
         }
-        @{
-            var collection = new
+        @foreach (var collection in 
+            from collection in new[] 
             {
-                Data  = error.ServerVariables,
-                Id    = "ServerVariables",
-                Title = "Server Variables",
-            };
-        }
-        @if (collection.Data != null && collection.Data.Count > 0)
+                new
+                {
+                    Id    = "ServerVariables",
+                    Title = "Server Variables",
+                    Items = error.ServerVariables,
+                }
+            }
+            let data = collection.Items
+            where data != null && data.Count > 0
+            let items = from i in Enumerable.Range(0, data.Count)
+                        select KeyValuePair.Create(data.GetKey(i), data[i])
+            select new
+            {
+                collection.Id, 
+                collection.Title,
+                Items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase)
+            }
+        )
         {
-            var items = 
-                from i in Enumerable.Range(0, collection.Data.Count)
-                select KeyValuePair.Create(collection.Data.GetKey(i), 
-                                           collection.Data[i]);
-            
-            items = items.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase);
-
             <div id="@collection.Id">
                 <h1>@collection.Title</h1>
                 <table class="collection">
                     <tr><th>Name</th>            
                         <th>Value</th></tr>
-                    @foreach (var item in items)
+                    @foreach (var item in collection.Items)
                     {
                         <tr><td>@item.Key</td>
                             <td>@item.Value</td></tr>
