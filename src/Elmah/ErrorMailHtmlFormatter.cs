@@ -21,8 +21,6 @@
 //
 #endregion
 
-using System.Web;
-
 [assembly: Elmah.Scc("$Id: ErrorMailHtmlFormatter.cs 640 2009-06-01 17:22:02Z azizatif $")]
 
 namespace Elmah
@@ -30,14 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
-
     using TextWriter = System.IO.TextWriter;
-    using HttpUtility = System.Web.HttpUtility;
-    using NameValueCollection = System.Collections.Specialized.NameValueCollection;
-    using HtmlTextWriter = System.Web.UI.HtmlTextWriter;
-    using Html32TextWriter = System.Web.UI.Html32TextWriter;
-    using HtmlTextWriterTag = System.Web.UI.HtmlTextWriterTag;
-    using HtmlTextWriterAttribute = System.Web.UI.HtmlTextWriterAttribute;
 
     #endregion
 
