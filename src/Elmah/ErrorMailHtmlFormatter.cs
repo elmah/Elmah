@@ -71,7 +71,7 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            var page = new ErrorMailHtmlPage { Error = error };
+            var page = new ErrorMailHtmlPage(error);
             writer.Write(page.TransformText());
         }
     }

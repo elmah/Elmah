@@ -6,6 +6,7 @@
 //  Author(s):
 //
 //      James Driscoll, mailto:jamesdriscoll@btinternet.com
+//      Atif Aziz, http://www.raboof.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,12 +24,21 @@
 
 namespace Elmah
 {
+    using System;
+
     /// <summary>
     /// Renders an HTML page displaying details about an error from the 
     /// error log ready for emailing.
     /// </summary>
+
     partial class ErrorMailHtmlPage
     {
-        public Error Error { get; set; }
+        public Error Error { get; private set; }
+
+        public ErrorMailHtmlPage(Error error)
+        {
+            if (error == null) throw new ArgumentNullException("error");
+            Error = error;
+        }
     }
 }
