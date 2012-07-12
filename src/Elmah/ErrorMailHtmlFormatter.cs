@@ -65,11 +65,8 @@ namespace Elmah
 
         public override void Format(TextWriter writer, Error error)
         {
-            if (writer == null)
-                throw new ArgumentNullException("writer");
-
-            if (error == null)
-                throw new ArgumentNullException("error");
+            if (writer == null) throw new ArgumentNullException("writer");
+            if (error == null) throw new ArgumentNullException("error");
 
             var page = new ErrorMailHtmlPage(error);
             writer.Write(page.TransformText());
