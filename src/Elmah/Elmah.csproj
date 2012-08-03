@@ -135,9 +135,6 @@
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AccessErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
