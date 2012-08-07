@@ -282,7 +282,7 @@ LIMIT @limit
             {
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.CommandText = "SELECT COUNT(*) FROM Elmah_Error WHERE Application = @Application";
-				command.Parameters.Add("@Application", NpgsqlDbType.Text, _maxAppNameLength).Value = appName;
+                command.Parameters.Add("@Application", NpgsqlDbType.Text, _maxAppNameLength).Value = appName;
                 return command;
             }
         }
