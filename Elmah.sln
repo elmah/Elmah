@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.MsAccess", "src\Elmah
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.MySql", "src\Elmah.MySql\Elmah.MySql.csproj", "{04341ECA-C1BF-410E-B3B2-0DC54612D475}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.SqlServer", "src\Elmah.SqlServer\Elmah.SqlServer.csproj", "{FD960C29-E686-4EE0-B4BC-1D826877CB2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,16 @@ Global
 		{04341ECA-C1BF-410E-B3B2-0DC54612D475}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{04341ECA-C1BF-410E-B3B2-0DC54612D475}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{04341ECA-C1BF-410E-B3B2-0DC54612D475}.Release|x86.ActiveCfg = Release|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

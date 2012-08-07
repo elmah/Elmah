@@ -359,9 +359,6 @@
     <Compile Include="Memoization.cs" />
     <Compile Include="SpeedBar.cs">
     </Compile>
-    <Compile Include="SqlErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SqlServerCompactErrorLog.cs" />
     <Compile Include="StringFormatter.cs">
     </Compile>
@@ -383,8 +380,6 @@
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
     <EmbeddedResource Include="ErrorLog.css" />
-    <Content Include="SQLServer.sql">
-    </Content>
     <EmbeddedResource Include="mkmdb.vbs">
     </EmbeddedResource>
     <Content Include="Oracle.sql">
