@@ -48,7 +48,7 @@ namespace Elmah
         private const int _maxAppNameLength = 60;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlErrorLog"/> class
+        /// Initializes a new instance of the <see cref="PgsqlErrorLog"/> class
         /// using a dictionary of configured settings.
         /// </summary>
 
@@ -87,7 +87,7 @@ namespace Elmah
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlErrorLog"/> class
+        /// Initializes a new instance of the <see cref="PgsqlErrorLog"/> class
         /// to use a specific connection string for connecting to the database.
         /// </summary>
 
