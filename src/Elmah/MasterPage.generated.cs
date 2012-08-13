@@ -133,8 +133,18 @@ WriteLiteral(@"        <!-- Le HTML5 shim, for IE6-8 support of HTML elements --
             
             #line default
             #line hidden
-WriteLiteral("/stylesheet\" />\r\n        <style type=\"text/css\">\r\n          body {\r\n            p" +
-"adding-top: 60px;\r\n          }\r\n        </style>\r\n    </head>\r\n    <body>\r\n");
+WriteLiteral("/stylesheet?");
+
+
+            
+            #line 42 "..\..\MasterPage.cshtml"
+                                                                         Write(StylesheetHelper.StylesheetHash);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(">\" />\r\n        <style type=\"text/css\">\r\n          body {\r\n            padding-top" +
+": 60px;\r\n          }\r\n        </style>\r\n    </head>\r\n    <body>\r\n");
 
 
             
