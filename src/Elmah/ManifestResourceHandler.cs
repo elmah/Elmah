@@ -48,15 +48,15 @@ namespace Elmah
 
         public static Action<HttpContextBase> Create(string resourceName, string mediaType, Encoding responseEncoding)
         {
-            return Create(new[] { resourceName }, mediaType, responseEncoding);
+            return Create(new[] { resourceName }, mediaType, responseEncoding, false);
         }
 
         public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType)
         {
-            return Create(resourceNames, mediaType, null);
+            return Create(resourceNames, mediaType, null, false);
         }
 
-        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding)
+        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
         {
             Debug.Assert(resourceNames != null);
             Debug.AssertStringNotEmpty(mediaType);
@@ -70,6 +70,12 @@ namespace Elmah
 
                 var response = context.Response;
                 response.ContentType = mediaType;
+
+                if (cacheResponse)
+                {
+                    response.Cache.SetCacheability(HttpCacheability.Public);
+                    response.Cache.SetExpires(DateTime.MaxValue);
+                }
 
                 if (responseEncoding != null)
                     response.ContentEncoding = responseEncoding;
