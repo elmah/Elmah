@@ -23,13 +23,34 @@
 
 namespace Elmah
 {
+    #region Imports
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
+    #endregion
+
     public static class StylesheetHelper
     {
         public static string StylesheetHash { get; private set; }
 
         static StylesheetHelper()
         {
-            StylesheetHash = "XXX";
+            CalculateHash();
+        }
+
+        private static void CalculateHash()
+        {
+            var memoryStream = new MemoryStream();
+            foreach (var resourceName in new[] { "Bootstrap.css", "ErrorLog.css" })
+                ManifestResourceHelper.WriteResourceToStream(memoryStream, resourceName);
+            var md5 = new MD5CryptoServiceProvider();
+            var hash = md5.ComputeHash(memoryStream);
+
+            var result = new StringBuilder();
+            foreach (var hashByte in hash)
+                result.Append(hashByte.ToString("x2"));
+            
+            StylesheetHash = result.ToString();
         }
     }
 }
