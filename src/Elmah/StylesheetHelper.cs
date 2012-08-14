@@ -30,12 +30,12 @@ namespace Elmah
     using System.Text;
     #endregion
 
-    public static class StylesheetHelper
+    public static class StyleSheetHelper
     {
         public static string StylesheetHash { get; private set; }
         public static readonly string[] StylesheetResourceNames = new[] {"Bootstrap.css", "ErrorLog.css"};
 
-        static StylesheetHelper()
+        static StyleSheetHelper()
         {
             CalculateHash();
         }

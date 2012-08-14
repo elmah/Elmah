@@ -144,7 +144,7 @@ WriteLiteral("/stylesheet?h=");
 
             
             #line 43 "..\..\MasterPage.cshtml"
-                                                                           Write(Uri.EscapeDataString(StylesheetHelper.StylesheetHash));
+                                                                           Write(Uri.EscapeDataString(StyleSheetHelper.StylesheetHash));
 
             
             #line default

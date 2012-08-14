@@ -220,7 +220,7 @@
     <Compile Include="ErrorMailHtmlPage.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="StylesheetHelper.cs" />
+    <Compile Include="StyleSheetHelper.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="ErrorDetailPage.generated.cs">
       <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
