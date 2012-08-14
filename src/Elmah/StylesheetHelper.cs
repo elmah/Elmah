@@ -24,16 +24,17 @@
 namespace Elmah
 {
     #region Imports
+    using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
-    using System.Text;
     #endregion
 
     public static class StyleSheetHelper
     {
         public static readonly string StyleSheetHash = CalculateHash();
-        public static readonly string[] StyleSheetResourceNames = new[] {"Bootstrap.css", "ErrorLog.css"};
+        public static readonly IEnumerable<string> StyleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
 
         private static string CalculateHash()
         {
