@@ -32,8 +32,8 @@ namespace Elmah
 
     public static class StyleSheetHelper
     {
-        public static string StylesheetHash { get; private set; }
-        public static readonly string[] StylesheetResourceNames = new[] {"Bootstrap.css", "ErrorLog.css"};
+        public static string StyleSheetHash { get; private set; }
+        public static readonly string[] StyleSheetResourceNames = new[] {"Bootstrap.css", "ErrorLog.css"};
 
         static StyleSheetHelper()
         {
@@ -43,13 +43,13 @@ namespace Elmah
         private static void CalculateHash()
         {
             var memoryStream = new MemoryStream();
-            foreach (var resourceName in StylesheetResourceNames)
+            foreach (var resourceName in StyleSheetResourceNames)
                 ManifestResourceHelper.WriteResourceToStream(memoryStream, resourceName);
             
             var md5 = new MD5CryptoServiceProvider();
             var hash = md5.ComputeHash(memoryStream);
 
-            StylesheetHash = hash.Select(b => b.ToString("x2"))
+            StyleSheetHash = hash.Select(b => b.ToString("x2"))
                                  .ToDelimitedString(null);
         }
     }
