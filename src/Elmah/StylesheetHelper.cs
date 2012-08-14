@@ -25,6 +25,7 @@ namespace Elmah
 {
     #region Imports
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
     #endregion
@@ -48,11 +49,8 @@ namespace Elmah
             var md5 = new MD5CryptoServiceProvider();
             var hash = md5.ComputeHash(memoryStream);
 
-            var result = new StringBuilder();
-            foreach (var hashByte in hash)
-                result.Append(hashByte.ToString("x2"));
-            
-            StylesheetHash = result.ToString();
+            StylesheetHash = hash.Select(b => b.ToString("x2"))
+                                 .ToDelimitedString(null);
         }
     }
 }

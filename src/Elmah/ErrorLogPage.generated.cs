@@ -40,7 +40,7 @@ namespace Elmah
     #line default
     #line hidden
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.3.2.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.4.1.0")]
     internal partial class ErrorLogPage : WebTemplateBase
     {
 #line hidden
@@ -306,7 +306,7 @@ WriteLiteral("). \r\n                Start with ");
 
             
             #line 121 "..\..\ErrorLogPage.cshtml"
-                      Write(Html(string.Join(null, stockSizes.ToArray())));
+                      Write(Html(stockSizes.ToDelimitedString(null)));
 
             
             #line default

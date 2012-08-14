@@ -28,15 +28,30 @@ namespace Elmah
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     #endregion
 
-    static class Elnumerable
+    static partial class Elnumerable
     {
         public static IEnumerable<KeyValuePair<int, T>> Index<T>(this IEnumerable<T> source)
         {
             if (source == null) throw new ArgumentNullException("source");
             return source.Select((item, index) => KeyValuePair.Create(index, item));
+        }
+
+        public static string ToDelimitedString<T>(this IEnumerable<T> source, string delimiter)
+        {
+            return FormatDelimitedString(source, delimiter, (sb, e) => sb.Append(e));
+        }
+
+        static string FormatDelimitedString<T>(IEnumerable<T> source, string delimiter, Func<StringBuilder, T, StringBuilder> append)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            return source.Index()
+                         .Aggregate(new StringBuilder(),
+                                    (sb, e) => append(sb.Append(e.Key > 0 ? delimiter : null), e.Value),
+                                    sb => sb.ToString());
         }
     }
 }

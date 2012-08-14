@@ -200,6 +200,15 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Elnumerable.g.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Elnumerable.g.cs</LastGenOutput>
+    </None>
+    <Compile Include="Elnumerable.g.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Elnumerable.g.tt</DependentUpon>
+    </Compile>
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -446,6 +455,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
