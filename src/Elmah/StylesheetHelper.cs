@@ -24,29 +24,41 @@
 namespace Elmah
 {
     #region Imports
+
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
+    
     #endregion
 
     public static class StyleSheetHelper
     {
-        public static readonly string StyleSheetHash = CalculateHash();
-        public static readonly IEnumerable<string> StyleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
+        static string _styleSheetHash;
+        static readonly ReadOnlyCollection<string> _styleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
+
+        public static string StyleSheetHash
+        {
+            get { return _styleSheetHash ?? (_styleSheetHash = CalculateHash()); }
+        }
+
+        public static IEnumerable<string> StyleSheetResourceNames
+        {
+            get { return _styleSheetResourceNames; }
+        }
 
         private static string CalculateHash()
         {
             var memoryStream = new MemoryStream();
-            foreach (var resourceName in StyleSheetResourceNames)
+            foreach (var resourceName in _styleSheetResourceNames)
                 ManifestResourceHelper.WriteResourceToStream(memoryStream, resourceName);
 
-            var md5 = new MD5CryptoServiceProvider();
-            var hash = md5.ComputeHash(memoryStream);
-
-            return hash.Select(b => b.ToString("x2"))
-                .ToDelimitedString(null);
+            return MD5.Create()
+                      .ComputeHash(memoryStream)
+                      .Select(b => b.ToString("x2"))
+                      .ToDelimitedString(null);
         }
     }
 }
