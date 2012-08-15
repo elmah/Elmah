@@ -36,8 +36,13 @@ namespace Elmah
     {
         public static IEnumerable<KeyValuePair<int, T>> Index<T>(this IEnumerable<T> source)
         {
+            return Index(source, 0);
+        }
+
+        public static IEnumerable<KeyValuePair<int, T>> Index<T>(this IEnumerable<T> source, int startIndex)
+        {
             if (source == null) throw new ArgumentNullException("source");
-            return source.Select((item, index) => KeyValuePair.Create(index, item));
+            return source.Select((item, index) => KeyValuePair.Create(startIndex + index, item));
         }
 
         public static string ToDelimitedString<T>(this IEnumerable<T> source, string delimiter)
