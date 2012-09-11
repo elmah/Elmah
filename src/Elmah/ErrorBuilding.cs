@@ -764,19 +764,19 @@ namespace Elmah
             if (modules == null)
                 return;
 
-            ICollection<InitializedModule> current;
-            InitializedModule[] updated;
-            do
+            while (true)
             {
-                current = _modules;
-                int currentCount = append ? current.Count : 0;
-                updated = new InitializedModule[currentCount + modules.Length];
+                var current = _modules;
+                var currentCount = append ? current.Count : 0;
+                var updated = new InitializedModule[currentCount + modules.Length];
                 if (append)
                     current.CopyTo(updated, 0);
                 Array.Copy(modules, 0, updated, currentCount, modules.Length);
                 // TODO handle duplicates
-            }
-            while (current != Interlocked.CompareExchange(ref _modules, Array.AsReadOnly(updated), current));
+                if (current == Interlocked.CompareExchange(ref _modules, Array.AsReadOnly(updated), current))
+                    break;
+                Thread.SpinWait(1); // TODO Use SpinWait[1] when on .NET 4 
+            }                       // [1] http://msdn.microsoft.com/en-us/library/system.threading.spinwait.aspx
         }
 
         [ThreadStatic] static ExtensionHub _thread;
