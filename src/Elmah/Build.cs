@@ -47,6 +47,8 @@ namespace Elmah
         public const string Framework = "net-3.5";
 #elif NET_4_0
         public const string Framework = "net-4.0";
+#elif NET_4_5
+        public const string Framework = "net-4.5";
 #else
         public const string Framework = "unknown";
 #endif

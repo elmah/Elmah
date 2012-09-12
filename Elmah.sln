@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A240CA4F-E517-4493-9FD6-40F886ECF8DC}"
 	ProjectSection(SolutionItems) = preProject
 		samples\elmah.config = samples\elmah.config
@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "src\Elmah\Elmah.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Tests", "tests\Elmah.Tests.csproj", "{8F619C74-74F2-48B5-A06B-780BD329DD43}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "localhost", "http://localhost:51296", "{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "http://localhost:51296", "{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv3.5"
@@ -39,6 +39,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7B2D89
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.net-4.0", "src\Elmah\Elmah.net-4.0.csproj", "{270CE8D7-4EEB-4106-9D3E-A7DFDC642F85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.net-4.5", "src\Elmah\Elmah.net-4.5.csproj", "{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{270CE8D7-4EEB-4106-9D3E-A7DFDC642F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{270CE8D7-4EEB-4106-9D3E-A7DFDC642F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{270CE8D7-4EEB-4106-9D3E-A7DFDC642F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{270CE8D7-4EEB-4106-9D3E-A7DFDC642F85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
