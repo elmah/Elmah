@@ -132,16 +132,13 @@ namespace Elmah
                 }
 
                 var request = context.Request;
-                #if NET_3_5 || NET_4_0
-                var qsfc = request.TryGetUnvalidatedCollections((form, qs) => new
+                var qsfc = request.TryGetUnvalidatedCollections((form, qs, cookies) => new
                 {
                     QueryString = qs,
                     Form = form, 
-                    request.Cookies,
+                    Cookies = cookies,
                 });
-                #else
-                var qsfc = request.Unvalidated;
-                #endif
+
                 _serverVariables = CopyCollection(request.ServerVariables);
                 _queryString = CopyCollection(qsfc.QueryString);
                 _form = CopyCollection(qsfc.Form);

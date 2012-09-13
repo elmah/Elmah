@@ -40,21 +40,23 @@ namespace Elmah
         /// <summary>
         /// Returns unvalidated collections if build targets .NET Framework
         /// 4.0 or later and if caller is hosted at run-time (based on value
-        /// of <see cref="HostingEnvironment.IsHosted"/>). In all other 
-        /// cases, collections returned are validated ones from
-        /// <see cref="HttpRequestBase.Form"/> and 
+        /// of <see cref="HostingEnvironment.IsHosted"/>) when targeting 
+        /// .NET Framework 4.0 exclusively. In all other cases except when
+        /// targeting .NET Framework 4.5, collections returned are validated 
+        /// ones from <see cref="HttpRequestBase.Form"/> and 
         /// <see cref="HttpRequestBase.QueryString"/> and therefore
         /// could raise <see cref="HttpRequestValidationException"/>.
         /// </summary>
 
-        internal static T TryGetUnvalidatedCollections<T>(this HttpRequestBase request, Func<NameValueCollection, NameValueCollection, T> resultor)
+        internal static T TryGetUnvalidatedCollections<T>(this HttpRequestBase request, 
+            Func<NameValueCollection, NameValueCollection, HttpCookieCollection, T> resultor)
         {
             if (request == null) throw new ArgumentNullException("request");
             if (resultor == null) throw new ArgumentNullException("resultor");
 
             NameValueCollection form = null, queryString = null;
 
-            #if NET_4_0 // ASP.NET 4 and later
+            #if NET_4_0
 
             // ValidationUtility.GetUnvalidatedCollections relies on
             // HttpContext as opposed to HttpContextBase, which would render
@@ -82,14 +84,20 @@ namespace Elmah
 
             // TODO Use HttpRequestBase.Unvalidated[1] in ASP.NET 4.5 and later
             // [1] http://msdn.microsoft.com/en-us/library/system.web.httprequestbase.unvalidated.aspx
-
             #endif
-
-            // ReSharper disable ConstantNullCoalescingCondition
-            return resultor(form ?? request.Form, queryString ?? request.QueryString); // ReSharper restore ConstantNullCoalescingCondition
+            
+            #if NET_3_5 || NET_4_0
+            var qsfc = request;
+            #else
+            var qsfc = request.Unvalidated; // ASP.NET 4.5 and later
+            #endif
+                                                             // ReSharper disable ConstantNullCoalescingCondition
+            return resultor(form ?? qsfc.Form,
+                            queryString ?? qsfc.QueryString, // ReSharper restore ConstantNullCoalescingCondition
+                            qsfc.Cookies);
         }
 
-        #if NET_4_0 // .NET Framework 4.0 and later
+        #if NET_4_0
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         static IEnumerable<NameValueCollection> GetUnvalidatedCollections(HttpRequestBase request)
