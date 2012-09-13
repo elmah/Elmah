@@ -12,7 +12,7 @@
     
     protected override void OnLoad(EventArgs e)
     {
-        SmtpSection smtpSection = (SmtpSection) WebConfigurationManager.GetSection("system.net/mailSettings/smtp");
+        var smtpSection = (SmtpSection) WebConfigurationManager.GetSection("system.net/mailSettings/smtp");
 
         MailPath = (smtpSection != null && smtpSection.SpecifiedPickupDirectory != null 
                     ? smtpSection.SpecifiedPickupDirectory.PickupDirectoryLocation 
@@ -97,11 +97,49 @@
         {
             font-size: small;
         }
+        .alert
+        {
+            background-color: #fcf8e3;
+            border: #fbeed5 1px solid;
+            padding: 0 2em 1em 2em;
+        }
+        .alert .warning
+        {
+            color: #b94a48;
+        }
     </style>
 </head>
 <body>
     <form runat="server">
     <h1><%= Server.HtmlEncode(Title) %></h1>
+    <% if (MailSetup.SuppressesErrorMailing) { %>
+    <div class="alert">
+        <p>
+        <strong class="warning">Warning!</strong>
+        <strong>Error mailing has been suppressed in this demo due to incomplete
+        or invalid configuration of the SMTP pick-up direction location.</strong> 
+        To have e-mails generated when an error occurs, create the directory 
+        <code><%= Server.MapPath("~/Mails") %></code> (using, for example, 
+        <code><a href="http://technet.microsoft.com/en-us/library/bb490930.aspx">MKDIR</a></code> 
+        on a Command Prompt) and then update SMTP configuration section of 
+        this web site's <code>web.config</code> of 
+        this demo as follows:
+        </p>
+        <pre><%= Server.HtmlEncode(@"
+<system.net>
+  <mailSettings>
+    <smtp deliveryMethod=""SpecifiedPickupDirectory"">
+      <specifiedPickupDirectory 
+        pickupDirectoryLocation=""" + Server.MapPath("~/Mails") + @""" />
+    </smtp>
+  </mailSettings>
+</system.net>
+".TrimStart()) %></pre>
+        You can also use another path for <code>pickupDirectoryLocation</code>
+        instead of the one suggested here as long as it exists and with
+        sufficient permissions.
+    </div>
+    <% } %>
     <h2>Introduction</h2>
     <p>
         This sample web application is set up to use ELMAH to log errors
