@@ -58,7 +58,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;DEBUG;NET_4_5</DefineConstants>
-    <DocumentationFile>Elmah.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.5\Elmah.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
