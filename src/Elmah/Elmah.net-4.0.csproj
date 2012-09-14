@@ -80,7 +80,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;NET_4_0</DefineConstants>
-    <DocumentationFile>Elmah.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.0\Elmah.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
