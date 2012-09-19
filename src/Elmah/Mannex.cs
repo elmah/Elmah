@@ -21,6 +21,49 @@
 //
 #endregion
 
+namespace Mannex
+{
+    #region Imports
+
+    using System;
+    using System.Diagnostics;
+    using System.Globalization;
+
+    #endregion
+
+    /// <summary>
+    /// Extension methods for <see cref="int"/>.
+    /// </summary>
+
+    static partial class Int32Extensions
+    {
+        /// <summary>
+        /// Converts <see cref="int"/> to its string representation in the
+        /// invariant culture.
+        /// </summary>
+
+        [DebuggerStepThrough]
+        public static string ToInvariantString(this int value)
+        {
+            return value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Calculates the quotient and remainder from dividing two numbers 
+        /// and returns a user-defined result.
+        /// </summary>
+
+        [DebuggerStepThrough]
+        public static T DivRem<T>(this int dividend, int divisor, Func<int, int, T> resultFunc)
+        {
+            if (resultFunc == null) throw new ArgumentNullException("resultFunc");
+            var quotient = dividend / divisor;
+            var remainder = dividend % divisor;
+            return resultFunc(quotient, remainder);
+        }
+    }
+}
+
 namespace Mannex.Collections.Generic
 {
     #region Imports

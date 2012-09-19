@@ -29,6 +29,7 @@ namespace Elmah
 
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices; // caller info attributes
     using System.Web;
     using Mannex.Collections.Generic;
 
@@ -48,13 +49,34 @@ namespace Elmah
 
         public void Raise(Exception e, HttpContextBase context)
         {
+            Raise(e, context, null);
+        }
+
+        public void Raise(Exception e, HttpContextBase context, CallerInfo callerInfo)
+        {
             if (context == null)
                 context = new HttpContextWrapper(HttpContext.Current);
 
             ErrorSignalEventHandler handler = Raised;
 
             if (handler != null)
-                handler(this, new ErrorSignalEventArgs(e, context));
+                handler(this, new ErrorSignalEventArgs(e, context, callerInfo));
+        }
+
+        public void RaiseWithCallerInfo(Exception e,
+            [CallerMemberName] string callerMember = null,
+            [CallerFilePath] string callerFilePath = null,
+            [CallerLineNumber] int callerLineNumber = 0)
+        {
+            Raise(e, null, new CallerInfo(callerMember, callerFilePath, callerLineNumber));
+        }
+
+        public void RaiseWithCallerInfo(Exception e, HttpContextBase context,
+            [CallerMemberName] string callerMember = null,
+            [CallerFilePath] string callerFilePath = null,
+            [CallerLineNumber] int callerLineNumber = 0)
+        {
+            Raise(e, context, new CallerInfo(callerMember, callerFilePath, callerLineNumber));
         }
 
         public static ErrorSignal FromCurrentContext()
@@ -135,13 +157,17 @@ namespace Elmah
         [ NonSerialized ]
         private readonly HttpContextBase _context;
 
-        public ErrorSignalEventArgs(Exception e, HttpContextBase context)
+        public ErrorSignalEventArgs(Exception e, HttpContextBase context) : 
+            this(e, context, null) {}
+
+        public ErrorSignalEventArgs(Exception e, HttpContextBase context, CallerInfo callerInfo)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
 
             _exception = e;
             _context = context;
+            CallerInfo = callerInfo ?? CallerInfo.Empty;
         }
 
         public Exception Exception
@@ -153,6 +179,8 @@ namespace Elmah
         {
             get { return _context; }
         }
+
+        public CallerInfo CallerInfo { get; private set; }
 
         public override string ToString()
         {

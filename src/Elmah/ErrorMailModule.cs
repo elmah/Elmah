@@ -312,7 +312,8 @@ namespace Elmah
 
         protected virtual void OnErrorSignaled(object sender, ErrorSignalEventArgs args)
         {
-            OnError(args.Exception, args.Context);
+            using (args.Exception.TryScopeCallerInfo(args.CallerInfo))
+                OnError(args.Exception, args.Context);
         }
 
         /// <summary>

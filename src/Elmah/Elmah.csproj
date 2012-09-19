@@ -195,6 +195,7 @@
     <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
+    <Compile Include="CallerInfo.cs" />
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
@@ -208,6 +209,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Elnumerable.g.cs</LastGenOutput>
     </None>
+    <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="Elnumerable.g.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

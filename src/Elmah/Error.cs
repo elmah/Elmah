@@ -33,6 +33,7 @@ namespace Elmah
     using System.Security.Principal;
     using System.Web;
     using System.Xml;
+    using Mannex;
     using Thread = System.Threading.Thread;
     using NameValueCollection = System.Collections.Specialized.NameValueCollection;
 
@@ -143,6 +144,14 @@ namespace Elmah
                 _queryString = CopyCollection(qsfc.QueryString);
                 _form = CopyCollection(qsfc.Form);
                 _cookies = CopyCollection(qsfc.Cookies);
+            }
+
+            var callerInfo = e.TryGetCallerInfo() ?? CallerInfo.Empty;
+            if (!callerInfo.IsEmpty)
+            {
+                _detail = "# caller: " + callerInfo
+                        + System.Environment.NewLine
+                        + _detail;
             }
         }
 

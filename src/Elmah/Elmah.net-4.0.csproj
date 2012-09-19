@@ -198,6 +198,7 @@
     <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
+    <Compile Include="CallerInfo.cs" />
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
@@ -225,6 +226,7 @@
     <Compile Include="DbProviderFactoryQuery.cs" />
     <Compile Include="DelegatingDisposable.cs" />
     <Compile Include="ErrorMailHtmlPage.cs" />
+    <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />

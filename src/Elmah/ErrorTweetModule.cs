@@ -129,7 +129,8 @@ namespace Elmah
 
         protected virtual void OnErrorSignaled(object sender, ErrorSignalEventArgs args)
         {
-            LogException(args.Exception, args.Context);
+            using (args.Exception.TryScopeCallerInfo(args.CallerInfo))
+                LogException(args.Exception, args.Context);
         }
 
         /// <summary>
