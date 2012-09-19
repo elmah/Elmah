@@ -31,6 +31,7 @@ namespace Elmah
     using System.Configuration;
     using System.Xml;
     using Elmah.Assertions;
+    using Mannex;
 
     #endregion
 
@@ -57,7 +58,7 @@ namespace Elmah
             if (parent != null)
             {
                 ErrorFilterConfiguration parentConfig = (ErrorFilterConfiguration) parent;
-                config = (ErrorFilterConfiguration) ((ICloneable) parentConfig).Clone();
+                config = parentConfig.CloneObject();
             }    
             else
             {

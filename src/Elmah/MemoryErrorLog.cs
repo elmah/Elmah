@@ -31,6 +31,7 @@ namespace Elmah
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Threading;
+    using Mannex;
     using IDictionary = System.Collections.IDictionary;
     using CultureInfo = System.Globalization.CultureInfo;
 
@@ -149,7 +150,7 @@ namespace Elmah
             // Assign a new GUID and create an entry for the error.
             //
 
-            error = (Error) ((ICloneable) error).Clone();
+            error = error.CloneObject();
             error.ApplicationName = ApplicationName;
             var newId = Guid.NewGuid();
             var entry = new ErrorLogEntry(this, newId.ToString(), error);
@@ -199,7 +200,7 @@ namespace Elmah
             // Return a copy that the caller can party on.
             //
 
-            var error = (Error) ((ICloneable) entry.Error).Clone();
+            var error = entry.Error.CloneObject();
             return new ErrorLogEntry(this, entry.Id, error);
         }
 
@@ -262,7 +263,7 @@ namespace Elmah
 
                 foreach (var entry in selectedEntries)
                 {
-                    var error = (Error)((ICloneable)entry.Error).Clone();
+                    var error = entry.Error.CloneObject();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
                 }
             }

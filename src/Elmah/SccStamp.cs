@@ -33,6 +33,7 @@ namespace Elmah
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Collections.Generic;
+    using Mannex;
 
     #endregion
 
@@ -227,7 +228,7 @@ namespace Elmah
             if (stamps.Length == 0)
                 return null;
             
-            stamps = (SccStamp[]) stamps.Clone();
+            stamps = stamps.CloneObject();
             SortByRevision(stamps, /* descending */ true);
             return stamps[0];
         }
