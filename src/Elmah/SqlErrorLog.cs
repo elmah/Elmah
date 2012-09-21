@@ -34,6 +34,9 @@ namespace Elmah
     using System.IO;
     using System.Text;
     using System.Threading;
+    #if !NET_3_5
+    using System.Threading.Tasks;
+    #endif
     using System.Xml;
 
     using IDictionary = System.Collections.IDictionary;
@@ -212,6 +215,21 @@ namespace Elmah
             }
         }
 
+        #if !NET_3_5
+
+        /// <summary>
+        /// Asynchronous version of <see cref="GetErrors"/>.
+        /// </summary>
+
+        public override Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
+        {
+            return Task.Factory.FromAsync<int, int, ICollection<ErrorLogEntry>, int>(
+                       BeginGetErrors, EndGetErrors, 
+                       pageIndex, pageSize, errorEntryList, null);
+        }
+
+        #endif
+        
         /// <summary>
         /// Begins an asynchronous version of <see cref="GetErrors"/>.
         /// </summary>
