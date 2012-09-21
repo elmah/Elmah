@@ -173,7 +173,7 @@ namespace Elmah
                 command.Connection = connection;
                 connection.Open();
 
-                string xml = ReadSingleXmlStringResult(command.ExecuteReader());
+                var xml = ReadSingleXmlStringResult(command.ExecuteReader());
                 ErrorsXmlToList(xml, errorEntryList);
 
                 int total;
@@ -275,7 +275,7 @@ namespace Elmah
                 using (connection)
                 using (command)
                 {
-                    string xml = ReadSingleXmlStringResult(command.EndExecuteReader(asyncResult.InnerResult));
+                    var xml = ReadSingleXmlStringResult(command.EndExecuteReader(asyncResult.InnerResult));
                     ErrorsXmlToList(xml, errorEntryList);
                     int total;
                     Commands.GetErrorsXmlOutputs(command, out total);
@@ -319,7 +319,7 @@ namespace Elmah
             settings.CheckCharacters = false;
             settings.ConformanceLevel = ConformanceLevel.Fragment;
 
-            using (XmlReader reader = XmlReader.Create(new StringReader(xml), settings))
+            using (var reader = XmlReader.Create(new StringReader(xml), settings))
                 ErrorsXmlToList(reader, errorEntryList);
         }
 
@@ -442,7 +442,7 @@ namespace Elmah
             {
                 var command = new SqlCommand("ELMAH_GetErrorsXml") { CommandType = CommandType.StoredProcedure };
 
-                SqlParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
                 parameters.Add("@Application", SqlDbType.NVarChar, _maxAppNameLength).Value = appName;
                 parameters.Add("@PageIndex", SqlDbType.Int).Value = pageIndex;
