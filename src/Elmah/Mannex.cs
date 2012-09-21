@@ -127,3 +127,111 @@ namespace Mannex
         }
     }
 }
+
+#if !NET_3_5
+
+namespace Mannex.Threading.Tasks
+{
+    #region Imports
+
+    using System;
+    using System.Diagnostics;
+    using System.Threading.Tasks;
+
+    #endregion
+
+    /// <summary>
+    /// Extension methods for <see cref="TaskCompletionSource{TResult}"/>.
+    /// </summary>
+
+    static partial class TaskCompletionSourceExtensions
+    {
+        /// <summary>
+        /// Attempts to conclude <see cref="TaskCompletionSource{TResult}"/>
+        /// as being canceled, faulted or having completed successfully
+        /// based on the corresponding status of the given 
+        /// <see cref="Task{T}"/>.
+        /// </summary>
+
+        public static bool TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            if (task == null) throw new ArgumentNullException("task");
+
+            if (task.IsCanceled)
+            {
+                source.TrySetCanceled();
+            }
+            else if (task.IsFaulted)
+            {
+                var aggregate = task.Exception;
+                Debug.Assert(aggregate != null);
+                source.TrySetException(aggregate.InnerExceptions);
+            }
+            else if (TaskStatus.RanToCompletion == task.Status)
+            {
+                source.TrySetResult(task.Result);
+            }
+            else
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+}
+
+namespace Mannex.Threading.Tasks
+{
+    #region Imports
+
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    #endregion
+
+    /// <summary>
+    /// Extension methods for <see cref="Task"/>.
+    /// </summary>
+
+    static partial class TaskExtensions
+    {
+        /// <summary>
+        /// Returns a <see cref="Task{T}"/> that can be used as the
+        /// <see cref="IAsyncResult"/> return value from the method
+        /// that begin the operation of an API following the 
+        /// <a href="http://msdn.microsoft.com/en-us/library/ms228963.aspx">Asynchronous Programming Model</a>.
+        /// If an <see cref="AsyncCallback"/> is supplied, it is invoked
+        /// when the supplied task concludes (fails, cancels or completes
+        /// successfully).
+        /// </summary>
+
+        public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state)
+        {
+            var result = task;
+
+            TaskCompletionSource<T> tcs = null;
+            if (task.AsyncState != state)
+            {
+                tcs = new TaskCompletionSource<T>(state);
+                result = tcs.Task;
+            }
+
+            Action<Task<T>> then = null;
+            if (tcs != null) then += delegate { tcs.TryConcludeFrom(task); };
+            if (callback != null) then += delegate { callback(result); };
+            if (then != null)
+            {
+                task.ContinueWith(then, CancellationToken.None,
+                                  TaskContinuationOptions.ExecuteSynchronously,
+                                  TaskScheduler.Default);
+            }
+
+            return result;
+        }
+    }
+}
+
+#endif // !NET_3_5
+

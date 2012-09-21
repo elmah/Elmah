@@ -194,6 +194,7 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
+    <Compile Include="Async.cs" />
     <Compile Include="AsyncResult.cs" />
     <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">

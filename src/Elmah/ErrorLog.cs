@@ -21,6 +21,10 @@
 //
 #endregion
 
+#if !NET_3_5
+#define ASYNC
+#endif
+
 [assembly: Elmah.Scc("$Id: ErrorLog.cs 776 2011-01-12 21:09:24Z azizatif $")]
 
 namespace Elmah
@@ -30,6 +34,12 @@ namespace Elmah
     using System;
     using System.Web;
     using System.Collections.Generic;
+
+    #if ASYNC
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Mannex.Threading.Tasks;
+    #endif
 
     #endregion
 
@@ -50,6 +60,31 @@ namespace Elmah
         
         public abstract string Log(Error error);
 
+        #if ASYNC
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="Log"/>.
+        /// </summary>
+
+        public Task<string> LogAsync(Error error)
+        {
+            return LogAsync(error, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="Log"/>. An additional parameter
+        /// specifies a <see cref="CancellationToken"/> to use.
+        /// </summary>
+
+        public virtual Task<string> LogAsync(Error error, CancellationToken cancellationToken)
+        {
+            return Async.RunSynchronously(Log, error);
+        }
+        
+        #endif
+
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
         /// of <see cref="Log"/>.
@@ -57,7 +92,11 @@ namespace Elmah
 
         public virtual IAsyncResult BeginLog(Error error, AsyncCallback asyncCallback, object asyncState)
         {
+            #if ASYNC
+            return LogAsync(error, CancellationToken.None).Apmize(asyncCallback, asyncState);
+            #else
             return Apm.BeginSync(asyncCallback, asyncState, this, "Log", () => Log(error));
+            #endif
         }
 
         /// <summary>
@@ -67,7 +106,11 @@ namespace Elmah
 
         public virtual string EndLog(IAsyncResult asyncResult)
         {
+            #if ASYNC
+            return EndApmizedTask<string>(asyncResult);
+            #else
             return AsyncResult<string>.End(asyncResult, this, "Log");
+            #endif
         }
 
         /// <summary>
@@ -77,6 +120,31 @@ namespace Elmah
 
         public abstract ErrorLogEntry GetError(string id);
 
+        #if ASYNC
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="GetError"/>.
+        /// </summary>
+
+        public virtual Task<ErrorLogEntry> GetErrorAsync(string id)
+        {
+            return GetErrorAsync(id, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="GetError"/>. An additional parameter
+        /// specifies a <see cref="CancellationToken"/> to use.
+        /// </summary>
+
+        public virtual Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken)
+        {
+            return Async.RunSynchronously(GetError, id);
+        }
+
+        #endif
+
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
         /// of <see cref="GetError"/>.
@@ -84,7 +152,11 @@ namespace Elmah
 
         public virtual IAsyncResult BeginGetError(string id, AsyncCallback asyncCallback, object asyncState)
         {
+            #if ASYNC
+            return GetErrorAsync(id, CancellationToken.None).Apmize(asyncCallback, asyncState);
+            #else
             return Apm.BeginSync(asyncCallback, asyncState, this, "GetError", () => GetError(id));
+            #endif
         }
 
         /// <summary>
@@ -94,7 +166,11 @@ namespace Elmah
 
         public virtual ErrorLogEntry EndGetError(IAsyncResult asyncResult)
         {
+            #if ASYNC
+            return EndApmizedTask<ErrorLogEntry>(asyncResult);
+            #else
             return AsyncResult<ErrorLogEntry>.End(asyncResult, this, "GetError");
+            #endif
         }
 
         /// <summary>
@@ -104,6 +180,31 @@ namespace Elmah
 
         public abstract int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList);
 
+        #if ASYNC
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="GetErrors"/>. An additional 
+        /// parameter specifies a <see cref="CancellationToken"/> to use.
+        /// </summary>
+
+        public virtual Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        {
+            return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// When overridden in a subclass, starts a task that asynchronously
+        /// does the same as <see cref="GetErrors"/>.
+        /// </summary>
+
+        public virtual Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
+        {
+            return Async.RunSynchronously(GetErrors, pageIndex, pageSize, errorEntryList);
+        }
+
+        #endif
+
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
         /// of <see cref="GetErrors"/>.
@@ -111,7 +212,11 @@ namespace Elmah
 
         public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
         {
+            #if ASYNC
+            return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None).Apmize(asyncCallback, asyncState);
+            #else
             return Apm.BeginSync(asyncCallback, asyncState, this, "GetErrors", () => GetErrors(pageIndex, pageSize, errorEntryList));
+            #endif
         }
 
         /// <summary>
@@ -121,7 +226,11 @@ namespace Elmah
         
         public virtual int EndGetErrors(IAsyncResult asyncResult)
         {
+            #if ASYNC
+            return EndApmizedTask<int>(asyncResult);
+            #else
             return AsyncResult<int>.End(asyncResult, this, "GetErrors");
+            #endif
         }
 
         /// <summary>
@@ -246,5 +355,24 @@ namespace Elmah
 
             return Mask.EmptyString(appName, "/");
         }
+
+        #if ASYNC
+
+        static T EndApmizedTask<T>(IAsyncResult asyncResult)
+        {
+            if (asyncResult == null) throw new ArgumentNullException("asyncResult");
+            var task = asyncResult as Task<T>;
+            if (task == null) throw new ArgumentException(null, "asyncResult");
+            try
+            {
+                return task.Result;
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException; // TODO handle stack trace reset?
+            }
+        }
+
+        #endif
     }
 }
