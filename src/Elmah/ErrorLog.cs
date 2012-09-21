@@ -127,7 +127,7 @@ namespace Elmah
         /// does the same as <see cref="GetError"/>.
         /// </summary>
 
-        public virtual Task<ErrorLogEntry> GetErrorAsync(string id)
+        public Task<ErrorLogEntry> GetErrorAsync(string id)
         {
             return GetErrorAsync(id, CancellationToken.None);
         }
@@ -188,7 +188,7 @@ namespace Elmah
         /// parameter specifies a <see cref="CancellationToken"/> to use.
         /// </summary>
 
-        public virtual Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None);
         }
