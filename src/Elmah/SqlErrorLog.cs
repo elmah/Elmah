@@ -259,7 +259,7 @@ namespace Elmah
 
                 List<string> chunks = null;
                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
-                    while (await reader.ReadAsync())
+                    while (await reader.ReadAsync(cancellationToken))
                         (chunks ?? (chunks = new List<string>())).Add(reader.GetString(0));
 
                 var xml = chunks != null && chunks.Count > 0 ? string.Join(null, chunks) : null;
