@@ -128,7 +128,11 @@ namespace Elmah
                     return new DelegatingHttpHandler(ErrorDigestRssHandler.ProcessRequest);
 
                 case "download":
+                    #if NET_3_5 || NET_4_0
                     return new HttpAsyncHandler((context, getAsyncCallback) => HttpTextAsyncHandler.Create(ErrorLogDownloadHandler.ProcessRequest)(context, getAsyncCallback));
+                    #else
+                    return new DelegatingHttpTaskAsyncHandler(ErrorLogDownloadHandler.ProcessRequestAsync);
+                    #endif
 
                 case "stylesheet":
                     return new DelegatingHttpHandler(ManifestResourceHandler.Create(StyleSheetHelper.StyleSheetResourceNames, "text/css", Encoding.GetEncoding("Windows-1252"), true));

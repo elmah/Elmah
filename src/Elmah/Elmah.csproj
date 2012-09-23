@@ -210,6 +210,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Elnumerable.g.cs</LastGenOutput>
     </None>
+    <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="Elnumerable.g.cs">
       <AutoGen>True</AutoGen>

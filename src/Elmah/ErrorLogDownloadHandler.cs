@@ -28,11 +28,12 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections;
     using System.Globalization;
     using System.IO;
-    using System.Text;
     using System.Text.RegularExpressions;
+    #if !NET_3_5 && !NET_4_0
+    using System.Threading.Tasks;
+    #endif
     using System.Web;
     using System.Collections.Generic;
 
@@ -50,6 +51,14 @@ namespace Elmah
         {
             if (context == null) throw new ArgumentNullException("context");
             if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
+
+            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequest(context, getAsyncCallback, format, maxDownloadCount));
+        }
+
+        private static T ProcessRequestPrelude<T>(HttpContextBase context, Func<Format, int, T> resultor)
+        {
+            Debug.Assert(context != null);
+            Debug.Assert(resultor != null);
 
             var request = context.Request;
             var query = request.QueryString;
@@ -72,8 +81,76 @@ namespace Elmah
             //
 
             context.Response.BufferOutput = false;
-            return ProcessRequest(context, getAsyncCallback, format, maxDownloadCount);
+            return resultor(format, maxDownloadCount);
         }
+
+        #if !NET_3_5 && !NET_4_0
+
+        public static Task ProcessRequestAsync(HttpContextBase context)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequestAsync(context, format, maxDownloadCount));
+        }
+
+        private static async Task ProcessRequestAsync(HttpContextBase context, Format format, int maxDownloadCount)
+        {
+            var response = context.Response;
+            var output = response.Output;
+
+            foreach (var text in format.Header())
+                await output.WriteAsync(text);
+
+            var log = ErrorLog.GetDefault(context);
+            var errorEntryList = new List<ErrorLogEntry>(_pageSize);
+            var downloadCount = 0;
+            var clientDisconnectedToken = response.ClientDisconnectedToken;
+
+            for (var pageIndex = 0; ; pageIndex++)
+            {
+                var total = await log.GetErrorsAsync(pageIndex, _pageSize, errorEntryList, clientDisconnectedToken);
+                var count = errorEntryList.Count;
+
+                if (maxDownloadCount > 0)
+                {
+                    var remaining = maxDownloadCount - (downloadCount + count);
+                    if (remaining < 0)
+                        count += remaining;
+                }
+
+                foreach (var entry in format.Entries(errorEntryList, 0, count, total))
+                    await output.WriteAsync(entry);
+
+                downloadCount += count;
+
+                await Task.Factory.FromAsync(response.BeginFlush, response.EndFlush, null);
+
+                //
+                // Done if either the end of the list (no more errors found) or
+                // the requested limit has been reached.
+                //
+
+                if (count == 0 || downloadCount == maxDownloadCount)
+                {
+                    if (count > 0)
+                    {
+                        foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
+                            await output.WriteAsync(entry);
+                    }
+                    break;
+                }
+
+                if (clientDisconnectedToken.IsCancellationRequested)
+                    break;
+
+                //
+                // Fetch next page of results.
+                //
+
+                errorEntryList.Clear();
+            }
+        }
+
+        #endif // !NET_3_5 && !NET_4_0
 
         private static IEnumerable<AsyncResultOr<string>> ProcessRequest(HttpContextBase context, Func<AsyncCallback> getAsyncCallback, Format format, int maxDownloadCount)
         {
