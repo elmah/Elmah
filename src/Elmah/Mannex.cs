@@ -209,6 +209,21 @@ namespace Mannex.Threading.Tasks
 
         public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state)
         {
+            return Apmize(task, callback, state, null);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Task{T}"/> that can be used as the
+        /// <see cref="IAsyncResult"/> return value from the method
+        /// that begin the operation of an API following the 
+        /// <a href="http://msdn.microsoft.com/en-us/library/ms228963.aspx">Asynchronous Programming Model</a>.
+        /// If an <see cref="AsyncCallback"/> is supplied, it is invoked
+        /// when the supplied task concludes (fails, cancels or completes
+        /// successfully).
+        /// </summary>
+
+        public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state, TaskScheduler scheduler)
+        {
             var result = task;
 
             TaskCompletionSource<T> tcs = null;
@@ -218,16 +233,23 @@ namespace Mannex.Threading.Tasks
                 result = tcs.Task;
             }
 
-            Action<Task<T>> then = null;
-            if (tcs != null) then += delegate { tcs.TryConcludeFrom(task); };
-            if (callback != null) then += delegate { callback(result); };
-            if (then != null)
+            Task t = task;
+            if (tcs != null)
             {
-                task.ContinueWith(then, CancellationToken.None,
-                                  TaskContinuationOptions.ExecuteSynchronously,
-                                  TaskScheduler.Default);
+                t = t.ContinueWith(delegate { tcs.TryConcludeFrom(task); }, 
+                                   CancellationToken.None,
+                                   TaskContinuationOptions.ExecuteSynchronously,
+                                   TaskScheduler.Default);
             }
-
+            if (callback != null)
+            {
+                // ReSharper disable RedundantAssignment
+                t = t.ContinueWith(delegate { callback(result); }, // ReSharper restore RedundantAssignment
+                                   CancellationToken.None,
+                                   TaskContinuationOptions.None,
+                                   scheduler ?? TaskScheduler.Default);
+            }
+            
             return result;
         }
     }
