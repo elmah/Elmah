@@ -23,6 +23,11 @@ REM -------------------------------------------------------------------------
 REM
 setlocal
 pushd "%~dp0"
+call :main %*
+popd
+goto :EOF
+
+:main
 set MSBUILDEXE=%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe
 if not exist "%MSBUILDEXE%" (
     echo Microsoft Build Engine ^(MSBuild^) 4.0 does not appear to be 
@@ -47,3 +52,4 @@ if %vrev% lss 17929 (
 )
 set EnableNuGetPackageRestore=true
 for %%i in (debug release) do %build% /p:Configuration=%%i %*
+goto :EOF
