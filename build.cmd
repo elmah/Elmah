@@ -51,5 +51,5 @@ if %vrev% lss 17929 (
     set build=%build% /t:Elmah;Elmah_net-4_0;Elmah_Tests
 )
 set EnableNuGetPackageRestore=true
-for %%i in (debug release) do %build% /p:Configuration=%%i %*
+for %%i in (debug release) do %build% /p:Configuration=%%i /v:m %*
 goto :EOF
