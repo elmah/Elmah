@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallerInfoTests.cs" />
+    <Compile Include="StackTraceParserTests.cs" />
     <Compile Include="ErrorLogPageFactoryTests.cs" />
     <Compile Include="ErrorMailModuleTests.cs" />
     <Compile Include="DelegatingDisposableTests.cs" />

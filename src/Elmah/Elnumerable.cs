@@ -58,5 +58,30 @@ namespace Elmah
                                     (sb, e) => append(sb.Append(e.Key > 0 ? delimiter : null), e.Value),
                                     sb => sb.ToString());
         }
+
+        public static IEnumerable<TResult> Pairwise<TSource, TResult>(this IEnumerable<TSource> source,
+                                                                      Func<TSource, TSource, TResult> selector)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            if (selector == null) throw new ArgumentNullException("selector");
+            return PairwiseImpl(source, selector);
+        }
+
+        static IEnumerable<TResult> PairwiseImpl<TSource, TResult>(IEnumerable<TSource> source,
+                                                                   Func<TSource, TSource, TResult> selector)
+        {
+            using (var e = source.GetEnumerator())
+            {
+                if (!e.MoveNext()) 
+                    yield break;
+                var previous = e.Current;
+                while (e.MoveNext())
+                {
+                    var current = e.Current;
+                    yield return selector(previous, current);
+                    previous = current;
+                }
+            }
+        }
     }
 }

@@ -28,8 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.IO;
-    using System.Text.RegularExpressions;
+    using System.Linq;
     using System.Web;
 
     #endregion
@@ -43,28 +42,7 @@ namespace Elmah
     {
         public ErrorLog ErrorLog { get; set; }
 
-        private static readonly Regex _reStackTrace = new Regex(@"
-                ^
-                \s*
-                \w+ \s+ 
-                (?<type> .+ ) \.
-                (?<method> .+? ) 
-                (?<params> \( (?<params> .*? ) \) )
-                ( \s+ 
-                \w+ \s+ 
-                  (?<file> [a-z] \: .+? ) 
-                  \: \w+ \s+ 
-                  (?<line> [0-9]+ ) \p{P}? )?
-                \s*
-                $",
-            RegexOptions.IgnoreCase
-            | RegexOptions.Multiline
-            | RegexOptions.ExplicitCapture
-            | RegexOptions.CultureInvariant
-            | RegexOptions.IgnorePatternWhitespace
-            | RegexOptions.Compiled);
-
-        private static HelperResult MarkupStackTrace(string text)
+        static HelperResult MarkupStackTrace(string text)
         {
             Debug.Assert(text != null);
 
@@ -72,122 +50,77 @@ namespace Elmah
             {
                 if (writer == null) throw new ArgumentNullException("writer");
 
-                var anchor = 0;
+                var frames = StackTraceParser.Parse
+                (
+                    text,
+                    (idx, len, txt) => new
+                    {
+                        Index = idx,
+                        End   = idx + len,
+                        Html  = txt.Length > 0
+                              ? HttpUtility.HtmlEncode(txt)
+                              : string.Empty,
+                    },
+                    (t, m) => new
+                    {
+                        Type   = new { t.Index, t.End, Html = "<span class='st-type'>" + t.Html + "</span>" },
+                        Method = new { m.Index, m.End, Html = "<span class='st-method'>" + m.Html + "</span>" }
+                    },
+                    (t, n) => new
+                    {
+                        Type = new { t.Index, t.End, Html = "<span class='st-param-type'>" + t.Html + "</span>" },
+                        Name = new { n.Index, n.End, Html = "<span class='st-param-name'>" + n.Html + "</span>" }
+                    },
+                    (p, ps) => new { List = p, Parameters = ps.ToArray() },
+                    (f, l) => new
+                    {
+                        File = f.Html.Length > 0
+                             ? new { f.Index, f.End, Html = "<span class='st-file'>" + f.Html + "</span>" }
+                             : null,
+                        Line = l.Html.Length > 0
+                             ? new { l.Index, l.End, Html = "<span class='st-line'>" + l.Html + "</span>" }
+                             : null,
+                    },
+                    (f, tm, p, fl) =>
+                        from tokens in new[]
+                        {
+                            new[]
+                            {
+                                new { f.Index, End = f.Index, Html = "<span class='st-frame'>" },
+                                tm.Type,
+                                tm.Method,
+                                new { p.List.Index, End = p.List.Index, Html = "<span class='params'>" },
+                            },
+                            from pe in p.Parameters
+                            from e in new[] { pe.Type, pe.Name }
+                            select e,
+                            new[]
+                            {
+                                new { Index = p.List.End, p.List.End, Html = "</span>" },
+                                fl.File,
+                                fl.Line,
+                                new { Index = f.End, f.End, Html = "</span>" },
+                            },
+                        }
+                        from token in tokens
+                        where token != null
+                        select token
+                );
 
-                foreach (Match match in _reStackTrace.Matches(text))
-                {
-                    Debug.Assert(writer != null);
-                    HttpUtility.HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
-                    MarkupStackFrame(text, match, writer);
-                    anchor = match.Index + match.Length;
-                }
+                var markups =
+                    from token in Enumerable.Repeat(new { Index = 0, End = 0, Html = string.Empty }, 1)
+                                            .Concat(from tokens in frames from token in tokens select token)
+                                            .Pairwise((prev, curr) => new { Previous = prev, Current = curr })
+                    from m in new[]
+                    {
+                        HttpUtility.HtmlEncode(text.Substring(token.Previous.End, token.Current.Index - token.Previous.End)),
+                        token.Current.Html
+                    }
+                    where m.Length > 0
+                    select m;
 
-                Debug.Assert(writer != null);
-                HttpUtility.HtmlEncode(text.Substring(anchor), writer);
+                writer.Write(markups.ToDelimitedString(null));
             });
-        }
-
-        private static void MarkupStackFrame(string text, Match match, TextWriter writer)
-        {
-            Debug.Assert(text != null);
-            Debug.Assert(match != null);
-            Debug.Assert(writer != null);
-
-            int anchor = match.Index;
-            GroupCollection groups = match.Groups;
-
-            //
-            // Type + Method
-            //
-
-            Group type = groups["type"];
-            Debug.Assert(writer != null);
-            HttpUtility.HtmlEncode(text.Substring(anchor, type.Index - anchor), writer);
-            anchor = type.Index;
-            writer.Write("<span class='st-frame'>");
-            anchor = StackFrameSpan(text, anchor, "st-type", type, writer);
-            anchor = StackFrameSpan(text, anchor, "st-method", groups["method"], writer);
-
-            //
-            // Parameters
-            //
-
-            Group parameters = groups["params"];
-            Debug.Assert(writer != null);
-            HttpUtility.HtmlEncode(text.Substring(anchor, parameters.Index - anchor), writer);
-            writer.Write("<span class='st-params'>(");
-            int position = 0;
-            foreach (string parameter in parameters.Captures[0].Value.Split(StringSeparatorStock.Comma))
-            {
-                int spaceIndex = parameter.LastIndexOf(' ');
-                if (spaceIndex <= 0)
-                {
-                    Span(writer, "st-param", parameter.Trim());
-                }
-                else
-                {
-                    if (position++ > 0)
-                        writer.Write(", ");
-                    string argType = parameter.Substring(0, spaceIndex).Trim();
-                    Span(writer, "st-param-type", argType);
-                    writer.Write(' ');
-                    string argName = parameter.Substring(spaceIndex + 1).Trim();
-                    Span(writer, "st-param-name", argName);                    
-                }
-            }
-            writer.Write(")</span>");
-            anchor = parameters.Index + parameters.Length;
-
-            //
-            // File + Line
-            //
-
-            anchor = StackFrameSpan(text, anchor, "st-file", groups["file"], writer);
-            anchor = StackFrameSpan(text, anchor, "st-line", groups["line"], writer);
-            
-            writer.Write("</span>");
-
-            //
-            // Epilogue
-            //
-
-            int end = match.Index + match.Length;
-            Debug.Assert(writer != null);
-            HttpUtility.HtmlEncode(text.Substring(anchor, end - anchor), writer);
-        }
-
-        private static int StackFrameSpan(string text, int anchor, string klass, Group group, TextWriter writer)
-        {
-            Debug.Assert(text != null);
-            Debug.Assert(group != null);
-            Debug.Assert(writer != null);
-
-            return group.Success 
-                 ? StackFrameSpan(text, anchor, klass, group.Value, group.Index, group.Length, writer) 
-                 : anchor;
-        }
-
-        private static int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length, TextWriter writer)
-        {
-            Debug.Assert(text != null);
-            Debug.Assert(writer != null);
-
-            Debug.Assert(writer != null);
-            HttpUtility.HtmlEncode(text.Substring(anchor, index - anchor), writer);
-            Span(writer, klass, value);
-            return index + length;
-        }
-
-        private static void Span(TextWriter writer, string klass, string value)
-        {
-            Debug.Assert(writer != null);
-
-            writer.Write("<span class='"); 
-            writer.Write(klass);  
-            writer.Write("'>");
-            Debug.Assert(writer != null);
-            HttpUtility.HtmlEncode(value, writer);
-            writer.Write("</span>");
         }
     }
 }
