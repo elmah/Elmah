@@ -206,17 +206,8 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Elnumerable.g.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Elnumerable.g.cs</LastGenOutput>
-    </None>
     <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
     <Compile Include="ExceptionExtensions.cs" />
-    <Compile Include="Elnumerable.g.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Elnumerable.g.tt</DependentUpon>
-    </Compile>
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -229,6 +220,9 @@
     <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
     <Compile Include="StackTraceParser.cs" />
     <Compile Include="StyleSheetHelper.cs" />
     <Compile Include="TypeExtensions.cs" />
@@ -251,7 +245,6 @@
     </Compile>
     <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="Elnumerable.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Error.cs">
       <SubType>Code</SubType>

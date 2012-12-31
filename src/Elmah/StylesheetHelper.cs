@@ -31,7 +31,8 @@ namespace Elmah
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
-    
+    using MoreLinq;
+
     #endregion
 
     public static class StyleSheetHelper
@@ -58,7 +59,7 @@ namespace Elmah
             return MD5.Create()
                       .ComputeHash(memoryStream)
                       .Select(b => b.ToString("x2"))
-                      .ToDelimitedString(null);
+                      .ToDelimitedString(string.Empty);
         }
     }
 }

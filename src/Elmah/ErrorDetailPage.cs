@@ -30,6 +30,7 @@ namespace Elmah
     using System;
     using System.Linq;
     using System.Web;
+    using MoreLinq;
 
     #endregion
 
@@ -119,7 +120,7 @@ namespace Elmah
                     where m.Length > 0
                     select m;
 
-                writer.Write(markups.ToDelimitedString(null));
+                writer.Write(markups.ToDelimitedString(string.Empty));
             });
         }
     }

@@ -3,6 +3,7 @@
 @using System.IO
 @using System.Web
 @using Elmah
+@using MoreLinq
 @inherits WebTemplateBase
 @{
     const int defaultPageSize = 15;
@@ -118,7 +119,7 @@
             <p>Errors @firstErrorNumber.ToString("N0") to @lastErrorNumber.ToString("N0") 
                 of total @totalCount.ToString("N0") 
                 (page @((pageIndex + 1).ToString("N0")) of @totalPages.ToString("N0")). 
-                Start with @Html(stockSizes.ToDelimitedString(null)) errors per page.</p>
+                Start with @Html(stockSizes.ToDelimitedString(string.Empty)) errors per page.</p>
 
             // Write out the main table to display the errors.
 
