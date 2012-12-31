@@ -444,6 +444,7 @@
       <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
     </None>
     <None Include="MySql.sql" />
+    <None Include="packages.config" />
     <None Include="Pgsql.sql" />
   </ItemGroup>
   <ItemGroup>
