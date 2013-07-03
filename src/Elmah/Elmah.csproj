@@ -223,6 +223,7 @@
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
     <Compile Include="StackTraceParser.cs" />
     <Compile Include="StyleSheetHelper.cs" />
     <Compile Include="TypeExtensions.cs" />

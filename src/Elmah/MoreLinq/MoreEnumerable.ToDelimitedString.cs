@@ -57,21 +57,22 @@ namespace MoreLinq
         public static string ToDelimitedString<TSource>(this IEnumerable<TSource> source, string delimiter)
         {
             if (source == null) throw new ArgumentNullException("source");
-            return ToDelimitedStringImpl(source, delimiter ?? CultureInfo.CurrentCulture.TextInfo.ListSeparator);
+            return ToDelimitedStringImpl(source, delimiter, (sb, e) => sb.Append(e));
         }
 
-        private static string ToDelimitedStringImpl<TSource>(IEnumerable<TSource> source, string delimiter)
+        static string ToDelimitedStringImpl<T>(IEnumerable<T> source, string delimiter, Func<StringBuilder, T, StringBuilder> append)
         {
             Debug.Assert(source != null);
-            Debug.Assert(delimiter != null);
+            Debug.Assert(append != null);
 
+            delimiter = delimiter ?? CultureInfo.CurrentCulture.TextInfo.ListSeparator;
             var sb = new StringBuilder();
             var i = 0;
 
             foreach (var value in source)
             {
                 if (i++ > 0) sb.Append(delimiter);
-                sb.Append(value);
+                append(sb, value);
             }
 
             return sb.ToString();
