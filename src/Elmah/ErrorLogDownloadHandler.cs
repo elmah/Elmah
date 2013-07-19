@@ -129,13 +129,18 @@ namespace Elmah
             if (result != _result)
                 throw new ArgumentException(null, "result");
 
-            _result = null;
-            _log = null;
-            _context = null;
-            _callback = null;
-            _errorEntryList = null;
-
-            ((AsyncResult) result).End();
+            try
+            {
+                ((AsyncResult) result).End();
+            }
+            finally
+            {
+                _result = null;
+                _log = null;
+                _context = null;
+                _callback = null;
+                _errorEntryList = null;
+            }
         }
 
         private void GetErrorsCallback(IAsyncResult result)

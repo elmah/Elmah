@@ -57,7 +57,7 @@ namespace Elmah
         public const string Framework = "unknown";
 #endif
 
-        public const string Configuration = TypeLowercase + "; " + Status + "; " + Framework;
+        public const string Configuration = TypeLowercase + "; " + Status + "; " + Framework + "; QF338";
 
         /// <summary>
         /// Gets a string representing the version of the CLR saved in 
