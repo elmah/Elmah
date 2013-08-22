@@ -36,7 +36,7 @@ namespace Elmah.Tests
         [Fact]
         public void CanPageMultipleErrors()
         {
-            var errorLog = new MemoryErrorLog(4);
+            var errorLog = new MemoryErrorLog();
             var today = DateTime.Today;
             for (var i = 3; i >= 0; i--)
             {
