@@ -234,7 +234,7 @@ namespace Elmah
 
                 totalCount = _entries.Count;
 
-                var startIndex = totalCount - pageSize - (pageIndex * pageSize);
+                var startIndex = totalCount - ((pageIndex + 1) * pageSize);
                 var endIndex = Math.Min(startIndex + pageSize, totalCount);
                 var count = Math.Max(0, endIndex - startIndex);
                 
