@@ -115,9 +115,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\System.Data.SQLite.DLL</HintPath>
     </Reference>
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\lib\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web">
       <Name>System.Web</Name>
     </Reference>
@@ -373,7 +370,6 @@
     <Compile Include="Memoization.cs" />
     <Compile Include="SpeedBar.cs">
     </Compile>
-    <Compile Include="SqlServerCompactErrorLog.cs" />
     <Compile Include="StringFormatter.cs">
     </Compile>
     <Compile Include="StringSeparatorStock.cs">
