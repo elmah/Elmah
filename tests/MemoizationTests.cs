@@ -23,10 +23,13 @@
 
 namespace Elmah.Tests
 {
+    extern alias o;
+
     #region Imports
 
     using System;
     using Xunit;
+    using Memoization = o::Elmah.Memoization;
 
     #endregion
 

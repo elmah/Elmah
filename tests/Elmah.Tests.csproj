@@ -80,9 +80,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\src\Elmah.Oracle\Elmah.Oracle.csproj">
+      <Project>{1eff8e01-6259-4e57-a2e7-a44f201077de}</Project>
+      <Name>Elmah.Oracle</Name>
+      <Aliases>o</Aliases>
+    </ProjectReference>
     <ProjectReference Include="..\src\Elmah\Elmah.csproj">
       <Project>{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}</Project>
       <Name>Elmah</Name>
+      <Aliases>global</Aliases>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

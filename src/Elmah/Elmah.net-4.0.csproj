@@ -201,8 +201,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="DbCommandExtensions.cs" />
-    <Compile Include="DbProviderFactoryQuery.cs" />
     <Compile Include="DelegatingDisposable.cs" />
     <Compile Include="ErrorMailHtmlPage.cs" />
     <Compile Include="ExceptionExtensions.cs" />
@@ -214,7 +212,6 @@
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
     <Compile Include="StackTraceParser.cs" />
     <Compile Include="StyleSheetHelper.cs" />
-    <Compile Include="TypeExtensions.cs" />
     <Compile Include="ErrorDetailPage.generated.cs">
       <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -338,9 +335,6 @@
     </Compile>
     <Compile Include="MsAjaxDeltaErrorLogModule.cs">
     </Compile>
-    <Compile Include="OracleErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="PgsqlErrorLog.cs" />
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
@@ -365,7 +359,6 @@
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Memoization.cs" />
     <Compile Include="SpeedBar.cs">
     </Compile>
     <Compile Include="StringFormatter.cs">
@@ -388,8 +381,6 @@
     <EmbeddedResource Include="ErrorLog.css" />
     <EmbeddedResource Include="mkmdb.vbs">
     </EmbeddedResource>
-    <Content Include="Oracle.sql">
-    </Content>
     <EmbeddedResource Include="RemoteAccessError.htm">
     </EmbeddedResource>
     <EmbeddedResource Include="Bootstrap.css">

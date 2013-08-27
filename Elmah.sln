@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.SqlServerCompact", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.SQLite", "src\Elmah.SQLite\Elmah.SQLite.csproj", "{30DE3B3A-87B5-4025-A04A-882769090C60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Oracle", "src\Elmah.Oracle\Elmah.Oracle.csproj", "{1EFF8E01-6259-4E57-A2E7-A44F201077DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,16 @@ Global
 		{30DE3B3A-87B5-4025-A04A-882769090C60}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{30DE3B3A-87B5-4025-A04A-882769090C60}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{30DE3B3A-87B5-4025-A04A-882769090C60}.Release|x86.ActiveCfg = Release|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1EFF8E01-6259-4E57-A2E7-A44F201077DE}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

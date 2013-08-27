@@ -29,7 +29,7 @@ namespace Elmah.Tests
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using Mannex;
+    using Elmah;
 
     #endregion
 
@@ -48,10 +48,12 @@ namespace Elmah.Tests
     {
         readonly EntryCollection _entries = new EntryCollection();
 
+        static Error Clone(Error error) { return Mannex.ICloneableExtensions.CloneObject(error); }
+
         public override string Log(Error error)
         {
             var id = Guid.NewGuid();
-            var entry = new ErrorLogEntry(this, id.ToString(), error.CloneObject());
+            var entry = new ErrorLogEntry(this, id.ToString(), Clone(error));
             _entries.Add(entry);
             return entry.Id;
         }
@@ -62,7 +64,7 @@ namespace Elmah.Tests
                 from key in Enumerable.Repeat(id, 1)
                 select _entries[key] into e
                 where e != null
-                select new ErrorLogEntry(this, e.Id, e.Error.CloneObject());
+                select new ErrorLogEntry(this, e.Id, Clone(e.Error));
             return entries.SingleOrDefault();
         }
 
@@ -77,7 +79,7 @@ namespace Elmah.Tests
                 }
                 from e in sorted.Skip(pageIndex * pageSize).Take(pageSize)
                 select errorEntryList != null
-                     ? new ErrorLogEntry(this, e.Id, e.Error.CloneObject())
+                     ? new ErrorLogEntry(this, e.Id, Clone(e.Error))
                      : e;
             if (errorEntryList != null)
             {
