@@ -25,20 +25,24 @@ namespace Elmah.Tests
 {
     #region Imports
 
-    using System.Web;
+    using System.Collections.Specialized;
     using Xunit;
 
     #endregion
 
     public class ErrorJsonTests
     {
+        /// <summary>
+        /// Tests that encoding error to json with query parameter without equal sign.
+        /// Test fix of: https://code.google.com/p/elmah/issues/detail?id=308
+        /// </summary>
         [Fact]
-        public void CanSerializeErrorJsonWithQueryStringWithoutEqualSign()
+        public void CanEncodeNullKeysInCollections()
         {
             var error = new Error();
-            var queryString = HttpUtility.ParseQueryString("foo");
-            error.QueryString.Add(queryString);
-            ErrorJson.EncodeString(error);
+            error.QueryString.Add(new NameValueCollection { { null, "foo" } });
+            var json = ErrorJson.EncodeString(error);
+            Assert.NotNull(json);
         }
     }
 }
