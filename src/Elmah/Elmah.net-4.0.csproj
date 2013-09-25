@@ -379,8 +379,6 @@
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
     <EmbeddedResource Include="ErrorLog.css" />
-    <EmbeddedResource Include="mkmdb.vbs">
-    </EmbeddedResource>
     <EmbeddedResource Include="RemoteAccessError.htm">
     </EmbeddedResource>
     <EmbeddedResource Include="Bootstrap.css">
