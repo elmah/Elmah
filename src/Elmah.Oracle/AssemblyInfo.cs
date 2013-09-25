@@ -32,7 +32,7 @@ using InternalsVisibleToAttribute = System.Runtime.CompilerServices.InternalsVis
 #endregion
 
 [assembly: AssemblyTitle("Elmah.Oracle")]
-[assembly: AssemblyDescription("Oracle Access Support for ELMAH")]
+[assembly: AssemblyDescription("Oracle Support for ELMAH")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ELMAH")]
 [assembly: AssemblyCopyright("Copyright \u00a9 2004, Atif Aziz. All rights reserved.")]
