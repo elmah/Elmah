@@ -99,10 +99,6 @@
   <ItemGroup>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="Microsoft.Vsa" />
-    <Reference Include="Npgsql, Version=2.0.6.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Npgsql.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -333,7 +329,6 @@
     </Compile>
     <Compile Include="MsAjaxDeltaErrorLogModule.cs">
     </Compile>
-    <Compile Include="PgsqlErrorLog.cs" />
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -403,7 +398,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
     </None>
-    <None Include="Pgsql.sql" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
