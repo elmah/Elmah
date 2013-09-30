@@ -331,53 +331,53 @@ namespace Elmah
 
         static class EventSubscriptionHelper
         {
-            public static void OnException(this ExtensionHub ehub, Action<object, ExceptionEventArgs> handler)
+            public static IDisposable OnException(this ExtensionHub ehub, Action<object, ExceptionEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ExceptionEvent>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ExceptionEvent>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
-            public static void OnExceptionFilter(this ExtensionHub ehub, Func<object, ExceptionFilterEventArgs, bool> handler)
+            public static IDisposable OnExceptionFilter(this ExtensionHub ehub, Func<object, ExceptionFilterEventArgs, bool> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ExceptionFilterMessage>().PushHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
+                return ehub.Get<ExceptionFilterMessage>().PushHandler(next => (sender, args) => next(sender, args) || handler(sender, args));
             }
 
-            public static void OnErrorMailing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            public static IDisposable OnErrorMailing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Mailing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ErrorMailEvents.Mailing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
-            public static void OnErrorMailed(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            public static IDisposable OnErrorMailed(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Mailed>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ErrorMailEvents.Mailed>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
-            public static void OnErrorMailDisposing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
+            public static IDisposable OnErrorMailDisposing(this ExtensionHub ehub, Action<object, ErrorMailEventArgs> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorMailEvents.Disposing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ErrorMailEvents.Disposing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
-            public static void OnErrorInitializing(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
+            public static IDisposable OnErrorInitializing(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorInitialization.Initializing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ErrorInitialization.Initializing>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
 
-            public static void OnErrorInitialized(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
+            public static IDisposable OnErrorInitialized(this ExtensionHub ehub, Action<object, ErrorInitializationContext> handler)
             {
                 if (ehub == null) throw new ArgumentNullException("ehub");
                 if (handler == null) throw new ArgumentNullException("handler");
-                ehub.Get<ErrorInitialization.Initialized>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
+                return ehub.Get<ErrorInitialization.Initialized>().PushHandler(next => (sender, args) => { var result = next(sender, args); handler(sender, args); return result; });
             }
         }
 
