@@ -37,7 +37,7 @@ namespace Elmah.Tests
         /// Test fix of: https://code.google.com/p/elmah/issues/detail?id=308
         /// </summary>
         [Fact]
-        public void CanEncodeNullKeysInCollections()
+        public void Issue308()
         {
             var error = new Error();
             error.QueryString.Add(new NameValueCollection { { null, "foo" } });
