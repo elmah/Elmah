@@ -107,7 +107,6 @@ namespace Elmah
         public JsonTextWriter Member(string name)
         {
             if (name == null) throw new ArgumentNullException("name");
-            if (name.Length == 0) throw new ArgumentException(null, "name");
             if (_memberName != null) throw new InvalidOperationException("Missing member value.");
             _memberName = name;
             return this;

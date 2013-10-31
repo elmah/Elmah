@@ -194,7 +194,7 @@ namespace Elmah
                     writer.Object();
                 }
 
-                writer.Member(item.Key);
+                writer.Member(item.Key ?? string.Empty);
 
                 if (item.IsArray)
                     writer.Array(); // Wrap multiples in an array
