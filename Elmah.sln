@@ -14,7 +14,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "http://localhost:51
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv3.5"
-		ProjectReferences = "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}|Elmah.dll;"
+		ProjectReferences = "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}|Elmah.dll;{2990960b-2cb4-484c-819a-ef186b8fcac5}|Elmah.AspNet.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/Demo"
 		Debug.AspNetCompiler.PhysicalPath = "samples\Demo\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\Demo\"
@@ -57,6 +57,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Oracle", "src\Elmah.O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Pgsql", "src\Elmah.Pgsql\Elmah.Pgsql.csproj", "{B5A71BBD-3316-4210-88E3-C97B92C5241B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.AspNet", "src\Elmah\Elmah.AspNet.csproj", "{2990960B-2CB4-484C-819A-EF186B8FCAC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,12 +82,10 @@ Global
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.Release|x86.ActiveCfg = Release|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -187,6 +187,16 @@ Global
 		{B5A71BBD-3316-4210-88E3-C97B92C5241B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B5A71BBD-3316-4210-88E3-C97B92C5241B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B5A71BBD-3316-4210-88E3-C97B92C5241B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
