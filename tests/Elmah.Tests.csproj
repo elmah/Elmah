@@ -93,7 +93,7 @@
     <ProjectReference Include="..\src\Elmah\Elmah.csproj">
       <Project>{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}</Project>
       <Name>Elmah</Name>
-      <Aliases>global</Aliases>
+      <Aliases>e</Aliases>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
