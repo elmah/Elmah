@@ -26,6 +26,7 @@ namespace Elmah.Tests
     #region Imports
 
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using Xunit;
 
@@ -54,6 +55,17 @@ namespace Elmah.Tests
             Assert.Equal(2, page2.Count);
             Assert.Equal(today.AddDays(-2), page2[0].Error.Time);
             Assert.Equal(today.AddDays(-3), page2[1].Error.Time);
+        }
+
+        [Fact]
+        public void CanSetSize()
+        {
+            var config = new Hashtable {{"size", "2"}};
+            var memoryErrorLog = new MemoryErrorLog(config);
+            memoryErrorLog.Log(new Error());
+            memoryErrorLog.Log(new Error());
+            memoryErrorLog.Log(new Error());
+            Assert.Equal(2, memoryErrorLog.GetErrors(0, int.MaxValue, new List<ErrorLogEntry>()));
         }
     }
 }
