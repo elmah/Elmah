@@ -288,7 +288,10 @@ namespace Elmah
             protected override void InsertItem(int index, ErrorLogEntry item)
             {
                 if (Count == _size)
+                {
                     RemoveAt(0);
+                    index--;
+                }
                 base.InsertItem(index, item);
             }
         }
