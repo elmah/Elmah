@@ -109,7 +109,7 @@ namespace Elmah
             switch (name)
             {
                 case "detail":
-                    return new ErrorDetailPage();
+                    return CreateTemplateHandler<ErrorDetailPage>();
                 case "html":
                     return new ErrorHtmlPage();
                 case "xml":
@@ -131,10 +131,19 @@ namespace Elmah
                 case "test":
                     throw new TestException();
                 case "about":
-                    return new AboutPage();
+                    return CreateTemplateHandler<AboutPage>();
                 default:
-                    return name.Length == 0 ? new ErrorLogPage() : null;
+                    return name.Length == 0 ? CreateTemplateHandler<ErrorLogPage>() : null;
             }
+        }
+
+        static IHttpHandler CreateTemplateHandler<T>() where T : WebTemplateBase, new()
+        {
+            return new DelegatingHttpHandler(context =>
+            {
+                var template = new T { Context = context };
+                context.Response.Write(template.TransformText());
+            });
         }
 
         /// <summary>
