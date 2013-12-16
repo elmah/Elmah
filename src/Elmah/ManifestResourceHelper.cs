@@ -34,11 +34,6 @@ namespace Elmah
 
     public static class ManifestResourceHelper
     {
-        public static void WriteResourceToStream(Stream outputStream, string resourceName)
-        {
-            WriteResourceToStream(outputStream, null, resourceName);
-        }
-
         public static void WriteResourceToStream(Stream outputStream, Type type, string resourceName)
         {
             if (outputStream == null) throw new ArgumentNullException("outputStream");

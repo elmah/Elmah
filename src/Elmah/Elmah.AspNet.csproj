@@ -297,7 +297,6 @@
     <Compile Include="DelegatingDisposable.cs" />
     <Compile Include="ErrorMailHtmlPage.cs" />
     <Compile Include="KeyValuePair.cs" />
-    <Compile Include="ManifestResourceHelper.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />

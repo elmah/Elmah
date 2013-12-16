@@ -54,7 +54,7 @@ namespace Elmah
         {
             var memoryStream = new MemoryStream();
             foreach (var resourceName in _styleSheetResourceNames)
-                ManifestResourceHelper.WriteResourceToStream(memoryStream, resourceName);
+                ManifestResourceHelper.WriteResourceToStream(memoryStream, typeof(StyleSheetHelper), resourceName);
 
             return MD5.Create()
                       .ComputeHash(memoryStream)
