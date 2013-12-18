@@ -24,6 +24,8 @@
 namespace Elmah.Tests
 {
     extern alias e;
+    using System.Collections.ObjectModel;
+    using System.Security.Cryptography;
 
     #region Imports
 
@@ -45,6 +47,16 @@ namespace Elmah.Tests
             errorLog.Reset();
             var errorId = errorLog.Log(new Error());
             Assert.False(string.IsNullOrEmpty(errorId));
+        }
+
+        [Fact]
+        public void CanGetError()
+        {
+            var errorLog = new MemoryErrorLog();
+            errorLog.Reset();
+            var expectedErrorId = errorLog.Log(new Error());
+            var error = errorLog.GetError(expectedErrorId);
+            Assert.Equal(expectedErrorId, error.Id);
         }
 
         [Fact]
@@ -88,6 +100,38 @@ namespace Elmah.Tests
             Assert.False(result.Any(error => error.Id == error1Id));
             Assert.True(result.Any(error => error.Id == error2Id));
             Assert.True(result.Any(error => error.Id == error3Id));
+        }
+
+        [Fact]
+        public void ThrowExceptionOnSizeLessThanZero()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(-1));
+        }
+
+        [Fact]
+        public void ThrowExceptionOnSizeMoreThanMaximumAllowed()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(1 + MemoryErrorLog.MaximumSize));
+        }
+
+        [Fact]
+        public void ThrowExceptionOnPageIndexBelowZero()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new MemoryErrorLog().GetErrors(-1, 0, new Collection<ErrorLogEntry>()));
+        }
+
+        [Fact]
+        public void ThrowExceptionOnPageSizeBelowZero()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new MemoryErrorLog().GetErrors(0, -1, new Collection<ErrorLogEntry>()));
+        }
+
+        [Fact]
+        public void ThrowExceptionWhenErrorIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new MemoryErrorLog().Log(null));
         }
     }
 }
