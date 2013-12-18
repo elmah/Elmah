@@ -28,12 +28,21 @@ namespace Elmah.Tests
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using Xunit;
 
     #endregion
 
     public class MemoryErrorLogTests
     {
+        [Fact]
+        public void CanLogError()
+        {
+            var errorLog = new MemoryErrorLog();
+            var errorId = errorLog.Log(new Error());
+            Assert.False(string.IsNullOrEmpty(errorId));
+        }
+
         [Fact]
         public void CanPageMultipleErrors()
         {
@@ -58,14 +67,21 @@ namespace Elmah.Tests
         }
 
         [Fact]
-        public void CanSetSize()
+        public void CanLogMoreErrorsThanConfiguredSize()
         {
             var config = new Hashtable {{"size", "2"}};
-            var memoryErrorLog = new MemoryErrorLog(config);
-            memoryErrorLog.Log(new Error());
-            memoryErrorLog.Log(new Error());
-            memoryErrorLog.Log(new Error());
-            Assert.Equal(2, memoryErrorLog.GetErrors(0, int.MaxValue, new List<ErrorLogEntry>()));
+            var errorLog = new MemoryErrorLog(config);
+            var error1Id = errorLog.Log(new Error());
+            var error2Id = errorLog.Log(new Error());
+            var error3Id = errorLog.Log(new Error());
+
+            var result = new List<ErrorLogEntry>();
+            var count = errorLog.GetErrors(0, 3, result);
+            
+            Assert.Equal(2, count);
+            Assert.False(result.Any(error => error.Id == error1Id));
+            Assert.True(result.Any(error => error.Id == error2Id));
+            Assert.True(result.Any(error => error.Id == error3Id));
         }
     }
 }
