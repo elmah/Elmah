@@ -95,7 +95,6 @@ namespace Elmah
                 throw new ArgumentOutOfRangeException("size", size, string.Format("Size must be between 0 and {0}.", MaximumSize));
 
             _size = size;
-            _entries = new EntryCollection(_size);
         }
 
         /// <summary>
@@ -123,8 +122,6 @@ namespace Elmah
                     _size = Math.Max(0, Math.Min(MaximumSize, _size));
                 }
             }
-
-            _entries = new EntryCollection(_size);
         }
 
         /// <summary>
@@ -274,6 +271,16 @@ namespace Elmah
             return totalCount;
         }
 
+        /// <summary>
+        /// Used to clear the content of the collection used by this logger. This method is ment
+        /// for testing and debugging purposes only.
+        /// </summary>
+
+        internal void Reset()
+        {
+            _entries = new EntryCollection(_size);
+        }
+
         sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
         {
             private readonly int _size;
@@ -295,7 +302,7 @@ namespace Elmah
                     RemoveAt(0);
                     index--;
                 }
-                base.InsertItem(index-sub, item);
+                base.InsertItem(index, item);
             }
         }
     }

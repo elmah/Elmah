@@ -42,6 +42,7 @@ namespace Elmah.Tests
         public void CanLogError()
         {
             var errorLog = new MemoryErrorLog();
+            errorLog.Reset();
             var errorId = errorLog.Log(new Error());
             Assert.False(string.IsNullOrEmpty(errorId));
         }
@@ -50,6 +51,7 @@ namespace Elmah.Tests
         public void CanPageMultipleErrors()
         {
             var errorLog = new MemoryErrorLog();
+            errorLog.Reset();
             var today = DateTime.Today;
             for (var i = 3; i >= 0; i--)
             {
@@ -74,6 +76,7 @@ namespace Elmah.Tests
         {
             var config = new Hashtable {{"size", "2"}};
             var errorLog = new MemoryErrorLog(config);
+            errorLog.Reset();
             var error1Id = errorLog.Log(new Error());
             var error2Id = errorLog.Log(new Error());
             var error3Id = errorLog.Log(new Error());
