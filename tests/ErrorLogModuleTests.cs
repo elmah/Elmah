@@ -23,6 +23,8 @@
 
 namespace Elmah.Tests
 {
+    extern alias e;
+
     #region Imports
 
     using System;
@@ -31,6 +33,7 @@ namespace Elmah.Tests
     using System.Web;
     using Moq;
     using Xunit;
+    using e::Elmah;
 
     #endregion
 

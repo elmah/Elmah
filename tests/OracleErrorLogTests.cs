@@ -23,10 +23,14 @@
 
 namespace Elmah.Tests
 {
+    extern alias o;
+
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
     using Xunit;
+    using OracleErrorLog = o::Elmah.OracleErrorLog;
+    using DbProviderFactoryQuery = o::Elmah.DbProviderFactoryQuery;
 
     public class OracleErrorLogTests
     {

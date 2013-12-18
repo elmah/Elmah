@@ -414,7 +414,7 @@ namespace Elmah
                     var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
                     
                     json.Object();
-                            ErrorJson.Encode(entry.Error, json);
+                            ErrorJson.EncodeMembers(entry.Error, json);
                             json.Member("hrefs")
                             .Array()
                                 .Object()

@@ -4,14 +4,14 @@
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BF80CAB4-F68D-40F6-B4E1-DB6D47808EB7}</ProjectGuid>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{2990960B-2CB4-484C-819A-EF186B8FCAC5}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">NETFX 4.5 Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ApplicationIcon>
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>Elmah</AssemblyName>
+    <AssemblyName>Elmah.AspNet</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
@@ -44,21 +44,21 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <BaseIntermediateOutputPath>obj\net-4.5\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\net-4.5\Debug\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 3.5 Debug|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-3.5\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-3.5\Debug\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>TRACE;DEBUG;NET_4_5</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.5\Elmah.xml</DocumentationFile>
+    <DefineConstants>TRACE;DEBUG;NET_3_5</DefineConstants>
+    <DocumentationFile>xmldoc\net-3.5\Elmah.AspNet.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -71,17 +71,19 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\net-4.5\Release\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 3.5 Release|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-3.5\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-3.5\Release\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>TRACE;NET_4_5</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.5\Elmah.xml</DocumentationFile>
+    <DefineConstants>TRACE;NET_3_5</DefineConstants>
+    <DocumentationFile>xmldoc\net-3.5\Elmah.AspNet.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -94,41 +96,124 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.0 Debug|AnyCPU' ">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-4.0\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-4.0\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;NET_4_0</DefineConstants>
+    <DocumentationFile>xmldoc\net-4.0\Elmah.AspNet.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.0 Release|AnyCPU' ">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-4.0\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-4.0\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;NET_4_0</DefineConstants>
+    <DocumentationFile>xmldoc\net-4.0\Elmah.AspNet.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.5 Debug|AnyCPU' ">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-4.5\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-4.5\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;NET_4_5</DefineConstants>
+    <DocumentationFile>xmldoc\net-4.5\Elmah.AspNet.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.5 Release|AnyCPU' ">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <BaseIntermediateOutputPath>obj\net-4.5\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>..\..\bin\net-4.5\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;NET_4_5</DefineConstants>
+    <DocumentationFile>xmldoc\net-4.5\Elmah.AspNet.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>1591;618</NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="Microsoft.Vsa" />
-    <Reference Include="mysql.data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\mysql.data.dll</HintPath>
-    </Reference>
-    <Reference Include="Npgsql, Version=2.0.6.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Npgsql.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
     <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data">
       <Name>System.Data</Name>
-    </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.61.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\System.Data.SQLite.DLL</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\lib\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.Web">
       <Name>System.Web</Name>
     </Reference>
     <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Services">
-      <Name>System.Web.Services</Name>
-    </Reference>
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
@@ -137,12 +222,6 @@
   <ItemGroup>
     <Compile Include="AboutPage.cs" />
     <Compile Include="Apm.cs" />
-    <Compile Include="ApplicationException.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AccessErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -197,7 +276,6 @@
     <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
-    <Compile Include="CallerInfo.cs" />
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="ConnectionStringHelper.cs">
@@ -213,20 +291,15 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="DbCommandExtensions.cs" />
-    <Compile Include="DbProviderFactoryQuery.cs" />
     <Compile Include="DelegatingDisposable.cs" />
     <Compile Include="ErrorMailHtmlPage.cs" />
-    <Compile Include="ExceptionExtensions.cs" />
-    <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
-    <Compile Include="Message.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
     <Compile Include="StackTraceParser.cs" />
     <Compile Include="StyleSheetHelper.cs" />
-    <Compile Include="TypeExtensions.cs" />
     <Compile Include="ErrorDetailPage.generated.cs">
       <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -247,9 +320,6 @@
     <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Environment.cs" />
-    <Compile Include="Error.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ErrorDetailPage.cs" />
     <Compile Include="ErrorDigestRssHandler.cs">
     </Compile>
@@ -265,19 +335,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorHtmlPage.cs" />
-    <Compile Include="ErrorJson.cs">
-    </Compile>
     <Compile Include="ErrorJsonHandler.cs">
-    </Compile>
-    <Compile Include="ErrorLog.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorLogDataSourceAdapter.cs">
     </Compile>
     <Compile Include="ErrorLogDownloadHandler.cs">
-    </Compile>
-    <Compile Include="ErrorLogEntry.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorLogModule.cs">
       <SubType>Code</SubType>
@@ -313,8 +375,6 @@
     </Compile>
     <Compile Include="ErrorTweetSectionHandler.cs">
     </Compile>
-    <Compile Include="ErrorXml.cs">
-    </Compile>
     <Compile Include="ErrorXmlHandler.cs">
     </Compile>
     <Compile Include="ExceptionFiltering.cs">
@@ -334,27 +394,15 @@
     </Compile>
     <Compile Include="JetBrains.Annotations.cs">
     </Compile>
-    <Compile Include="JsonTextWriter.cs">
-    </Compile>
     <Compile Include="ManifestResourceHandler.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ManifestResourceHelper.cs">
     </Compile>
     <Compile Include="Mannex.cs" />
     <Compile Include="Mask.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MemoryErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MsAjaxDeltaErrorLogModule.cs">
     </Compile>
-    <Compile Include="MySqlErrorLog.cs" />
-    <Compile Include="OracleErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PgsqlErrorLog.cs" />
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -363,28 +411,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RssXml.cs" />
-    <Compile Include="SccAttribute.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SccStamp.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SecurityConfiguration.cs">
     </Compile>
     <Compile Include="SecuritySectionHandler.cs">
     </Compile>
-    <Compile Include="ServiceCenter.cs" />
-    <Compile Include="ServiceContainer.cs" />
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Memoization.cs" />
     <Compile Include="SpeedBar.cs">
     </Compile>
-    <Compile Include="SqlErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SqlServerCompactErrorLog.cs" />
     <Compile Include="StringFormatter.cs">
     </Compile>
     <Compile Include="StringSeparatorStock.cs">
@@ -392,25 +427,13 @@
     </Compile>
     <Compile Include="StringTranslation.cs">
     </Compile>
-    <Compile Include="SQLiteErrorLog.cs">
-    </Compile>
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TypeResolution.cs" />
     <Compile Include="WebTemplateBase.cs" />
-    <Compile Include="XmlFileErrorLog.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
     <EmbeddedResource Include="ErrorLog.css" />
-    <Content Include="SQLServer.sql">
-    </Content>
-    <EmbeddedResource Include="mkmdb.vbs">
-    </EmbeddedResource>
-    <Content Include="Oracle.sql">
-    </Content>
     <EmbeddedResource Include="RemoteAccessError.htm">
     </EmbeddedResource>
     <EmbeddedResource Include="Bootstrap.css">
@@ -437,8 +460,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
     </None>
-    <None Include="MySql.sql" />
-    <None Include="Pgsql.sql" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -462,6 +484,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Elmah.csproj">
+      <Project>{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}</Project>
+      <Name>Elmah</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

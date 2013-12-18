@@ -81,7 +81,7 @@ namespace Elmah
                     response.ContentEncoding = responseEncoding;
 
                 foreach (var resourceName in resourceNames)
-                    ManifestResourceHelper.WriteResourceToStream(response.OutputStream, resourceName);
+                    ManifestResourceHelper.WriteResourceToStream(response.OutputStream, typeof(ManifestResourceHandler), resourceName);
             };
         }
     }
