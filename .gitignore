@@ -21,3 +21,4 @@ samples/Demo/Web.config
 packages/**
 .nuget/NuGet.exe
 .nuget/nuget.exe
+src/**/xmldoc/**
