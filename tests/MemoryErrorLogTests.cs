@@ -23,6 +23,8 @@
 
 namespace Elmah.Tests
 {
+    extern alias e;
+
     #region Imports
 
     using System;
@@ -30,6 +32,7 @@ namespace Elmah.Tests
     using System.Collections.Generic;
     using System.Linq;
     using Xunit;
+    using e::Elmah;
 
     #endregion
 

@@ -34,13 +34,13 @@ namespace Elmah
 
     public static class ManifestResourceHelper
     {
-        public static void WriteResourceToStream(Stream outputStream, string resourceName)
+        public static void WriteResourceToStream(Stream outputStream, Type type, string resourceName)
         {
             if (outputStream == null) throw new ArgumentNullException("outputStream");
             if (resourceName == null) throw new ArgumentNullException("resourceName");
             if (resourceName.Length == 0) throw new ArgumentException(null, "resourceName");
 
-            var thisType = typeof(ManifestResourceHelper);
+            var thisType = type ?? typeof(ManifestResourceHelper);
             var thisAssembly = thisType.Assembly;
 
             using (var inputStream = thisAssembly.GetManifestResourceStream(thisType, resourceName))

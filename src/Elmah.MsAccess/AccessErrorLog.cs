@@ -346,7 +346,7 @@ namespace Elmah
 
                 using (FileStream scriptStream = new FileStream(scriptPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    ManifestResourceHelper.WriteResourceToStream(scriptStream, _scriptResourceName);
+                    ManifestResourceHelper.WriteResourceToStream(scriptStream, GetType(), _scriptResourceName);
                 }
 
                 //

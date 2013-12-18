@@ -23,11 +23,14 @@
 
 namespace Elmah.Tests
 {
+    extern alias e;
+
     #region Imports
 
     using System.Collections.Specialized;
     using Xunit;
-
+    using e::Elmah;
+    
     #endregion
 
     public class ErrorJsonTests

@@ -82,11 +82,11 @@ namespace Elmah
             Debug.Assert(writer != null);
 
             writer.Object();
-            Encode(error, writer);
+            EncodeMembers(error, writer);
             writer.Pop();
         }
 
-        internal static void Encode(Error error, JsonTextWriter writer)
+        public static void EncodeMembers(Error error, JsonTextWriter writer)
         {
             Debug.Assert(error != null);
             Debug.Assert(writer != null);

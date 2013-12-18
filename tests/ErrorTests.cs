@@ -23,12 +23,15 @@
 
 namespace Elmah.Tests
 {
+    extern alias e;
+
     #region Imports
 
     using System;
     using System.Linq;
     using Mannex;
     using Xunit;
+    using e::Elmah;
 
     #endregion
 

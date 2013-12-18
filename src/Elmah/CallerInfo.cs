@@ -33,9 +33,9 @@ namespace Elmah
 
     #if NET_3_5 || NET_4_0
 
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] sealed class CallerMemberNameAttribute : Attribute { }
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] sealed class CallerFilePathAttribute : Attribute { }
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] sealed class CallerLineNumberAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] /* FIXFIX */public sealed class CallerMemberNameAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] /* FIXFIX */public sealed class CallerFilePathAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)] /* FIXFIX */public sealed class CallerLineNumberAttribute : Attribute { }
     
     #endif
 
