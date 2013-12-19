@@ -51,6 +51,22 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "http://localhost:51
 		SlnRelativePath = "samples\Demo\"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DDA8D29-1462-465C-AA30-710B5E5C746B}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		buildw.cmd = buildw.cmd
+		COPYING.txt = COPYING.txt
+		prestore.cmd = prestore.cmd
+		README.html = README.html
+		README.txt = README.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{82A2DC8E-216D-4BEE-8AF1-C3F447A6E252}"
+	ProjectSection(SolutionItems) = preProject
+		samples\elmah.config = samples\elmah.config
+		samples\web.config = samples\web.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		NETFX 3.5 Debug|Any CPU = NETFX 3.5 Debug|Any CPU
