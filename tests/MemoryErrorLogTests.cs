@@ -38,20 +38,28 @@ namespace Elmah.Tests
 
     public class MemoryErrorLogTests
     {
+        static MemoryErrorLog CreateLog(int? size = null)
+        {
+            return Resetting(size != null ? new MemoryErrorLog(size.Value) : new MemoryErrorLog());
+        }
+
+        static MemoryErrorLog Resetting(MemoryErrorLog log)
+        {
+            log.Reset();
+            return log;
+        }
+
         [Fact]
         public void CanLogError()
         {
-            var errorLog = new MemoryErrorLog();
-            errorLog.Reset();
-            var errorId = errorLog.Log(new Error());
+            var errorId = CreateLog().Log(new Error());
             Assert.False(string.IsNullOrEmpty(errorId));
         }
 
         [Fact]
         public void CanGetError()
         {
-            var errorLog = new MemoryErrorLog();
-            errorLog.Reset();
+            var errorLog = CreateLog();
             var expectedErrorId = errorLog.Log(new Error());
             var error = errorLog.GetError(expectedErrorId);
             Assert.Equal(expectedErrorId, error.Id);
@@ -60,8 +68,7 @@ namespace Elmah.Tests
         [Fact]
         public void CanPageMultipleErrors()
         {
-            var errorLog = new MemoryErrorLog();
-            errorLog.Reset();
+            var errorLog = CreateLog();
             var today = DateTime.Today;
             for (var i = 3; i >= 0; i--)
             {
@@ -84,9 +91,7 @@ namespace Elmah.Tests
         [Fact]
         public void CanLogMoreErrorsThanConfiguredSize()
         {
-            var config = new Hashtable {{"size", "2"}};
-            var errorLog = new MemoryErrorLog(config);
-            errorLog.Reset();
+            var errorLog = CreateLog(2);
             var error1Id = errorLog.Log(new Error());
             var error2Id = errorLog.Log(new Error());
             var error3Id = errorLog.Log(new Error());
