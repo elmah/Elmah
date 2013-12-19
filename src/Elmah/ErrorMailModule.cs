@@ -138,8 +138,8 @@ namespace Elmah
             // Hook into the Error event of the application.
             //
 
-            application.Error += new EventHandler(OnError);
-            ErrorSignal.Get(application).Raised += new ErrorSignalEventHandler(OnErrorSignaled);
+            application.Error += OnError;
+            ErrorSignal.Get(application).Raised += OnErrorSignaled;
             
             //
             // Finally, commit the state of the module if we got this far.
@@ -382,7 +382,7 @@ namespace Elmah
             // requests in the case where lots of errors being generated.
             //
 
-            ThreadPool.QueueUserWorkItem(new WaitCallback(ReportError), error);
+            ThreadPool.QueueUserWorkItem(ReportError, error);
         }
 
         private void ReportError(object state)

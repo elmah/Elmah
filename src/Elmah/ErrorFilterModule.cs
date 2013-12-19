@@ -65,7 +65,7 @@ namespace Elmah
                 var filtering = module as IExceptionFiltering;
 
                 if (filtering != null)
-                    filtering.Filtering += new ExceptionFilterEventHandler(OnErrorModuleFiltering);
+                    filtering.Filtering += OnErrorModuleFiltering;
             }
         }
 

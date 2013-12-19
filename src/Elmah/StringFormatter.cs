@@ -46,7 +46,7 @@ namespace Elmah
 
     public static class StringFormatter
     {
-        public static readonly StringFormatTokenBindingHandler DefaultTokenBinder = new StringFormatTokenBindingHandler(BindFormatToken);
+        public static readonly StringFormatTokenBindingHandler DefaultTokenBinder = BindFormatToken;
 
         /// <summary>
         /// Replaces each format item in a specified string with the text 

@@ -124,7 +124,7 @@ namespace Elmah
                 {
                     signal = new ErrorSignal();
                     _signalByApp.Add(application, signal);
-                    application.Disposed += new EventHandler(OnApplicationDisposed);
+                    application.Disposed += OnApplicationDisposed;
                 }
 
                 return signal;

@@ -53,8 +53,8 @@ namespace Elmah
             if (application == null)
                 throw new ArgumentNullException("application");
             
-            application.Error += new EventHandler(OnError);
-            ErrorSignal.Get(application).Raised += new ErrorSignalEventHandler(OnErrorSignaled);
+            application.Error += OnError;
+            ErrorSignal.Get(application).Raised += OnErrorSignaled;
         }
 
         /// <summary>

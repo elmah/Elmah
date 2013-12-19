@@ -55,7 +55,7 @@ namespace Elmah
 
         static ServiceCenter()
         {
-            _current = Default = new ServiceProviderQueryHandler(CreateServiceContainer);
+            _current = Default = CreateServiceContainer;
         }
 
         private static IServiceProvider CreateServiceContainer(object context)

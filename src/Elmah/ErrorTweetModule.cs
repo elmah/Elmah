@@ -98,8 +98,8 @@ namespace Elmah
             _formFormat = formFormat;
             _requests = new List<WebRequest>(); // TODO Synchronization
 
-            application.Error += new EventHandler(OnError);
-            ErrorSignal.Get(application).Raised += new ErrorSignalEventHandler(OnErrorSignaled);
+            application.Error += OnError;
+            ErrorSignal.Get(application).Raised += OnErrorSignaled;
         }
 
         /// <summary>
@@ -224,9 +224,8 @@ namespace Elmah
 
                 _requests.Add(request);
 
-                var ar = request.BeginGetRequestStream(
-                    new AsyncCallback(OnGetRequestStreamCompleted), 
-                    AsyncArgs(request, data));
+                var ar = request.BeginGetRequestStream(OnGetRequestStreamCompleted, 
+                                                       AsyncArgs(request, data));
             }
             catch (Exception localException)
             {
@@ -273,7 +272,7 @@ namespace Elmah
             {
                 using (var output = request.EndGetRequestStream(ar))
                     output.Write(data, 0, data.Length);
-                request.BeginGetResponse(new AsyncCallback(OnGetResponseCompleted), request);
+                request.BeginGetResponse(OnGetResponseCompleted, request);
             }
             catch (Exception e)
             {

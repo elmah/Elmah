@@ -91,7 +91,7 @@ namespace Elmah
             //
 
             var housekeeper = new Housekeeper(module);
-            application.Disposed += new EventHandler(housekeeper.OnApplicationDisposed);
+            application.Disposed += housekeeper.OnApplicationDisposed;
 
             return true;
         }

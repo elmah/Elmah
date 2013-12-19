@@ -85,7 +85,7 @@ namespace Elmah
                 // and then rewrite the path so that the handler is found.
                 //
 
-                context.BeginRequest += new EventHandler(OnBeginRequest);
+                context.BeginRequest += OnBeginRequest;
             }
         }
 
