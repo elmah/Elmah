@@ -108,33 +108,38 @@ namespace Elmah.Tests
         [Fact]
         public void ThrowExceptionOnSizeLessThanZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(-1));
+            var e = Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(-1));
+            Assert.Equal("size", e.ParamName);
         }
 
         [Fact]
         public void ThrowExceptionOnSizeMoreThanMaximumAllowed()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(1 + MemoryErrorLog.MaximumSize));
+            var e = Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(1 + MemoryErrorLog.MaximumSize));
+            Assert.Equal("size", e.ParamName);
         }
 
         [Fact]
         public void ThrowExceptionOnPageIndexBelowZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(
+            var e = Assert.Throws<ArgumentOutOfRangeException>(
                 () => new MemoryErrorLog().GetErrors(-1, 0, new Collection<ErrorLogEntry>()));
+            Assert.Equal("pageIndex", e.ParamName);
         }
 
         [Fact]
         public void ThrowExceptionOnPageSizeBelowZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(
+            var e = Assert.Throws<ArgumentOutOfRangeException>(
                 () => new MemoryErrorLog().GetErrors(0, -1, new Collection<ErrorLogEntry>()));
+            Assert.Equal("pageSize", e.ParamName);
         }
 
         [Fact]
         public void ThrowExceptionWhenErrorIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new MemoryErrorLog().Log(null));
+            var e = Assert.Throws<ArgumentNullException>(() => new MemoryErrorLog().Log(null));
+            Assert.Equal("error", e.ParamName);
         }
     }
 }
