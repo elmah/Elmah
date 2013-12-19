@@ -278,7 +278,16 @@ namespace Elmah
 
         internal void Reset()
         {
-            _entries = null;
+            _lock.EnterWriteLock();
+
+            try
+            {
+                _entries = null;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
