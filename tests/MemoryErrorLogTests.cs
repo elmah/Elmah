@@ -23,12 +23,14 @@
 
 namespace Elmah.Tests
 {
-    extern alias e;
-
     #region Imports
 
+    extern alias e;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
     using Xunit;
     using e::Elmah;
 
@@ -36,10 +38,37 @@ namespace Elmah.Tests
 
     public class MemoryErrorLogTests
     {
+        static MemoryErrorLog CreateLog(int? size = null)
+        {
+            return Resetting(size != null ? new MemoryErrorLog(size.Value) : new MemoryErrorLog());
+        }
+
+        static MemoryErrorLog Resetting(MemoryErrorLog log)
+        {
+            log.Reset();
+            return log;
+        }
+
+        [Fact]
+        public void CanLogError()
+        {
+            var errorId = CreateLog().Log(new Error());
+            Assert.False(string.IsNullOrEmpty(errorId));
+        }
+
+        [Fact]
+        public void CanGetError()
+        {
+            var errorLog = CreateLog();
+            var expectedErrorId = errorLog.Log(new Error());
+            var error = errorLog.GetError(expectedErrorId);
+            Assert.Equal(expectedErrorId, error.Id);
+        }
+
         [Fact]
         public void CanPageMultipleErrors()
         {
-            var errorLog = new MemoryErrorLog();
+            var errorLog = CreateLog();
             var today = DateTime.Today;
             for (var i = 3; i >= 0; i--)
             {
@@ -57,6 +86,60 @@ namespace Elmah.Tests
             Assert.Equal(2, page2.Count);
             Assert.Equal(today.AddDays(-2), page2[0].Error.Time);
             Assert.Equal(today.AddDays(-3), page2[1].Error.Time);
+        }
+
+        [Fact]
+        public void CanLogMoreErrorsThanConfiguredSize()
+        {
+            var errorLog = CreateLog(2);
+            var error1Id = errorLog.Log(new Error());
+            var error2Id = errorLog.Log(new Error());
+            var error3Id = errorLog.Log(new Error());
+
+            var result = new List<ErrorLogEntry>();
+            var count = errorLog.GetErrors(0, 3, result);
+            
+            Assert.Equal(2, count);
+            Assert.False(result.Any(error => error.Id == error1Id));
+            Assert.True(result.Any(error => error.Id == error2Id));
+            Assert.True(result.Any(error => error.Id == error3Id));
+        }
+
+        [Fact]
+        public void ThrowExceptionOnSizeLessThanZero()
+        {
+            var e = Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(-1));
+            Assert.Equal("size", e.ParamName);
+        }
+
+        [Fact]
+        public void ThrowExceptionOnSizeMoreThanMaximumAllowed()
+        {
+            var e = Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(1 + MemoryErrorLog.MaximumSize));
+            Assert.Equal("size", e.ParamName);
+        }
+
+        [Fact]
+        public void ThrowExceptionOnPageIndexBelowZero()
+        {
+            var e = Assert.Throws<ArgumentOutOfRangeException>(
+                () => new MemoryErrorLog().GetErrors(-1, 0, new Collection<ErrorLogEntry>()));
+            Assert.Equal("pageIndex", e.ParamName);
+        }
+
+        [Fact]
+        public void ThrowExceptionOnPageSizeBelowZero()
+        {
+            var e = Assert.Throws<ArgumentOutOfRangeException>(
+                () => new MemoryErrorLog().GetErrors(0, -1, new Collection<ErrorLogEntry>()));
+            Assert.Equal("pageSize", e.ParamName);
+        }
+
+        [Fact]
+        public void ThrowExceptionWhenErrorIsNull()
+        {
+            var e = Assert.Throws<ArgumentNullException>(() => new MemoryErrorLog().Log(null));
+            Assert.Equal("error", e.ParamName);
         }
     }
 }

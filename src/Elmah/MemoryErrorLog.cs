@@ -234,7 +234,7 @@ namespace Elmah
 
                 totalCount = _entries.Count;
 
-                var startIndex = totalCount - ((pageIndex + 1) * pageSize);
+                var startIndex = totalCount - ((pageIndex + 1) * Math.Min(pageSize, totalCount));
                 var endIndex = Math.Min(startIndex + pageSize, totalCount);
                 var count = Math.Max(0, endIndex - startIndex);
                 
@@ -269,6 +269,25 @@ namespace Elmah
             }
 
             return totalCount;
+        }
+
+        /// <summary>
+        /// Used to clear the content of the collection used by this logger. This method is ment
+        /// for testing and debugging purposes only.
+        /// </summary>
+
+        internal void Reset()
+        {
+            _lock.EnterWriteLock();
+
+            try
+            {
+                _entries = null;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
