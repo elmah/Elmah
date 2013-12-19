@@ -133,20 +133,20 @@ namespace Elmah
         
         public override string Log(Error error)
         {
-            string logPath = LogPath;
+            var logPath = LogPath;
             if (!Directory.Exists(logPath))
                 Directory.CreateDirectory(logPath);
 
-            string errorId = Guid.NewGuid().ToString();
+            var errorId = Guid.NewGuid().ToString();
             
-            DateTime timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
+            var timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
             
-            string fileName = string.Format(CultureInfo.InvariantCulture, 
+            var fileName = string.Format(CultureInfo.InvariantCulture, 
                                   @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml", 
                                   /* 0 */ timeStamp.ToUniversalTime(), 
                                   /* 1 */ errorId);
 
-            string path = Path.Combine(logPath, fileName);
+            var path = Path.Combine(logPath, fileName);
 
             using (var writer = new XmlTextWriter(path, Encoding.UTF8))
             {

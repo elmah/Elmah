@@ -57,7 +57,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config, true);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config, true);
 
             //
             // If there is no connection string to use then throw an 
@@ -95,10 +95,10 @@ namespace Elmah
         private static readonly object _lock = new object();
         private void InitializeDatabase()
         {
-            string connectionString = ConnectionString;
+            var connectionString = ConnectionString;
             Debug.AssertStringNotEmpty(connectionString);
 
-            string dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
+            var dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
 
             if (File.Exists(dbFilePath))
                 return;
@@ -133,8 +133,8 @@ namespace Elmah
                     AllXml TEXT NOT NULL
                 )";
 
-                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+                using (var connection = new SQLiteConnection(connectionString))
+                using (var command = new SQLiteCommand(sql, connection))
                 {
                     connection.Open();
                     command.ExecuteNonQuery();
@@ -174,7 +174,7 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
+            var errorXml = ErrorXml.EncodeString(error);
 
             const string query = @"
                 INSERT INTO Error (
@@ -188,10 +188,10 @@ namespace Elmah
 
                 SELECT last_insert_rowid();";
 
-            using (SQLiteConnection connection = new SQLiteConnection(ConnectionString))
-            using (SQLiteCommand command = new SQLiteCommand(query, connection))
+            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var command = new SQLiteCommand(query, connection))
             {
-                SQLiteParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
                 parameters.Add("@Application", DbType.String, 60).Value = ApplicationName;
                 parameters.Add("@Host", DbType.String, 30).Value = error.HostName;
@@ -242,17 +242,17 @@ namespace Elmah
 
                 SELECT COUNT(*) FROM Error";
 
-            using (SQLiteConnection connection = new SQLiteConnection(ConnectionString))
-            using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var command = new SQLiteCommand(sql, connection))
             {
-                SQLiteParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
                 parameters.Add("@PageIndex", DbType.Int16).Value = pageIndex;
                 parameters.Add("@PageSize", DbType.Int16).Value = pageSize;
 
                 connection.Open();
 
-                using (SQLiteDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     if (errorEntryList != null)
                     {
@@ -319,20 +319,20 @@ namespace Elmah
                 WHERE
                     ErrorId = @ErrorId";
 
-            using (SQLiteConnection connection = new SQLiteConnection(ConnectionString))
-            using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var command = new SQLiteCommand(sql, connection))
             {
-                SQLiteParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("@ErrorId", DbType.Int64).Value = key;
 
                 connection.Open();
 
-                string errorXml = (string) command.ExecuteScalar();
+                var errorXml = (string) command.ExecuteScalar();
 
                 if (errorXml == null)
                     return null;
 
-                Error error = ErrorXml.DecodeString(errorXml);
+                var error = ErrorXml.DecodeString(errorXml);
                 return new ErrorLogEntry(this, id, error);
             }
         }

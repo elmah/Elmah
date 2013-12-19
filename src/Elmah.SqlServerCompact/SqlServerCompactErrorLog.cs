@@ -56,7 +56,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config, true);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config, true);
 
             //
             // If there is no connection string to use then throw an 
@@ -93,23 +93,23 @@ namespace Elmah
 
         private void InitializeDatabase()
         {
-            string connectionString = ConnectionString;
+            var connectionString = ConnectionString;
             Debug.AssertStringNotEmpty(connectionString);
 
-            string dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
+            var dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
             if (File.Exists(dbFilePath))
                 return;
-            using (SqlCeEngine engine = new SqlCeEngine(ConnectionString))
+            using (var engine = new SqlCeEngine(ConnectionString))
             {
                 engine.CreateDatabase();
             }
 
-            using (SqlCeConnection conn = new SqlCeConnection(ConnectionString))
+            using (var conn = new SqlCeConnection(ConnectionString))
             {
-                using (SqlCeCommand cmd = new SqlCeCommand())
+                using (var cmd = new SqlCeCommand())
                 {
                     conn.Open();
-                    SqlCeTransaction transaction = conn.BeginTransaction();
+                    var transaction = conn.BeginTransaction();
                     
                     try
                     {
@@ -119,7 +119,7 @@ namespace Elmah
                         cmd.CommandText = @"
                         SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'ELMAH_Error'";
 
-                        object obj = cmd.ExecuteScalar();
+                        var obj = cmd.ExecuteScalar();
                         if (obj == null)
                         {
                             cmd.CommandText = @"
@@ -190,9 +190,9 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
+            var errorXml = ErrorXml.EncodeString(error);
             
-            Guid id = Guid.NewGuid();
+            var id = Guid.NewGuid();
             
             const string query = @"
                 INSERT INTO ELMAH_Error (
@@ -204,11 +204,11 @@ namespace Elmah
                     @Type, @Source, @Message, @User, @StatusCode, 
                     @TimeUtc, @AllXml);";
 
-            using (SqlCeConnection connection = new SqlCeConnection(ConnectionString))
+            using (var connection = new SqlCeConnection(ConnectionString))
             {
-                using (SqlCeCommand command = new SqlCeCommand(query, connection))
+                using (var command = new SqlCeCommand(query, connection))
                 {
-                    SqlCeParameterCollection parameters = command.Parameters;
+                    var parameters = command.Parameters;
 
                     parameters.Add("@ErrorId", SqlDbType.UniqueIdentifier).Value = id;
                     parameters.Add("@Application", SqlDbType.NVarChar, 60).Value = ApplicationName;
@@ -265,28 +265,28 @@ namespace Elmah
                 const string getCount = @"
                 SELECT COUNT(*) FROM [ELMAH_Error]";
 
-            using (SqlCeConnection connection = new SqlCeConnection(ConnectionString))
+            using (var connection = new SqlCeConnection(ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCeCommand command = new SqlCeCommand(sql, connection))
+                using (var command = new SqlCeCommand(sql, connection))
                 {
-                    SqlCeParameterCollection parameters = command.Parameters;
+                    var parameters = command.Parameters;
 
                     parameters.Add("@PageIndex", SqlDbType.Int).Value = pageIndex;
                     parameters.Add("@PageSize", SqlDbType.Int).Value = pageSize;
                     parameters.Add("@Application", SqlDbType.NVarChar, 60).Value = ApplicationName;
 
 
-                    using (SqlCeDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         if (errorEntryList != null)
                         {
                             while (reader.Read())
                             {
-                                string id = reader["ErrorId"].ToString();
+                                var id = reader["ErrorId"].ToString();
 
-                                Elmah.Error error = new Elmah.Error();
+                                var error = new Elmah.Error();
                                 error.ApplicationName = reader["Application"].ToString();
                                 error.HostName = reader["Host"].ToString();
                                 error.Type = reader["Type"].ToString();
@@ -301,7 +301,7 @@ namespace Elmah
                     }
                 }
 
-                using (SqlCeCommand command = new SqlCeCommand(getCount, connection))
+                using (var command = new SqlCeCommand(getCount, connection))
                 {
                     return (int)command.ExecuteScalar();
                 }
@@ -340,20 +340,20 @@ namespace Elmah
                 WHERE
                     [ErrorId] = @ErrorId";
 
-            using (SqlCeConnection connection = new SqlCeConnection(ConnectionString))
+            using (var connection = new SqlCeConnection(ConnectionString))
             {
-                using (SqlCeCommand command = new SqlCeCommand(sql, connection))
+                using (var command = new SqlCeCommand(sql, connection))
                 {
                     command.Parameters.Add("@ErrorId", SqlDbType.UniqueIdentifier).Value = errorGuid;
 
                     connection.Open();
 
-                    string errorXml = (string)command.ExecuteScalar();
+                    var errorXml = (string)command.ExecuteScalar();
 
                     if (errorXml == null)
                         return null;
 
-                    Error error = ErrorXml.DecodeString(errorXml);
+                    var error = ErrorXml.DecodeString(errorXml);
                     return new ErrorLogEntry(this, id, error);
                 }
             }

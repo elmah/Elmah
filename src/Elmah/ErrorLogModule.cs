@@ -74,7 +74,7 @@ namespace Elmah
 
         protected virtual void OnError(object sender, EventArgs args)
         {
-            HttpApplication application = (HttpApplication) sender;
+            var application = (HttpApplication) sender;
             LogException(application.Server.GetLastError(), new HttpContextWrapper(application.Context));
         }
 
@@ -102,7 +102,7 @@ namespace Elmah
             // logging of the uncaught exception.
             //
 
-            ExceptionFilterEventArgs args = new ExceptionFilterEventArgs(e, context);
+            var args = new ExceptionFilterEventArgs(e, context);
             OnFiltering(args);
             
             if (args.Dismissed)
@@ -116,10 +116,10 @@ namespace Elmah
 
             try
             {
-                Error error = new Error(e, context);
-                ErrorLog log = GetErrorLog(context);
+                var error = new Error(e, context);
+                var log = GetErrorLog(context);
                 error.ApplicationName = log.ApplicationName;
-                string id = log.Log(error);
+                var id = log.Log(error);
                 entry = new ErrorLogEntry(log, id, error);
             }
             catch (Exception localException)
@@ -146,7 +146,7 @@ namespace Elmah
 
         protected virtual void OnLogged(ErrorLoggedEventArgs args)
         {
-            ErrorLoggedEventHandler handler = Logged;
+            var handler = Logged;
 
             if (handler != null)
                 handler(this, args);
@@ -158,7 +158,7 @@ namespace Elmah
 
         protected virtual void OnFiltering(ExceptionFilterEventArgs args)
         {
-            ExceptionFilterEventHandler handler = Filtering;
+            var handler = Filtering;
             
             if (handler != null)
                 handler(this, args);

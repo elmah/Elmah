@@ -41,7 +41,7 @@ namespace Elmah
     {
         public static string Serialize(object obj)
         {
-            StringWriter sw = new StringWriter();
+            var sw = new StringWriter();
             Serialize(obj, sw);
             return sw.GetStringBuilder().ToString();
         }
@@ -51,16 +51,16 @@ namespace Elmah
             Debug.Assert(obj != null);
             Debug.Assert(output != null);
 
-            XmlWriterSettings settings = new XmlWriterSettings();
+            var settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.NewLineOnAttributes = true;
             settings.CheckCharacters = false;
             settings.OmitXmlDeclaration = true;
-            XmlWriter writer = XmlWriter.Create(output, settings);
+            var writer = XmlWriter.Create(output, settings);
 
             try
             {
-                SystemXmlSerializer serializer = new SystemXmlSerializer(obj.GetType());
+                var serializer = new SystemXmlSerializer(obj.GetType());
                 serializer.Serialize(writer, obj);
                 writer.Flush();
             }

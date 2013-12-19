@@ -82,7 +82,7 @@ namespace Elmah
 
         private ErrorLogEntry[] GetErrorsPage(int index, int size)
         {
-            List<ErrorLogEntry> list = new List<ErrorLogEntry>(size);
+            var list = new List<ErrorLogEntry>(size);
             _log.GetErrors(index, size, list);
             return list.ToArray();
         }

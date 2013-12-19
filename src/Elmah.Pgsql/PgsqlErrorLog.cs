@@ -57,7 +57,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config);
 
             //
             // If there is no connection string to use then throw an 
@@ -74,7 +74,7 @@ namespace Elmah
             // per-application isolation over a single store.
             //
 
-            string appName = config.Find("applicationName", string.Empty);
+            var appName = config.Find("applicationName", string.Empty);
 
             if (appName.Length > _maxAppNameLength)
             {
@@ -125,11 +125,11 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
-            Guid id = Guid.NewGuid();
+            var errorXml = ErrorXml.EncodeString(error);
+            var id = Guid.NewGuid();
 
-            using (NpgsqlConnection connection = new NpgsqlConnection(ConnectionString))
-            using (NpgsqlCommand command = Commands.LogError(id, this.ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
+            using (var connection = new NpgsqlConnection(ConnectionString))
+            using (var command = Commands.LogError(id, this.ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -156,8 +156,8 @@ namespace Elmah
 
             string errorXml;
 
-            using (NpgsqlConnection connection = new NpgsqlConnection(ConnectionString))
-            using (NpgsqlCommand command = Commands.GetErrorXml(ApplicationName, errorGuid))
+            using (var connection = new NpgsqlConnection(ConnectionString))
+            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -167,7 +167,7 @@ namespace Elmah
             if (errorXml == null)
                 return null;
 
-            Error error = ErrorXml.DecodeString(errorXml);
+            var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
@@ -176,27 +176,27 @@ namespace Elmah
             if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
-            using (NpgsqlConnection connection = new NpgsqlConnection(ConnectionString))
+            using (var connection = new NpgsqlConnection(ConnectionString))
             {
                 connection.Open();
 
-                using (NpgsqlCommand command = Commands.GetErrorsXml(this.ApplicationName, pageIndex, pageSize))
+                using (var command = Commands.GetErrorsXml(this.ApplicationName, pageIndex, pageSize))
                 {
                     command.Connection = connection;    
                     
-                    using (NpgsqlDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            string id = reader.GetString(0);
-                            string xml = reader.GetString(1);
-                            Error error = ErrorXml.DecodeString(xml);
+                            var id = reader.GetString(0);
+                            var xml = reader.GetString(1);
+                            var error = ErrorXml.DecodeString(xml);
                             errorEntryList.Add(new ErrorLogEntry(this, id, error));
                         }
                     }
                 }
 
-                using (NpgsqlCommand command = Commands.GetErrorsXmlTotal(this.ApplicationName))
+                using (var command = Commands.GetErrorsXmlTotal(this.ApplicationName))
                 {
                     command.Connection = connection;
                     return Convert.ToInt32(command.ExecuteScalar());
@@ -219,7 +219,7 @@ namespace Elmah
                 DateTime time,
                 string xml)
             {
-                NpgsqlCommand command = new NpgsqlCommand();
+                var command = new NpgsqlCommand();
                 command.CommandText = 
 @"
 INSERT INTO Elmah_Error (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
@@ -241,7 +241,7 @@ VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusC
 
             public static NpgsqlCommand GetErrorXml(string appName, Guid id)
             {
-                NpgsqlCommand command = new NpgsqlCommand();
+                var command = new NpgsqlCommand();
 
                 command.CommandText = 
 @"
@@ -259,7 +259,7 @@ WHERE
 
             public static NpgsqlCommand GetErrorsXml(string appName, int pageIndex, int pageSize)
             {
-                NpgsqlCommand command = new NpgsqlCommand();
+                var command = new NpgsqlCommand();
 
                 command.CommandText =
 @"
@@ -280,7 +280,7 @@ LIMIT @limit
 
             public static NpgsqlCommand GetErrorsXmlTotal(string appName)
             {
-                NpgsqlCommand command = new NpgsqlCommand();
+                var command = new NpgsqlCommand();
                 command.CommandText = "SELECT COUNT(*) FROM Elmah_Error WHERE Application = @Application";
                 command.Parameters.Add("@Application", NpgsqlDbType.Text, _maxAppNameLength).Value = appName;
                 return command;

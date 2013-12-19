@@ -63,7 +63,7 @@ namespace Elmah
             // license.
             //
 
-            AboutSet about = this.About;
+            var about = this.About;
 
             writer.Write("Powered by ");
             writer.AddAttribute(HtmlTextWriterAttribute.Href, "http://elmah.googlecode.com/");
@@ -72,7 +72,7 @@ namespace Elmah
             writer.RenderEndTag();
             writer.Write(", version ");
 
-            string version = about.GetFileVersionString();
+            var version = about.GetFileVersionString();
             
             if (version.Length == 0)
                 version = about.GetVersionString();
@@ -85,7 +85,7 @@ namespace Elmah
             
             writer.Write(". ");
             
-            string copyright = about.Copyright;
+            var copyright = about.Copyright;
             
             if (copyright.Length > 0)
             {

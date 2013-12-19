@@ -53,8 +53,8 @@ namespace Elmah
 
         private static string GetHandlerPath()
         {
-            System.Web.Configuration.HttpHandlersSection handlersSection = System.Configuration.ConfigurationManager.GetSection("system.web/httpHandlers") as System.Web.Configuration.HttpHandlersSection;
-            string elmahHandlerTypeName = typeof(ErrorLogPageFactory).AssemblyQualifiedName;
+            var handlersSection = System.Configuration.ConfigurationManager.GetSection("system.web/httpHandlers") as System.Web.Configuration.HttpHandlersSection;
+            var elmahHandlerTypeName = typeof(ErrorLogPageFactory).AssemblyQualifiedName;
             foreach (System.Web.Configuration.HttpHandlerAction handlerAction in handlersSection.Handlers)
                 if (elmahHandlerTypeName.IndexOf(handlerAction.Type) == 0)
                     return handlerAction.Path;
@@ -64,7 +64,7 @@ namespace Elmah
 
         public void Init(HttpApplication context)
         {
-            string handlerPath = GetHandlerPath();
+            var handlerPath = GetHandlerPath();
 
             //
             // Only set things up if we've found the handler path
@@ -91,16 +91,16 @@ namespace Elmah
 
         private void OnBeginRequest(object sender, EventArgs e)
         {
-            HttpApplication app = (HttpApplication) sender;
+            var app = (HttpApplication) sender;
             HttpContextBase context = new HttpContextWrapper(app.Context);
-            string path = context.Request.Path;
+            var path = context.Request.Path;
 
             //
             // Check to see if we are dealing with a request for the "elmah.axd" handler
             // and if so, we need to rewrite the path!
             //
 
-            int handlerPosition = path.IndexOf(_handlerPathWithForwardSlash, StringComparison.OrdinalIgnoreCase);
+            var handlerPosition = path.IndexOf(_handlerPathWithForwardSlash, StringComparison.OrdinalIgnoreCase);
 
             if (handlerPosition >= 0)
                 context.RewritePath(

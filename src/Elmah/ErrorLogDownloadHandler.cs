@@ -347,7 +347,7 @@ namespace Elmah
 
             public override IEnumerable<string> Header()
             {
-                string callback = Context.Request.QueryString[Mask.EmptyString(null, "callback")] 
+                var callback = Context.Request.QueryString[Mask.EmptyString(null, "callback")] 
                                   ?? string.Empty;
                 
                 if (callback.Length == 0)

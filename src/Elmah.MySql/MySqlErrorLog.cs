@@ -58,7 +58,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config);
 
             //
             // If there is no connection string to use then throw an 
@@ -135,11 +135,11 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
-            Guid id = Guid.NewGuid();
+            var errorXml = ErrorXml.EncodeString(error);
+            var id = Guid.NewGuid();
 
-            using (MySqlConnection connection = new MySqlConnection(ConnectionString))
-            using (MySqlCommand command = Commands.LogError(
+            using (var connection = new MySqlConnection(ConnectionString))
+            using (var command = Commands.LogError(
                 id, ApplicationName,
                 error.HostName, error.Type, error.Source, error.Message, error.User,
                 error.StatusCode, error.Time.ToUniversalTime(), errorXml))
@@ -164,13 +164,13 @@ namespace Elmah
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
-            using (MySqlConnection connection = new MySqlConnection(ConnectionString))
-            using (MySqlCommand command = Commands.GetErrorsXml(ApplicationName, pageIndex, pageSize))
+            using (var connection = new MySqlConnection(ConnectionString))
+            using (var command = Commands.GetErrorsXml(ApplicationName, pageIndex, pageSize))
             {
                 command.Connection = connection;
                 connection.Open();
 
-                using (MySqlDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     Debug.Assert(reader != null);
 
@@ -178,7 +178,7 @@ namespace Elmah
                     {
                         while (reader.Read())
                         {
-                            Error error = new Error();
+                            var error = new Error();
 
                             error.ApplicationName = reader["Application"].ToString();
                             error.HostName = reader["Host"].ToString();
@@ -225,13 +225,13 @@ namespace Elmah
 
             string errorXml = null;
 
-            using (MySqlConnection connection = new MySqlConnection(ConnectionString))
-            using (MySqlCommand command = Commands.GetErrorXml(ApplicationName, errorGuid))
+            using (var connection = new MySqlConnection(ConnectionString))
+            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
                 connection.Open();
 
-                using (MySqlDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     Debug.Assert(reader != null);
 
@@ -246,7 +246,7 @@ namespace Elmah
             if (errorXml == null)
                 return null;
 
-            Error error = ErrorXml.DecodeString(errorXml);
+            var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
@@ -264,10 +264,10 @@ namespace Elmah
                 DateTime time,
                 string xml)
             {
-                MySqlCommand command = new MySqlCommand("elmah_LogError");
+                var command = new MySqlCommand("elmah_LogError");
                 command.CommandType = CommandType.StoredProcedure;
 
-                MySqlParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("ErrorId", MySqlDbType.String, 36).Value = id.ToString();
                 parameters.Add("Application", MySqlDbType.VarChar, _maxAppNameLength).Value = appName.Substring(0, Math.Min(_maxAppNameLength, appName.Length));
                 parameters.Add("Host", MySqlDbType.VarChar, 30).Value = hostName.Substring(0, Math.Min(30, hostName.Length));
@@ -284,10 +284,10 @@ namespace Elmah
 
             public static MySqlCommand GetErrorXml(string appName, Guid id)
             {
-                MySqlCommand command = new MySqlCommand("elmah_GetErrorXml");
+                var command = new MySqlCommand("elmah_GetErrorXml");
                 command.CommandType = CommandType.StoredProcedure;
 
-                MySqlParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("Id", MySqlDbType.String, 36).Value = id.ToString();
                 parameters.Add("App", MySqlDbType.VarChar, _maxAppNameLength).Value = appName.Substring(0, Math.Min(_maxAppNameLength, appName.Length));
 
@@ -296,10 +296,10 @@ namespace Elmah
 
             public static MySqlCommand GetErrorsXml(string appName, int pageIndex, int pageSize)
             {
-                MySqlCommand command = new MySqlCommand("elmah_GetErrorsXml");
+                var command = new MySqlCommand("elmah_GetErrorsXml");
                 command.CommandType = CommandType.StoredProcedure;
 
-                MySqlParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("App", MySqlDbType.VarChar, _maxAppNameLength).Value = appName.Substring(0, Math.Min(_maxAppNameLength, appName.Length));
                 parameters.Add("PageIndex", MySqlDbType.Int32).Value = pageIndex;
                 parameters.Add("PageSize", MySqlDbType.Int32).Value = pageSize;

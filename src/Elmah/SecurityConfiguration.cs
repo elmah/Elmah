@@ -60,7 +60,7 @@ namespace Elmah
 
         private static bool GetBoolean(IDictionary options, string name)
         {
-            string str = GetString(options, name).Trim().ToLower(CultureInfo.InvariantCulture);
+            var str = GetString(options, name).Trim().ToLower(CultureInfo.InvariantCulture);
             return Boolean.TrueString.Equals(StringTranslation.Translate(Boolean.TrueString, str, _trues));
         }
 
@@ -71,7 +71,7 @@ namespace Elmah
             if (options == null)
                 return string.Empty;
 
-            object value = options[name];
+            var value = options[name];
 
             if (value == null)
                 return string.Empty;

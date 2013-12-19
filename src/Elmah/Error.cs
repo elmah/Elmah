@@ -90,7 +90,7 @@ namespace Elmah
                 throw new ArgumentNullException("e");
 
             _exception = e;
-            Exception baseException = e.GetBaseException();
+            var baseException = e.GetBaseException();
 
             //
             // Load the basic information.
@@ -109,7 +109,7 @@ namespace Elmah
             // and detailed HTML message provided by the host.
             //
 
-            HttpException httpException = e as HttpException;
+            var httpException = e as HttpException;
 
             if (httpException != null)
             {
@@ -125,7 +125,7 @@ namespace Elmah
 
             if (context != null)
             {
-                IPrincipal webUser = context.User;
+                var webUser = context.User;
                 if (webUser != null 
                     && (webUser.Identity.Name ?? string.Empty).Length > 0)
                 {
@@ -361,7 +361,7 @@ namespace Elmah
             // Make a base shallow copy of all the members.
             //
 
-            Error copy = (Error) MemberwiseClone();
+            var copy = (Error) MemberwiseClone();
 
             //
             // Now make a deep copy of items that are mutable.
@@ -388,11 +388,11 @@ namespace Elmah
             if (cookies == null || cookies.Count == 0)
                 return null;
 
-            NameValueCollection copy = new NameValueCollection(cookies.Count);
+            var copy = new NameValueCollection(cookies.Count);
 
-            for (int i = 0; i < cookies.Count; i++)
+            for (var i = 0; i < cookies.Count; i++)
             {
-                HttpCookie cookie = cookies[i];
+                var cookie = cookies[i];
 
                 //
                 // NOTE: We drop the Path and Domain properties of the 

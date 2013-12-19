@@ -90,7 +90,7 @@ namespace Elmah
             // when the application fires its Disposed event.
             //
 
-            Housekeeper housekeeper = new Housekeeper(module);
+            var housekeeper = new Housekeeper(module);
             application.Disposed += new EventHandler(housekeeper.OnApplicationDisposed);
 
             return true;
@@ -125,7 +125,7 @@ namespace Elmah
                 // Remove the module from the list if it's in there.
                 //
 
-                int index = moduleList.IndexOf(module);
+                var index = moduleList.IndexOf(module);
 
                 if (index < 0)
                     return false;
@@ -157,7 +157,7 @@ namespace Elmah
             
             try
             {
-                IHttpModule[] modules = new IHttpModule[application.Modules.Count];
+                var modules = new IHttpModule[application.Modules.Count];
                 application.Modules.CopyTo(modules, 0);
                 return modules;
             }
@@ -181,7 +181,7 @@ namespace Elmah
                 if (moduleList == null)
                     return Enumerable.Empty<IHttpModule>();
                 
-                IHttpModule[] modules = new IHttpModule[moduleList.Count];
+                var modules = new IHttpModule[moduleList.Count];
                 moduleList.CopyTo(modules, 0);
                 return modules;
             }
@@ -191,7 +191,7 @@ namespace Elmah
         {
             try
             {
-                AspNetHostingPermission permission = new AspNetHostingPermission(AspNetHostingPermissionLevel.High);
+                var permission = new AspNetHostingPermission(AspNetHostingPermissionLevel.High);
                 permission.Demand();
                 return true;
             }

@@ -209,7 +209,7 @@ namespace Elmah
                 // http://code.google.com/p/elmah/issues/detail?id=129#c18
                 //
 
-                StringBuilder sb = new StringBuilder(/* capacity */ 2033);
+                var sb = new StringBuilder(/* capacity */ 2033);
                 do { sb.Append(reader.GetString(0)); } while (reader.Read());
                 return sb.ToString();
             }
@@ -375,7 +375,7 @@ namespace Elmah
             if (xml == null || xml.Length == 0) 
                 return;
 
-            XmlReaderSettings settings = new XmlReaderSettings();
+            var settings = new XmlReaderSettings();
             settings.CheckCharacters = false;
             settings.ConformanceLevel = ConformanceLevel.Fragment;
 

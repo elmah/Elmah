@@ -57,7 +57,7 @@ namespace Elmah
             if (context == null)
                 context = new HttpContextWrapper(HttpContext.Current);
 
-            ErrorSignalEventHandler handler = Raised;
+            var handler = Raised;
 
             if (handler != null)
                 handler(this, new ErrorSignalEventArgs(e, context, callerInfo));
@@ -118,7 +118,7 @@ namespace Elmah
                 // then setup a new and empty list.
                 //
 
-                ErrorSignal signal = _signalByApp.Find(application);
+                var signal = _signalByApp.Find(application);
 
                 if (signal == null)
                 {
@@ -133,7 +133,7 @@ namespace Elmah
 
         private static void OnApplicationDisposed(object sender, EventArgs e)
         {
-            HttpApplication application = (HttpApplication) sender;
+            var application = (HttpApplication) sender;
 
             lock (_lock)
             {

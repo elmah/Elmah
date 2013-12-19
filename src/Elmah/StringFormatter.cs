@@ -90,13 +90,13 @@ namespace Elmah
             // http://haacked.com/archive/2009/01/14/named-formats-redux.aspx#70485
             //
 
-            StringBuilder result = new StringBuilder(format.Length * 2);
-            StringBuilder token = new StringBuilder();
+            var result = new StringBuilder(format.Length * 2);
+            var token = new StringBuilder();
 
-            CharEnumerator e = format.GetEnumerator();
+            var e = format.GetEnumerator();
             while (e.MoveNext())
             {
-                char ch = e.Current;
+                var ch = e.Current;
                 if (ch == '{')
                 {
                     while (true)
@@ -148,8 +148,8 @@ namespace Elmah
             if (args.Length == 0)
                 throw new ArgumentException("Missing replacement arguments.", "args");
 
-            object source = args[0];
-            int dotIndex = token.IndexOf('.');
+            var source = args[0];
+            var dotIndex = token.IndexOf('.');
             int sourceIndex;
             if (dotIndex > 0 && 0 <= (sourceIndex = TryParseUnsignedInteger(token.Substring(0, dotIndex))))
             {
@@ -157,9 +157,9 @@ namespace Elmah
                 token = token.Substring(dotIndex + 1);
             }
 
-            string format = string.Empty;
+            var format = string.Empty;
 
-            int colonIndex = token.IndexOf(':');
+            var colonIndex = token.IndexOf(':');
             if (colonIndex > 0)
             {
                 format = "{0:" + token.Substring(colonIndex + 1) + "}";

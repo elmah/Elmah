@@ -55,7 +55,7 @@ namespace Elmah.Assertions
                 || type == TypeCode.Empty 
                 || type == TypeCode.Object)
             {
-                string message = string.Format(
+                var message = string.Format(
                     "The {0} value type is invalid for a comparison.", type.ToString());
                 throw new ArgumentException(message, "type");
             }

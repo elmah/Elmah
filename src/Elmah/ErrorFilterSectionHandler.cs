@@ -57,7 +57,7 @@ namespace Elmah
 
             if (parent != null)
             {
-                ErrorFilterConfiguration parentConfig = (ErrorFilterConfiguration) parent;
+                var parentConfig = (ErrorFilterConfiguration) parent;
                 config = parentConfig.CloneObject();
             }    
             else
@@ -70,7 +70,7 @@ namespace Elmah
             // assertion.
             //
 
-            XmlElement assertionNode = (XmlElement) section.SelectSingleNode("test/*");
+            var assertionNode = (XmlElement) section.SelectSingleNode("test/*");
 
             if (assertionNode != null)
                 config.SetAssertion(AssertionFactory.Create(assertionNode));

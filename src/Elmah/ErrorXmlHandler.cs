@@ -41,7 +41,7 @@ namespace Elmah
     {
         public static void ProcessRequest(HttpContextBase context)
         {
-            HttpResponseBase response = context.Response;
+            var response = context.Response;
             response.ContentType = "application/xml";
 
             //
@@ -49,12 +49,12 @@ namespace Elmah
             // the store.
             //
 
-            string errorId = context.Request.QueryString["id"] ?? string.Empty;
+            var errorId = context.Request.QueryString["id"] ?? string.Empty;
 
             if (errorId.Length == 0)
                 throw new ApplicationException("Missing error identifier specification.");
 
-            ErrorLogEntry entry = ErrorLog.GetDefault(context).GetError(errorId);
+            var entry = ErrorLog.GetDefault(context).GetError(errorId);
 
             //
             // Perhaps the error has been deleted from the store? Whatever
@@ -71,11 +71,11 @@ namespace Elmah
             // Stream out the error as formatted XML.
             //
 
-            XmlWriterSettings settings = new XmlWriterSettings();
+            var settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.NewLineOnAttributes = true;
             settings.CheckCharacters = false;
-            XmlWriter writer = XmlWriter.Create(response.Output, settings);
+            var writer = XmlWriter.Create(response.Output, settings);
 
             writer.WriteStartDocument();
             writer.WriteStartElement("error");

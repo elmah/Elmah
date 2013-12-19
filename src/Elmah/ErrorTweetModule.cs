@@ -77,18 +77,18 @@ namespace Elmah
             // In this case, the module is as good as mute.
             //
 
-            IDictionary config = (IDictionary) GetConfig();
+            var config = (IDictionary) GetConfig();
 
             if (config == null)
                 return;
 
-            string userName = GetSetting(config, "userName", string.Empty);
-            string password = GetSetting(config, "password", string.Empty);
-            string statusFormat = GetSetting(config, "statusFormat", "{Message}");
-            int maxStatusLength = int.Parse(GetSetting(config, "maxStatusLength", "140"), NumberStyles.None, CultureInfo.InvariantCulture);
-            string ellipsis = GetSetting(config, "ellipsis", /* ... */ "\x2026");
-            string formFormat = GetSetting(config, "formFormat", "status={0}");
-            Uri url = new Uri(GetSetting(config, "url", "http://twitter.com/statuses/update.xml"), UriKind.Absolute);
+            var userName = GetSetting(config, "userName", string.Empty);
+            var password = GetSetting(config, "password", string.Empty);
+            var statusFormat = GetSetting(config, "statusFormat", "{Message}");
+            var maxStatusLength = int.Parse(GetSetting(config, "maxStatusLength", "140"), NumberStyles.None, CultureInfo.InvariantCulture);
+            var ellipsis = GetSetting(config, "ellipsis", /* ... */ "\x2026");
+            var formFormat = GetSetting(config, "formFormat", "status={0}");
+            var url = new Uri(GetSetting(config, "url", "http://twitter.com/statuses/update.xml"), UriKind.Absolute);
 
             _credentials = new NetworkCredential(userName, password);
             _statusFormat = statusFormat;
@@ -119,7 +119,7 @@ namespace Elmah
 
         protected virtual void OnError(object sender, EventArgs args)
         {
-            HttpApplication application = (HttpApplication) sender;
+            var application = (HttpApplication) sender;
             LogException(application.Server.GetLastError(), new HttpContextWrapper(application.Context));
         }
 
@@ -147,7 +147,7 @@ namespace Elmah
             // logging of the uncaught exception.
             //
 
-            ExceptionFilterEventArgs args = new ExceptionFilterEventArgs(e, context);
+            var args = new ExceptionFilterEventArgs(e, context);
             OnFiltering(args);
             
             if (args.Dismissed)
@@ -161,7 +161,7 @@ namespace Elmah
 
             try
             {
-                string status = StringFormatter.Format(_statusFormat, new Error(e, context));
+                var status = StringFormatter.Format(_statusFormat, new Error(e, context));
 
                 //
                 // Apply ellipsis if status is too long. If the trimmed 
@@ -170,11 +170,11 @@ namespace Elmah
                 // someone gives an ellipsis that is ridiculously long.
                 //
 
-                int maxLength = _maxStatusLength;
+                var maxLength = _maxStatusLength;
                 if (status.Length > maxLength) 
                 {
-                    string ellipsis = _ellipsis;
-                    int trimmedStatusLength = maxLength - ellipsis.Length;
+                    var ellipsis = _ellipsis;
+                    var trimmedStatusLength = maxLength - ellipsis.Length;
                     status = trimmedStatusLength >= 0
                            ? status.Substring(0, trimmedStatusLength) + ellipsis
                            : status.Substring(0, maxLength);
@@ -203,8 +203,8 @@ namespace Elmah
                 // determine and set the content length.
                 //
                 
-                string encodedForm = string.Format(_formFormat, HttpUtility.UrlEncode(status));
-                byte[] data = Encoding.ASCII.GetBytes(encodedForm);
+                var encodedForm = string.Format(_formFormat, HttpUtility.UrlEncode(status));
+                var data = Encoding.ASCII.GetBytes(encodedForm);
                 Debug.Assert(data.Length > 0);
                 request.ContentLength = data.Length;
 
@@ -224,7 +224,7 @@ namespace Elmah
 
                 _requests.Add(request);
 
-                IAsyncResult ar = request.BeginGetRequestStream(
+                var ar = request.BeginGetRequestStream(
                     new AsyncCallback(OnGetRequestStreamCompleted), 
                     AsyncArgs(request, data));
             }
@@ -258,7 +258,7 @@ namespace Elmah
         private void OnGetRequestStreamCompleted(IAsyncResult ar)
         {
             if (ar == null) throw new ArgumentNullException("ar");
-            object[] args = (object[]) ar.AsyncState;
+            var args = (object[]) ar.AsyncState;
             OnGetRequestStreamCompleted(ar, (WebRequest) args[0], (byte[]) args[1]);
         }
 
@@ -271,7 +271,7 @@ namespace Elmah
 
             try
             {
-                using (Stream output = request.EndGetRequestStream(ar))
+                using (var output = request.EndGetRequestStream(ar))
                     output.Write(data, 0, data.Length);
                 request.BeginGetResponse(new AsyncCallback(OnGetResponseCompleted), request);
             }
@@ -310,7 +310,7 @@ namespace Elmah
 
         protected virtual void OnFiltering(ExceptionFilterEventArgs args)
         {
-            ExceptionFilterEventHandler handler = Filtering;
+            var handler = Filtering;
             
             if (handler != null)
                 handler(this, args);
@@ -341,7 +341,7 @@ namespace Elmah
             Debug.Assert(config != null);
             Debug.AssertStringNotEmpty(name);
 
-            string value = ((string)config[name]) ?? string.Empty;
+            var value = ((string)config[name]) ?? string.Empty;
 
             if (value.Length == 0)
             {

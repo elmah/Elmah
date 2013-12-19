@@ -333,8 +333,8 @@ namespace Elmah
             {
                 if (reader.IsStartElement("item"))
                 {
-                    string name = reader.GetAttribute("name");
-                    bool isNull = reader.IsEmptyElement;
+                    var name = reader.GetAttribute("name");
+                    var isNull = reader.IsEmptyElement;
 
                     reader.Read(); // <item>
 
@@ -344,7 +344,7 @@ namespace Elmah
                         {
                             if (reader.IsStartElement("value")) // <value ...>
                             {
-                                string value = reader.GetAttribute("string");
+                                var value = reader.GetAttribute("string");
                                 collection.Add(name, value);
                                 if (reader.IsEmptyElement)
                                 {

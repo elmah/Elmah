@@ -67,7 +67,7 @@ namespace Elmah
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            string connectionString = ConnectionStringHelper.GetConnectionString(config);
+            var connectionString = ConnectionStringHelper.GetConnectionString(config);
 
             //
             // If there is no connection string to use then throw an 
@@ -86,7 +86,7 @@ namespace Elmah
             // per-application isolation over a single store.
             //
 
-            string appName = config.Find("applicationName", string.Empty);
+            var appName = config.Find("applicationName", string.Empty);
 
             if (appName.Length > _maxAppNameLength)
             {
@@ -146,10 +146,10 @@ namespace Elmah
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            string errorXml = ErrorXml.EncodeString(error);
+            var errorXml = ErrorXml.EncodeString(error);
 
-            using (OleDbConnection connection = new OleDbConnection(this.ConnectionString))
-            using (OleDbCommand command = connection.CreateCommand())
+            using (var connection = new OleDbConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -162,7 +162,7 @@ namespace Elmah
                                             @Message, @UserName, @StatusCode, @TimeUtc, @AllXml)";
                 command.CommandType = CommandType.Text;
 
-                OleDbParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
 
                 parameters.Add("@Application", OleDbType.VarChar, _maxAppNameLength).Value = ApplicationName;
                 parameters.Add("@Host", OleDbType.VarChar, 30).Value = error.HostName;
@@ -176,7 +176,7 @@ namespace Elmah
                 
                 command.ExecuteNonQuery();
 
-                using (OleDbCommand identityCommand = connection.CreateCommand())
+                using (var identityCommand = connection.CreateCommand())
                 {
                     identityCommand.CommandType = CommandType.Text;
                     identityCommand.CommandText = "SELECT @@IDENTITY";
@@ -199,25 +199,25 @@ namespace Elmah
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
-            using (OleDbConnection connection = new OleDbConnection(this.ConnectionString))
-            using (OleDbCommand command = connection.CreateCommand())
+            using (var connection = new OleDbConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 command.CommandType = CommandType.Text;
                 command.CommandText = "SELECT COUNT(*) FROM ELMAH_Error";
 
                 connection.Open();
-                int totalCount = (int)command.ExecuteScalar();
+                var totalCount = (int)command.ExecuteScalar();
 
                 if (errorEntryList != null && pageIndex * pageSize < totalCount)
                 {
-                    int maxRecords = pageSize * (pageIndex + 1);
+                    var maxRecords = pageSize * (pageIndex + 1);
                     if (maxRecords > totalCount)
                     {
                         maxRecords = totalCount;
                         pageSize = totalCount - pageSize * (totalCount / pageSize);
                     }
 
-                    StringBuilder sql = new StringBuilder(1000);
+                    var sql = new StringBuilder(1000);
                     sql.Append("SELECT e.* FROM (");
                     sql.Append("SELECT TOP ");
                     sql.Append(pageSize.ToString(CultureInfo.InvariantCulture));
@@ -232,7 +232,7 @@ namespace Elmah
 
                     command.CommandText = sql.ToString();
 
-                    using (OleDbDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         Debug.Assert(reader != null);
 
@@ -292,15 +292,15 @@ namespace Elmah
 
             string errorXml;
 
-            using (OleDbConnection connection = new OleDbConnection(this.ConnectionString))
-            using (OleDbCommand command = connection.CreateCommand())
+            using (var connection = new OleDbConnection(this.ConnectionString))
+            using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"SELECT   AllXml
                                         FROM     ELMAH_Error
                                         WHERE    ErrorId = @ErrorId";
                 command.CommandType = CommandType.Text;
 
-                OleDbParameterCollection parameters = command.Parameters;
+                var parameters = command.Parameters;
                 parameters.Add("@ErrorId", OleDbType.Integer).Value = errorId;
 
                 connection.Open();
@@ -310,16 +310,16 @@ namespace Elmah
             if (errorXml == null)
                 return null;
 
-            Error error = ErrorXml.DecodeString(errorXml);
+            var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
         private void InitializeDatabase()
         {
-            string connectionString = ConnectionString;
+            var connectionString = ConnectionString;
             Debug.AssertStringNotEmpty(connectionString);
 
-            string dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
+            var dbFilePath = ConnectionStringHelper.GetDataSourceFilePath(connectionString);
             if (File.Exists(dbFilePath))
                 return;
 
@@ -342,9 +342,9 @@ namespace Elmah
                 // We do this in the same directory as the resulting database for security permission purposes.
                 //
 
-                string scriptPath = Path.Combine(Path.GetDirectoryName(dbFilePath), _scriptResourceName);
+                var scriptPath = Path.Combine(Path.GetDirectoryName(dbFilePath), _scriptResourceName);
 
-                using (FileStream scriptStream = new FileStream(scriptPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var scriptStream = new FileStream(scriptPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     ManifestResourceHelper.WriteResourceToStream(scriptStream, GetType(), _scriptResourceName);
                 }
@@ -355,7 +355,7 @@ namespace Elmah
                 // from displaying.
                 //
 
-                ProcessStartInfo psi = new ProcessStartInfo(
+                var psi = new ProcessStartInfo(
                     "cscript", "\"" + scriptPath + "\" \"" + dbFilePath + "\" //B //NoLogo");
                 
                 psi.UseShellExecute = false;    // i.e. CreateProcess
@@ -363,13 +363,13 @@ namespace Elmah
                 
                 try
                 {
-                    using (Process process = Process.Start(psi))
+                    using (var process = Process.Start(psi))
                     {
                         //
                         // A few seconds should be plenty of time to create the database.
                         //
 
-                        TimeSpan tolerance = TimeSpan.FromSeconds(2);
+                        var tolerance = TimeSpan.FromSeconds(2);
                         if (!process.WaitForExit((int) tolerance.TotalMilliseconds))
                         {
                             //

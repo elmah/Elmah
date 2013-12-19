@@ -63,7 +63,7 @@ namespace Elmah
             if (type == null || type.Length == 0)
                 return string.Empty;
 
-            int lastDotIndex = CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(type, '.');
+            var lastDotIndex = CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(type, '.');
 
             if (lastDotIndex > 0)
                 type = type.Substring(lastDotIndex + 1);
@@ -72,7 +72,7 @@ namespace Elmah
 
             if (type.Length > conventionalSuffix.Length)
             {
-                int suffixIndex = type.Length - conventionalSuffix.Length;
+                var suffixIndex = type.Length - conventionalSuffix.Length;
 
                 if (string.Compare(type, suffixIndex, conventionalSuffix, 0,
                                    conventionalSuffix.Length, true, CultureInfo.InvariantCulture) == 0)

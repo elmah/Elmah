@@ -48,7 +48,7 @@ namespace Elmah
             // Get the configuration section with the settings.
             //
             
-            IDictionary config = (IDictionary) Configuration.GetSection(sectionName);
+            var config = (IDictionary) Configuration.GetSection(sectionName);
 
             if (config == null)
                 return null;

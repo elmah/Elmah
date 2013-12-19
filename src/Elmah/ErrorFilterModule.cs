@@ -53,16 +53,16 @@ namespace Elmah
             if (application == null)
                 throw new ArgumentNullException("application");
             
-            ErrorFilterConfiguration config = (ErrorFilterConfiguration) Configuration.GetSubsection("errorFilter");
+            var config = (ErrorFilterConfiguration) Configuration.GetSubsection("errorFilter");
             
             if (config == null)
                 return;
             
             _assertion = config.Assertion;
 
-            foreach (IHttpModule module in HttpModuleRegistry.GetModules(application))
+            foreach (var module in HttpModuleRegistry.GetModules(application))
             {
-                IExceptionFiltering filtering = module as IExceptionFiltering;
+                var filtering = module as IExceptionFiltering;
 
                 if (filtering != null)
                     filtering.Filtering += new ExceptionFilterEventHandler(OnErrorModuleFiltering);
@@ -167,7 +167,7 @@ namespace Elmah
                     {
                         _statusCodeInitialized = true;
                         
-                        HttpException exception = Exception as HttpException;
+                        var exception = Exception as HttpException;
 
                         if (exception != null)
                             _httpStatusCode = exception.GetHttpCode();

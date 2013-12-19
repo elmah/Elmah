@@ -100,7 +100,7 @@ namespace Elmah
 
         public static object GetService(object context, Type serviceType)
         {
-            object service = FindService(context, serviceType);
+            var service = FindService(context, serviceType);
             
             if (service == null)
                 throw new Exception(string.Format("Service of the type {0} is not available.", serviceType));
@@ -116,7 +116,7 @@ namespace Elmah
 
         public static IServiceProvider GetServiceProvider(object context)
         {
-            IServiceProvider sp = Current(context);
+            var sp = Current(context);
             
             if (sp == null)
                 throw new Exception("Service provider not available.");

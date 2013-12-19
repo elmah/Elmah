@@ -61,7 +61,7 @@ namespace Elmah
             // TIME  := HH ":" MM ":" SS
             //
 
-            string escapedNonFileNameChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
+            var escapedNonFileNameChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
 
             _regex = new Regex(
                 @"\$ id: \s* 
@@ -92,25 +92,25 @@ namespace Elmah
             if (id.Length == 0)
                 throw new ArgumentException(null, "id");
             
-            Match match = _regex.Match(id);
+            var match = _regex.Match(id);
             
             if (!match.Success)
                 throw new ArgumentException(null, "id");
 
             _id = id;
 
-            GroupCollection groups = match.Groups;
+            var groups = match.Groups;
 
             _fileName = groups["f"].Value;
             _revision = int.Parse(groups["r"].Value);
             _author = groups["a"].Value;
 
-            int year = int.Parse(groups["y"].Value);
-            int month = int.Parse(groups["mo"].Value);
-            int day = int.Parse(groups["d"].Value);
-            int hour = int.Parse(groups["h"].Value);
-            int minute = int.Parse(groups["mi"].Value);
-            int second = int.Parse(groups["s"].Value);
+            var year = int.Parse(groups["y"].Value);
+            var month = int.Parse(groups["mo"].Value);
+            var day = int.Parse(groups["d"].Value);
+            var hour = int.Parse(groups["h"].Value);
+            var minute = int.Parse(groups["mi"].Value);
+            var second = int.Parse(groups["s"].Value);
             
             _lastChanged = new DateTime(year, month, day, hour, minute, second).ToLocalTime();
         }
@@ -186,16 +186,16 @@ namespace Elmah
             if (assembly == null)
                 throw new ArgumentNullException("assembly");
 
-            SccAttribute[] attributes = (SccAttribute[]) Attribute.GetCustomAttributes(assembly, typeof(SccAttribute), false);
+            var attributes = (SccAttribute[]) Attribute.GetCustomAttributes(assembly, typeof(SccAttribute), false);
             
             if (attributes.Length == 0)
                 return new SccStamp[0];
             
-            List<SccStamp> list = new List<SccStamp>(attributes.Length);
+            var list = new List<SccStamp>(attributes.Length);
 
-            foreach (SccAttribute attribute in attributes)
+            foreach (var attribute in attributes)
             {
-                string id = attribute.Id.Trim();
+                var id = attribute.Id.Trim();
 
                 if (id.Length > 0 && string.Compare("$Id" + /* IMPORTANT! */ "$", id, true, CultureInfo.InvariantCulture) != 0)
                     list.Add(new SccStamp(id));

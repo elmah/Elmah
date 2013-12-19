@@ -78,7 +78,7 @@ namespace Elmah
             if (!IsAsyncPostBackRequest(context.Request))
                 return;
 
-            Page page = context.Handler as Page;
+            var page = context.Handler as Page;
 
             if (page == null)
                 return;
@@ -88,8 +88,8 @@ namespace Elmah
 
         protected virtual void OnPageError(object sender, EventArgs args)
         {
-            Page page = (Page) sender;
-            Exception exception = page.Server.GetLastError();
+            var page = (Page) sender;
+            var exception = page.Server.GetLastError();
 
             if (exception == null)
                 return;
@@ -112,12 +112,12 @@ namespace Elmah
             if (request == null) 
                 throw new ArgumentNullException("request");
             
-            string[] values = request.Headers.GetValues("X-MicrosoftAjax");
+            var values = request.Headers.GetValues("X-MicrosoftAjax");
 
             if (values == null || values.Length == 0)
                 return false;
 
-            foreach (string value in values)
+            foreach (var value in values)
             {
                 if (string.Compare(value, "Delta=true", StringComparison.OrdinalIgnoreCase) == 0)
                     return true;

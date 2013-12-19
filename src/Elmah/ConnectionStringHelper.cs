@@ -58,11 +58,11 @@ namespace Elmah
             // the configuration to get the actual connection string.
             //
 
-            string connectionStringName = config.Find("connectionStringName", string.Empty);
+            var connectionStringName = config.Find("connectionStringName", string.Empty);
 
             if (connectionStringName.Length > 0)
             {
-                ConnectionStringSettings settings = ConfigurationManager.ConnectionStrings[connectionStringName];
+                var settings = ConfigurationManager.ConnectionStrings[connectionStringName];
 
                 if (settings == null)
                     return string.Empty;
@@ -129,7 +129,7 @@ namespace Elmah
         {
             Debug.AssertStringNotEmpty(connectionString);
 
-            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+            var builder = new DbConnectionStringBuilder();
             return GetDataSourceFilePath(builder, connectionString);
         }
 
@@ -140,7 +140,7 @@ namespace Elmah
 
         public static string GetConnectionString(IDictionary config, bool resolveDataSource)
         {
-            string connectionString = GetConnectionString(config);
+            var connectionString = GetConnectionString(config);
             return resolveDataSource ? GetResolvedConnectionString(connectionString) : connectionString;
         }
 
@@ -153,7 +153,7 @@ namespace Elmah
         {
             Debug.AssertStringNotEmpty(connectionString);
 
-            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+            var builder = new DbConnectionStringBuilder();
             builder["Data Source"] = GetDataSourceFilePath(builder, connectionString);
             return builder.ToString();
         }
@@ -169,7 +169,7 @@ namespace Elmah
             builder.ConnectionString = connectionString;
             if (!builder.ContainsKey("Data Source"))
                 throw new ArgumentException("A 'Data Source' parameter was expected in the supplied connection string, but it was not found.");
-            string dataSource = builder["Data Source"].ToString();
+            var dataSource = builder["Data Source"].ToString();
             return ResolveDataSourceFilePath(dataSource);
         }
 
@@ -200,7 +200,7 @@ namespace Elmah
             // http://blogs.msdn.com/smartclientdata/archive/2005/08/26/456886.aspx
             //
 
-            string baseDirectory = AppDomain.CurrentDomain.GetData("DataDirectory") as string;
+            var baseDirectory = AppDomain.CurrentDomain.GetData("DataDirectory") as string;
             
             //
             // If not, try the current AppDomain's base directory.
