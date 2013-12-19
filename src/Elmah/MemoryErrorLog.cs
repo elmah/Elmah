@@ -278,7 +278,7 @@ namespace Elmah
 
         internal void Reset()
         {
-            _entries = new EntryCollection(_size);
+            _entries = null;
         }
 
         sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>

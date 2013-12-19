@@ -23,15 +23,13 @@
 
 namespace Elmah.Tests
 {
-    extern alias e;
-    using System.Collections.ObjectModel;
-    using System.Security.Cryptography;
-
     #region Imports
 
+    extern alias e;
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using Xunit;
     using e::Elmah;
