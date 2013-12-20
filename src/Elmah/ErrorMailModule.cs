@@ -43,36 +43,6 @@ namespace Elmah
 
     #endregion
 
-    public sealed class ErrorMailEventArgs : EventArgs
-    {
-        private readonly Error _error;
-        private readonly MailMessage _mail;
-
-        public ErrorMailEventArgs(Error error, MailMessage mail)
-        {
-            if (error == null)
-                throw new ArgumentNullException("error");
-
-            if (mail == null)
-                throw new ArgumentNullException("mail");
-
-            _error = error;
-            _mail = mail;
-        }
-
-        public Error Error
-        {
-            get { return _error; }
-        }
-
-        public MailMessage Mail
-        {
-            get { return _mail; }
-        }
-    }
-
-    public delegate void ErrorMailEventHandler(object sender, ErrorMailEventArgs args);
-
     /// <summary>
     /// HTTP module that sends an e-mail whenever an unhandled exception
     /// occurs in an ASP.NET web application.
@@ -510,7 +480,7 @@ namespace Elmah
             }
         }
 
-        private static MailAttachment CreateHtmlAttachment(string name, string html)
+        internal static MailAttachment CreateHtmlAttachment(string name, string html)
         {
             Debug.AssertStringNotEmpty(name);
             Debug.AssertStringNotEmpty(html);
@@ -624,12 +594,12 @@ namespace Elmah
             return Configuration.GetSubsection("errorMail");
         }
 
-        private static string GetSetting(IDictionary config, string name)
+        internal static string GetSetting(IDictionary config, string name)
         {
             return GetSetting(config, name, null);
         }
 
-        private static string GetSetting(IDictionary config, string name, string defaultValue)
+        internal static string GetSetting(IDictionary config, string name, string defaultValue)
         {
             Debug.Assert(config != null);
             Debug.AssertStringNotEmpty(name);
