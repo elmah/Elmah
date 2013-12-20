@@ -407,9 +407,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RazorTemplateBase.cs" />
-    <Compile Include="ReverseComparer.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="RssXml.cs" />
     <Compile Include="SecurityConfiguration.cs">
     </Compile>
