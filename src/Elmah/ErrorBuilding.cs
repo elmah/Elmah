@@ -294,8 +294,10 @@ namespace Elmah
             }
         }
 
-        static class ErrorFilterModule // TODO Remove and un-nest AssertionHelperContext
+        static class ErrorFilterModule
         {
+            // TODO Consolidate duplicate definition and un-nest AssertionHelperContext
+
             public sealed class AssertionHelperContext
             {
                 private readonly object _source;
@@ -391,11 +393,11 @@ namespace Elmah
                 if (config == null)
                     return delegate { };
 
-                var assertion = config.GetType().GetProperty("Assertion").GetValue(config, null) /* config.Assertion */;
-                return Filter((Func<ErrorFilterModule.AssertionHelperContext, bool>) Delegate.CreateDelegate(typeof(Func<ErrorFilterModule.AssertionHelperContext, bool>), assertion, "Test", false, true) /* assertion.Test */);
+                var assertion = config.GetType().GetProperty("Assertion").GetValue(config, null) /* TODO config.Assertion */;
+                return Filter((Func<ErrorFilterModule.AssertionHelperContext, bool>) Delegate.CreateDelegate(typeof(Func<ErrorFilterModule.AssertionHelperContext, bool>), assertion, "Test", false, true) /* TODO assertion.Test */);
             }
 
-            /* public[1] */ static ModuleConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
+            /* TODO? public[1] */ static ModuleConnectionHandler Filter(Func<ErrorFilterModule.AssertionHelperContext, bool> predicate)
             // [1] Make public once we known what to do with ErrorFilterModule.AssertionHelperContext
             {
                 return ehub => ehub.OnExceptionFilter((sender, args) =>
