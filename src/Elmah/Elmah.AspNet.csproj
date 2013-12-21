@@ -380,8 +380,6 @@
     <Compile Include="ExceptionFiltering.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FixIIS5xWildcardMappingModule.cs">
-    </Compile>
     <Compile Include="HtmlLinkType.cs">
     </Compile>
     <Compile Include="HtmlString.cs" />
@@ -400,8 +398,6 @@
     <Compile Include="Mannex.cs" />
     <Compile Include="Mask.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MsAjaxDeltaErrorLogModule.cs">
     </Compile>
     <Compile Include="PoweredBy.cs">
       <SubType>Code</SubType>
