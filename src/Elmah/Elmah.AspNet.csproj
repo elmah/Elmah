@@ -278,8 +278,6 @@
     </Compile>
     <Compile Include="Configuration.cs">
     </Compile>
-    <Compile Include="ConnectionStringHelper.cs">
-    </Compile>
     <Compile Include="AboutPage.generated.cs">
       <DependentUpon>AboutPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
