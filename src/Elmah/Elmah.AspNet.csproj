@@ -317,7 +317,6 @@
     </Compile>
     <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="Environment.cs" />
     <Compile Include="ErrorDetailPage.cs" />
     <Compile Include="ErrorDigestRssHandler.cs">
     </Compile>

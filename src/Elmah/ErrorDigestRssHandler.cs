@@ -55,11 +55,9 @@ namespace Elmah
             var response = context.Response;
             
             response.ContentType = "application/xml";
-            
-            var hostName = Environment.TryGetMachineName(context);
-            var title = "Daily digest of errors in "
-                      + log.ApplicationName
-                      + (hostName.Length > 0 ? " on " + hostName : null);
+
+            var title = string.Format(@"Daily digest of errors in {0} on {1}", 
+                                      log.ApplicationName, Environment.MachineName);
 
             var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + request.ServerVariables["URL"];
             var baseUrl = new Uri(link.TrimEnd('/') + "/");

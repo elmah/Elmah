@@ -51,10 +51,8 @@ namespace Elmah
             var response = context.Response;
             response.ContentType = "application/xml";
 
-            var hostName = Environment.TryGetMachineName(context);
-            var title = "Error log of "
-                      + log.ApplicationName
-                      + (hostName.Length > 0 ? " on " + hostName : null);
+            var title = string.Format(@"Error log of {0} on {1}",
+                                      log.ApplicationName, Environment.MachineName);
 
             var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + context.Request.ServerVariables["URL"];
             var baseUrl = new Uri(link.TrimEnd('/') + "/");

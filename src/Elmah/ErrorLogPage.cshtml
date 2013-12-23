@@ -38,12 +38,10 @@
     // Set the title of the page.
     //
 
-    var hostName = Elmah.Environment.TryGetMachineName(Context);
-    var title = string.Format(
-        hostName.Length > 0
-        ? "Error log for {0} on {2} (Page #{1})"
-        : "Error log for {0} (Page #{1})",
-        log.ApplicationName, (pageIndex + 1).ToString("N0"), hostName);
+    var hostName = Environment.MachineName;
+    var title = string.Format(@"Error log for {0} on {1} (Page #{2})",
+                              log.ApplicationName, hostName, 
+                              (pageIndex + 1).ToString("N0"));
 
     Layout = new Elmah.MasterPage
     {
@@ -79,12 +77,7 @@
     }
 }        
         <h1 id="PageTitle">
-            Error Log for <span id="ApplicationName" title="@log.ApplicationName">@simpleName 
-            @if (!string.IsNullOrEmpty(hostName))
-            {
-                <text> on @hostName</text> 
-            }
-            </span>
+            Error Log for <span id="ApplicationName" title="@log.ApplicationName">@simpleName on @hostName</span>
         </h1>
         
         @if (errorEntryList.Count > 0)

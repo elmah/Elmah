@@ -96,7 +96,17 @@ namespace Elmah
             // Load the basic information.
             //
 
-            _hostName = Environment.TryGetMachineName(context);
+            try
+            {
+                _hostName = Environment.MachineName;
+            }
+            catch (SecurityException)
+            {
+                // A SecurityException may occur in certain, possibly 
+                // user-modified, Medium trust environments.
+                _hostName = string.Empty;
+            }
+
             _typeName = baseException.GetType().FullName;
             _message = baseException.Message;
             _source = baseException.Source;
