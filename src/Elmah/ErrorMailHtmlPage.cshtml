@@ -1,21 +1,9 @@
 @* Generator: Template TypeVisibility: Internal *@
-@using System.Web
 @using Elmah
 @inherits RazorTemplateBase
 @{
     // NB cast is not really required, but aids with intellisense!
     var error = (Error) this.Error;
-
-    var about = PoweredBy.GetAbout(HttpRuntime.Cache, (version, fileVersion, product, copyright) => new
-    {
-        Version = version != null
-                ? version.ToString()
-                : fileVersion != null
-                ? fileVersion.ToString()
-                : "?.?.?.?",
-        Product = Mask.EmptyString(product, "(product)"),
-        Copyright = copyright,
-    });
 }
 <html>
     <head>
@@ -80,10 +68,6 @@
                 </table>
             </div>
         }
-        <p>Powered by <a href="http://elmah.googlecode.com/">@about.Product</a>, 
-            version @about.Version
-            @about.Copyright 
-            Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>. 
-        </p>
+        <p>@(RenderPartial<PoweredBy>())</p>
     </body>
 </html>

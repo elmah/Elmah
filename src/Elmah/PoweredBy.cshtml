@@ -1,0 +1,22 @@
+@* Generator: Template TypeVisibility: Internal *@
+@inherits RazorTemplateBase
+@{
+    var about = GetAbout((version, fileVersion, product, copyright) => new
+    {
+        Version   = version != null
+                  ? version.ToString()
+                  : fileVersion != null 
+                  ? fileVersion.ToString() 
+                  : "?.?.?.?",
+        Product   = Mask.EmptyString(product, "(product)"),
+        Copyright = copyright,
+    });
+}<span>
+    Powered by <a href="http://elmah.googlecode.com/">@about.Product</a>,
+    version @about.Version@{
+#if DEBUG
+<text> (@Build.Configuration)</text>#endif
+    }.
+    @about.Copyright
+    Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+</span>
