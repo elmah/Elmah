@@ -152,7 +152,7 @@ WriteLiteral(@"            <div id=""topnavbar"" class=""navbar navbar-fixed-top
 
             
             #line 45 "..\..\MasterPage.cshtml"
-                   Write(SpeedBar.Render(Request.Browser, speedBarItems));
+                   Write(SpeedBar.Render(speedBarItems));
 
             
             #line default

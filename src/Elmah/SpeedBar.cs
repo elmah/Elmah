@@ -28,13 +28,11 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.IO;
-    using System.Web;
-    using System.Web.UI;
+    using System.Collections.Generic;
 
     #endregion
 
-    internal static class SpeedBar
+    class SpeedBar
     {
         public static readonly ItemTemplate Home = new ItemTemplate("Errors", "List of logged errors", "{0}");
         public static readonly ItemTemplate RssFeed = new ItemTemplate("RSS Feed", "RSS feed of recent errors", "{0}/rss");
@@ -43,15 +41,8 @@ namespace Elmah
         public static readonly FormattedItem Help = new FormattedItem("Help", "Documentation, discussions, issues and more", "http://elmah.googlecode.com/");
         public static readonly ItemTemplate About = new ItemTemplate("About", "Information about this version and build", "{0}/about");
 
-        public static HelperResult Render(HttpBrowserCapabilitiesBase browser, params FormattedItem[] items)
+        public static HelperResult Render(params FormattedItem[] items)
         {
-            return Render(browser.CreateHtmlTextWriter, items);
-        }
-
-        public static HelperResult Render(Func<TextWriter, HtmlTextWriter> htmlTextWriterFactory, params FormattedItem[] items)
-        {
-            htmlTextWriterFactory = htmlTextWriterFactory ?? (w => new HtmlTextWriter(w));
-
             return new HelperResult(writer =>
             {
                 if (writer == null) throw new ArgumentNullException("writer");
@@ -59,20 +50,15 @@ namespace Elmah
                 if (items == null || items.Length == 0)
                     return;
 
-                var htmlWriter = (writer as HtmlTextWriter) ?? htmlTextWriterFactory(writer);
-
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, "SpeedList");
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "nav");
-                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Ul);
-
+                writer.Write("<ul id='SpeedList' class='nav'>");
                 foreach (var item in items)
                 {
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Li);
-                    item.Render(htmlWriter);
-                    htmlWriter.RenderEndTag( /* li */);
+                    writer.Write("<li>");
+                    foreach (var html in item.Render())
+                        writer.Write(html);
+                    writer.Write("</li>");
                 }
-
-                htmlWriter.RenderEndTag( /* ul */);
+                writer.Write("<ul/>");
             });
         }
 
@@ -90,10 +76,7 @@ namespace Elmah
             public string Title { get; private set; }
             public string Href { get; private set; }
 
-            public override string ToString()
-            {
-                return Text;
-            }
+            public override string ToString() { return Text; }
         }
 
         [ Serializable ]
@@ -114,15 +97,16 @@ namespace Elmah
             public FormattedItem(string text, string title, string href) : 
                 base(text, title, href) {}
 
-            public void Render(HtmlTextWriter writer)
+            public IEnumerable<IHtmlString> Render()
             {
-                Debug.Assert(writer != null);
-
-                writer.AddAttribute(HtmlTextWriterAttribute.Href, Href);
-                writer.AddAttribute(HtmlTextWriterAttribute.Title, Title);
-                writer.RenderBeginTag(HtmlTextWriterTag.A);
-                HttpUtility.HtmlEncode(Text, writer);
-                writer.RenderEndTag( /* a */);
+                yield return new HtmlString(@"<a ");
+                yield return new HtmlString(@" href='");
+                yield return new HtmlString(/* TODO HTML attribute encoding */ Href);
+                yield return new HtmlString(@"' title='");
+                yield return new HtmlString(/* TODO HTML attribute encoding */ Title);
+                yield return new HtmlString(@"'>");
+                yield return new HtmlString(/* TODO HTML encoding */ Text);
+                yield return new HtmlString(@"</a>");
             }
         }
     }
