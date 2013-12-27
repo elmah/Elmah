@@ -35,15 +35,9 @@ namespace Elmah
 
     sealed class HtmlString : IHtmlString
     {
-        private readonly string _html;
-
-        public HtmlString(string html)
-        {
-            _html = html ?? string.Empty;
-        }
-
+        readonly string _html;
+        public HtmlString(string html) { _html = html ?? string.Empty; }
         public string ToHtmlString() { return _html; }
-
         public override string ToString() { return ToHtmlString(); }
     }
 
