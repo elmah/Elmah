@@ -23,7 +23,6 @@
 
 namespace Elmah
 {
-    using System;
     using Microsoft.Security.Application;
 
     // http://msdn.microsoft.com/en-us/library/system.web.ihtmlstring.aspx
