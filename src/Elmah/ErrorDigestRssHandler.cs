@@ -28,12 +28,10 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
     using System.Web;
-    using System.Web.UI;
     using System.Xml.Linq;
     using System.Collections.Generic;
 
@@ -80,7 +78,7 @@ namespace Elmah
             string title = null;
             DateTime? pubDate = null;
             var sb = new StringBuilder();
-            var writer = new HtmlTextWriter(new StringWriter(sb));
+            var writer = new StringWriter(sb);
 
             var source = GetErrors(log, pageSize, (p, e) => new { PageIndex = p, Entry = e });
 
@@ -147,14 +145,14 @@ namespace Elmah
 
         // TODO Consider moving the rest to a Razor template
 
-        private static void RenderStart(HtmlTextWriter writer) 
+        private static void RenderStart(TextWriter writer) 
         {
             Debug.Assert(writer != null);
 
-            writer.RenderBeginTag(HtmlTextWriterTag.Ul);
+            writer.Write("<ul>");
         }
 
-        private static void RenderError(HtmlTextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
+        private static void RenderError(TextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
         {
             Debug.Assert(writer != null);
             Debug.Assert(entry != null);
@@ -162,7 +160,7 @@ namespace Elmah
             Debug.Assert(baseUrl.IsAbsoluteUri);
 
             var error = entry.Error;
-            writer.RenderBeginTag(HtmlTextWriterTag.Li);
+            writer.Write("<li>");
 
             var errorType = ErrorDisplay.HumaneExceptionErrorType(error);
 
@@ -171,32 +169,28 @@ namespace Elmah
                 var abbreviated = errorType.Length < error.Type.Length;
                         
                 if (abbreviated)
-                {
-                    writer.AddAttribute(HtmlTextWriterAttribute.Title, error.Type);
-                    writer.RenderBeginTag(HtmlTextWriterTag.Span);
-                }
+                    writer.Write("<span title='{0}'>", Html.Encode(error.Type).ToHtmlString());
 
                 writer.Write(Html.Encode(errorType).ToHtmlString());
                         
                 if (abbreviated)
-                    writer.RenderEndTag(/* span */);
+                    writer.Write("</span>");
 
                 writer.Write(": ");
             }
 
-            writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
-            writer.RenderBeginTag(HtmlTextWriterTag.A);
+            writer.Write("<a href='{0}'>", Html.Encode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id)).ToHtmlString());
             writer.Write(Html.Encode(error.Message).ToHtmlString());
-            writer.RenderEndTag(/* a */);
-                    
-            writer.RenderEndTag( /* li */);
+            writer.Write("</a>");
+
+            writer.Write("</li>");
         }
 
-        private static void RenderEnd(HtmlTextWriter writer)
+        private static void RenderEnd(TextWriter writer)
         {
             Debug.Assert(writer != null);
 
-            writer.RenderEndTag(/* li */);
+            writer.Write("</li>");
             writer.Flush();
         }
     }
