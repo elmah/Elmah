@@ -23,6 +23,9 @@
 
 namespace Elmah
 {
+    using System;
+    using Microsoft.Security.Application;
+
     // http://msdn.microsoft.com/en-us/library/system.web.ihtmlstring.aspx
 
     interface IHtmlString
@@ -34,7 +37,7 @@ namespace Elmah
     {
         private readonly string _html;
 
-        public HtmlString(string html)
+        public HtmlString(string html) // TODO null handling
         {
             _html = html;
         }
@@ -42,5 +45,25 @@ namespace Elmah
         public string ToHtmlString() { return _html; }
 
         public override string ToString() { return ToHtmlString(); }
+    }
+
+    static class Html
+    {
+        public static readonly IHtmlString Empty = Raw(String.Empty);
+
+        public static IHtmlString Raw(string input)
+        {
+            return string.IsNullOrEmpty(input) ? Empty : new HtmlString(input);
+        }
+
+        public static IHtmlString Encode(object input)
+        {
+            IHtmlString html;
+            return null != (html = input as IHtmlString)
+                 ? html
+                 : input == null
+                 ? Empty
+                 : Raw(Encoder.HtmlEncode(input.ToString()));
+        }
     }
 }

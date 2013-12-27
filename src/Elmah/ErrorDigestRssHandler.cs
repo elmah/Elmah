@@ -176,7 +176,7 @@ namespace Elmah
                     writer.RenderBeginTag(HtmlTextWriterTag.Span);
                 }
 
-                HttpUtility.HtmlEncode(errorType, writer);
+                writer.Write(Html.Encode(errorType).ToHtmlString());
                         
                 if (abbreviated)
                     writer.RenderEndTag(/* span */);
@@ -186,7 +186,7 @@ namespace Elmah
 
             writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
-            HttpUtility.HtmlEncode(error.Message, writer);
+            writer.Write(Html.Encode(error.Message).ToHtmlString());
             writer.RenderEndTag(/* a */);
                     
             writer.RenderEndTag( /* li */);

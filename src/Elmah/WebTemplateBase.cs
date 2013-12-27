@@ -4,6 +4,7 @@ namespace Elmah
 
     using System;
     using System.Web;
+    using Microsoft.Security.Application;
 
     #endregion
 
@@ -23,22 +24,21 @@ namespace Elmah
         {
             return string.IsNullOrEmpty(text)
                  ? string.Empty
-                 : HttpUtility.HtmlAttributeEncode(text);
+                 : Encoder.HtmlAttributeEncode(text);
         }
 
         public string Encode(string text)
         {
             return string.IsNullOrEmpty(text) 
                  ? string.Empty 
-                 : HttpUtility.HtmlEncode(text);
+                 : Elmah.Html.Encode(text).ToHtmlString();
         }
 
         public override void Write(object value)
         {
             if (value == null)
                 return;
-            var html = value as IHtmlString;
-            base.Write(html != null ? html.ToHtmlString() : Encode(value.ToString()));
+            base.Write(Elmah.Html.Encode(value).ToHtmlString());
         }
 
         public override object RenderBody()

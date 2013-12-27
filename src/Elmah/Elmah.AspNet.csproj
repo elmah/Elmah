@@ -198,6 +198,12 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AntiXssLibrary" Condition="'$(Configuration)' == 'NETFX 3.5 Debug' Or '$(Configuration)' == 'NETFX 3.5 Release'">
+      <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net35\AntiXssLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="AntiXssLibrary" Condition="'$(Configuration)' != 'NETFX 3.5 Debug' And '$(Configuration)' != 'NETFX 3.5 Release'">
+      <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="Microsoft.Vsa" />
     <Reference Include="System">

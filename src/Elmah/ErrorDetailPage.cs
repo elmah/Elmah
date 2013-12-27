@@ -29,7 +29,6 @@ namespace Elmah
 
     using System;
     using System.Linq;
-    using System.Web;
     using MoreLinq;
 
     #endregion
@@ -59,7 +58,7 @@ namespace Elmah
                         Index = idx,
                         End   = idx + len,
                         Html  = txt.Length > 0
-                              ? HttpUtility.HtmlEncode(txt)
+                              ? Elmah.Html.Encode(txt).ToHtmlString()
                               : string.Empty,
                     },
                     (t, m) => new
@@ -112,11 +111,12 @@ namespace Elmah
                     from token in Enumerable.Repeat(new { Index = 0, End = 0, Html = string.Empty }, 1)
                                             .Concat(from tokens in frames from token in tokens select token)
                                             .Pairwise((prev, curr) => new { Previous = prev, Current = curr })
-                    from m in new[]
+                    from m in new object[]
                     {
-                        HttpUtility.HtmlEncode(text.Substring(token.Previous.End, token.Current.Index - token.Previous.End)),
-                        token.Current.Html
+                        text.Substring(token.Previous.End, token.Current.Index - token.Previous.End),
+                        Elmah.Html.Raw(token.Current.Html)
                     }
+                    select Elmah.Html.Encode(m).ToHtmlString() into m
                     where m.Length > 0
                     select m;
 

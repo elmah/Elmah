@@ -54,11 +54,11 @@ namespace Elmah
                 foreach (var item in items)
                 {
                     writer.Write("<li>");
-                    foreach (var html in item.Render())
-                        writer.Write(html);
+                    foreach (var part in item.Render())
+                        writer.Write(Html.Encode(part).ToHtmlString());
                     writer.Write("</li>");
                 }
-                writer.Write("<ul/>");
+                writer.Write(/* TODO fix end tag */ "<ul/>");
             });
         }
 
@@ -97,16 +97,16 @@ namespace Elmah
             public FormattedItem(string text, string title, string href) : 
                 base(text, title, href) {}
 
-            public IEnumerable<IHtmlString> Render()
+            public IEnumerable<object> Render()
             {
-                yield return new HtmlString(@"<a ");
-                yield return new HtmlString(@" href='");
-                yield return new HtmlString(/* TODO HTML attribute encoding */ Href);
-                yield return new HtmlString(@"' title='");
-                yield return new HtmlString(/* TODO HTML attribute encoding */ Title);
-                yield return new HtmlString(@"'>");
-                yield return new HtmlString(/* TODO HTML encoding */ Text);
-                yield return new HtmlString(@"</a>");
+                yield return Html.Raw(@"<a ");
+                yield return Html.Raw(@" href='");
+                yield return Href;
+                yield return Html.Raw(@"' title='");
+                yield return Title;
+                yield return Html.Raw(@"'>");
+                yield return Text;
+                yield return Html.Raw(@"</a>");
             }
         }
     }
