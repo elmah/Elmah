@@ -43,7 +43,7 @@ namespace Elmah
 
     static class Html
     {
-        public static readonly IHtmlString Empty = Raw(String.Empty);
+        public static readonly IHtmlString Empty = new HtmlString(string.Empty);
 
         public static IHtmlString Raw(string input)
         {
