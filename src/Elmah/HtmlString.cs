@@ -37,9 +37,9 @@ namespace Elmah
     {
         private readonly string _html;
 
-        public HtmlString(string html) // TODO null handling
+        public HtmlString(string html)
         {
-            _html = html;
+            _html = html ?? string.Empty;
         }
 
         public string ToHtmlString() { return _html; }
