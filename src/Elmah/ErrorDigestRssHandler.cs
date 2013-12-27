@@ -184,7 +184,7 @@ namespace Elmah
                 writer.Write(": ");
             }
 
-            writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id));
+            writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
             writer.Write(Html.Encode(error.Message).ToHtmlString());
             writer.RenderEndTag(/* a */);

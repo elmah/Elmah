@@ -372,7 +372,7 @@ namespace Elmah.Assertions
             
             if (OrdinalStringStartsWith(xmlns, assemblyNS))
             {
-                assemblyName = HttpUtility.UrlDecode(xmlns.Substring(assemblyNS.Length));
+                assemblyName = Uri.UnescapeDataString(xmlns.Substring(assemblyNS.Length));
                 return assemblyName.Length > 0;
             }
             
@@ -386,7 +386,7 @@ namespace Elmah.Assertions
             {
                 var index = xmlns.IndexOf("/", fullNS.Length);
                 typeNamespace = xmlns.Substring(fullNS.Length, index - fullNS.Length);
-                assemblyName = HttpUtility.UrlDecode(xmlns.Substring(index + 1));
+                assemblyName = Uri.UnescapeDataString(xmlns.Substring(index + 1));
                 return assemblyName.Length > 0 && typeNamespace.Length > 0;
             }
 

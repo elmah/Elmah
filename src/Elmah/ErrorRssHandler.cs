@@ -64,7 +64,7 @@ namespace Elmah
                     error.Message,
                     "An error of type " + error.Type + " occurred. " + error.Message,
                     error.Time,
-                    baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id));
+                    baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
             
             var rss = RssXml.Rss(title, link, "Log of recent errors", items);
 

@@ -203,7 +203,7 @@ namespace Elmah
                 // determine and set the content length.
                 //
                 
-                var encodedForm = string.Format(_formFormat, HttpUtility.UrlEncode(status));
+                var encodedForm = string.Format(_formFormat, Uri.EscapeDataString(status));
                 var data = Encoding.ASCII.GetBytes(encodedForm);
                 Debug.Assert(data.Length > 0);
                 request.ContentLength = data.Length;

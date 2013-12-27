@@ -300,7 +300,7 @@ namespace Elmah
                     var entry = entries[i];
                     var error = entry.Error;
                     var time = error.Time.ToUniversalTime();
-                    var query = "?id=" + HttpUtility.UrlEncode(entry.Id);
+                    var query = "?id=" + Uri.EscapeDataString(entry.Id);
                     var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                     csv.Field(error.ApplicationName)
@@ -411,7 +411,7 @@ namespace Elmah
                     if (i == 0) writer.Write(' ');
                     writer.Write("  ");
 
-                    var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
+                    var urlTemplate = new Uri(requestUrl, "{0}?id=" + Uri.EscapeDataString(entry.Id)).ToString();
                     
                     json.Object();
                             ErrorJson.EncodeMembers(entry.Error, json);
