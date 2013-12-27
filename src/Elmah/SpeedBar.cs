@@ -58,7 +58,7 @@ namespace Elmah
                         writer.Write(Html.Encode(part).ToHtmlString());
                     writer.Write("</li>");
                 }
-                writer.Write(/* TODO fix end tag */ "<ul/>");
+                writer.Write("</ul>");
             });
         }
 
