@@ -136,7 +136,7 @@
                                        e.StatusCode,
                                        StatusDescription = 
                                           e.StatusCode > 0
-                                          ? HttpWorkerRequest.GetStatusDescription(e.StatusCode)
+                                          ? HttpStatus.FromCode(e.StatusCode).Reason
                                           : null,
                                        e.Type,
                                        HumaneType = ErrorDisplay.HumaneExceptionErrorType(e),
