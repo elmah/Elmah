@@ -34,12 +34,6 @@ namespace Elmah.Tests
     public class DataBinderTests
     {
         [Fact]
-        public void EvalWithNullContainerReturnsNull()
-        {
-            Assert.Null(DataBinder.Eval(null, "foobar"));
-        }
-
-        [Fact]
         public void EvalWithNullExpressionReturnsContainer()
         {
             var container = new object();
@@ -95,6 +89,16 @@ namespace Elmah.Tests
             Assert.Equal(5,     DataBinder.Eval(container, "foo.bar.baz[3]('5')"));
             Assert.Equal(3,     DataBinder.Eval(container, "foo.bar.baz.[3].('six').Length"));
             Assert.Equal('I',   DataBinder.Eval(container, "foo.bar.baz.[3].('six')[1]"));
+        }
+
+        [Fact]
+        public void EvalIsNullSafe()
+        {
+            Assert.Null(DataBinder.Eval(null, "foo"));
+            Assert.Null(DataBinder.Eval(null, "[2]"));
+            Assert.Null(DataBinder.Eval(new { Foo = (object) null }, "foo.bar"));
+            Assert.Null(DataBinder.Eval(new { Foo = new object[1] }, "foo.[0].bar"));
+            Assert.Null(DataBinder.Eval(new { Foo = new object[1] }, "foo(0)bar"));
         }
     }
 }
