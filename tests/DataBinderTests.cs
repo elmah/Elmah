@@ -26,7 +26,6 @@ namespace Elmah.Tests
     #region
 
     using Elmah;
-    using System;
     using System.Collections.Generic;
     using Xunit;
 
@@ -35,10 +34,9 @@ namespace Elmah.Tests
     public class DataBinderTests
     {
         [Fact]
-        public void EvalThrowsWithNullContainer()
+        public void EvalWithNullContainerReturnsNull()
         {
-            var e = Assert.Throws<ArgumentNullException>(() => DataBinder.Eval(null, string.Empty));
-            Assert.Equal("container", e.ParamName);
+            Assert.Null(DataBinder.Eval(null, "foobar"));
         }
 
         [Fact]

@@ -52,7 +52,6 @@ namespace Elmah
 
         public static object Eval(object container, string expression, bool strict)
         {
-            if (container == null) throw new ArgumentNullException("container");
             return Compile(expression, strict)(container);
         }
 
