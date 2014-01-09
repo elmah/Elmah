@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="CallerInfoTests.cs" />
     <Compile Include="ErrorJsonTests.cs" />
+    <Compile Include="DataBinderTests.cs" />
     <Compile Include="MemoryErrorLogTests.cs" />
     <Compile Include="StackTraceParserTests.cs" />
     <Compile Include="ErrorLogPageFactoryTests.cs" />
