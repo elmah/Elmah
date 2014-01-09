@@ -62,7 +62,7 @@ namespace Elmah
 
         public static Func<object, object> Compile(string expression, bool strict)
         {
-            return obj => Parse(expression, strict).Aggregate(obj, (node, a) => a(node));
+            return obj => Parse(expression, strict).Aggregate(obj, (node, b) => b(node));
         }
 
         public static IEnumerable<Func<object, object>> Parse(string expression)
@@ -72,20 +72,24 @@ namespace Elmah
 
         public static IEnumerable<Func<object, object>> Parse(string expression, bool strict)
         {
-            var combinator = strict 
-                            ? new Func<Func<object, object>, Func<object, object>>(f => f) 
-                            : Optionalize;
-
             var mp = strict ? (obj, name)  => { throw new Exception(string.Format(@"DataBinding: '{0}' does not contain a property with the name '{1}'.", obj.GetType(), name)); } : (Func<object, string, object>) null;
             var mi = strict ? (obj, index) => { throw new Exception(string.Format(@"DataBinding: '{0}' does not allow indexed access.", obj.GetType())); }                         : (Func<object, object, object>) null;
 
-            return Parse(expression, p => combinator(obj => GetProperty(obj, p, mp)),
-                                     i => combinator(obj => GetIndex(obj, i, mi)));
+            var binders = Parse(expression, p => PassThru((object obj) => GetProperty(obj, p, mp)),
+                                            i => PassThru((object obj) => GetIndex(obj, i, mi)));
+
+            var combinator = strict
+                           ? new Func<Func<object, object>, Func<object, object>>(b => b)
+                           : Optionalize;
+
+            return strict ? binders : binders.Select(combinator);
         }
 
-        static Func<object, object> Optionalize(Func<object, object> accessor)
+        static Func<T, TResult> PassThru<T, TResult>(Func<T, TResult> f) { return f; }
+
+        static Func<object, object> Optionalize(Func<object, object> binder)
         {
-            return obj => obj == null || Convert.IsDBNull(obj) ? null : accessor(obj);
+            return obj => obj == null || Convert.IsDBNull(obj) ? null : binder(obj);
         }
 
         static object GetProperty(object obj, string name, Func<object, string, object> missingSelector)
@@ -104,6 +108,7 @@ namespace Elmah
         static object GetIndex(object obj, object index, Func<object, object, object> missingSelector)
         {
             if (obj == null) throw new ArgumentNullException("obj");
+            if (index == null) throw new ArgumentNullException("index");
 
             var isIntegralIndex = index is int;
         
@@ -114,21 +119,35 @@ namespace Elmah
             var list = obj as IList;
             if (list != null && isIntegralIndex)
                 return list[(int) index];
-        
-            var type = obj.GetType();
-            var defaultMember = (DefaultMemberAttribute) Attribute.GetCustomAttribute(type, typeof(DefaultMemberAttribute));
-            var defaultMemberName = defaultMember == null || string.IsNullOrEmpty(defaultMember.MemberName) 
-                                  ? "Item" 
-                                  : defaultMember.MemberName;
 
-            var property = type.GetProperty(defaultMemberName, 
-                                            BindingFlags.Public | BindingFlags.Instance, 
-                                            null, null, new[] { index.GetType() }, null);
+            var property = FindIndexerProperty(obj.GetType(), index.GetType());
 
             return property != null 
                  ? property.GetValue(obj, new[] { index })
                  : missingSelector != null 
                  ? missingSelector(obj, index)
+                 : null;
+        }
+
+        // TODO Consider as Type extension method
+        static PropertyInfo FindIndexerProperty(Type type, params Type[] types)
+        {
+            Debug.Assert(type != null);
+            Debug.Assert(types != null);
+
+            return type.GetProperty(TryGetDefaultMemberName(type) ?? "Item",
+                                    BindingFlags.Public | BindingFlags.Instance,
+                                    null, null, types, null);
+        }
+
+        // TODO Consider as Type extension method
+        static string TryGetDefaultMemberName(Type type)
+        {
+            Debug.Assert(type != null);
+            
+            var attribute = (DefaultMemberAttribute) Attribute.GetCustomAttribute(type, typeof(DefaultMemberAttribute));
+            return attribute != null && !string.IsNullOrEmpty(attribute.MemberName)
+                 ? attribute.MemberName
                  : null;
         }
 
