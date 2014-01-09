@@ -67,8 +67,12 @@ namespace Elmah.Tests
             };
             var bar = new { Baz = quux };
             var foo = new { Bar = bar };
-            var container = new { Foo = foo };
+            var container = new { Foo = foo, Foo2 = foo, Foo_3 = foo, _Foo4 = foo };
 
+            Assert.Equal(foo,   DataBinder.Eval(container, "foo"));
+            Assert.Equal(foo,   DataBinder.Eval(container, "foo2"));
+            Assert.Equal(foo,   DataBinder.Eval(container, "foo_3"));
+            Assert.Equal(foo,   DataBinder.Eval(container, "_foo4"));
             Assert.Equal(bar,   DataBinder.Eval(container, "foo.bar"));
             Assert.Equal(quux,  DataBinder.Eval(container, "foo.bar.baz"));
             Assert.Equal(1,     DataBinder.Eval(container, "foo.bar.baz[0]"));
