@@ -1,4 +1,6 @@
 @* Generator: Template TypeVisibility: Internal *@
+@using System
+@using System.Collections.Specialized
 @using System.Globalization
 @using System.IO
 @using System.Web
@@ -9,13 +11,13 @@
     const int defaultPageSize = 15;
     const int maximumPageSize = 100;
 
-    var basePageName = Request.ServerVariables["URL"];
+    var basePageName = Request.Uri.AbsolutePath;
     
     //
     // Get the page index and size parameters within their bounds.
     //
 
-    var pageSize = Convert.ToInt32(Request.QueryString["size"], CultureInfo.InvariantCulture);
+    var pageSize = Convert.ToInt32(Request.Query["size"], CultureInfo.InvariantCulture);
     pageSize = Math.Min(maximumPageSize, Math.Max(0, pageSize));
 
     if (pageSize == 0)
@@ -23,14 +25,14 @@
         pageSize = defaultPageSize;
     }
 
-    var pageIndex = Convert.ToInt32(Request.QueryString["page"], CultureInfo.InvariantCulture);
+    var pageIndex = Convert.ToInt32(Request.Query["page"], CultureInfo.InvariantCulture);
     pageIndex = Math.Max(1, pageIndex) - 1;
 
     //
     // Read the error records.
     //
 
-    var log = this.ErrorLog ?? ErrorLog.GetDefault(Context);
+    var log = this.ErrorLog ?? ErrorLog.GetDefault(null /* TODO? Context */);
     var errorEntryList = new List<ErrorLogEntry>(pageSize);
     var totalCount = log.GetErrors(pageIndex, pageSize, errorEntryList);
 
@@ -65,8 +67,8 @@
 
     var simpleName = log.ApplicationName;
 
-    if (string.Compare(simpleName, Request.ServerVariables["APPL_MD_PATH"],
-        true, CultureInfo.InvariantCulture) == 0)
+    var httpContext = Context.Get<object>("System.Web.HttpContextBase");
+    if (httpContext != null && string.Equals(simpleName, ((NameValueCollection) ((dynamic) httpContext).Request.ServerVariables)["APPL_MD_PATH"], StringComparison.OrdinalIgnoreCase))
     {
         var lastSlashIndex = simpleName.LastIndexOf('/');
 

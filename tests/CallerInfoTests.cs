@@ -113,15 +113,11 @@ namespace Elmah.Tests
                 "foo@bar:42",
             };
 
-            var assertions = // TODO Zip instead of joining when on .NET 4
-                from info in infos.Index()
-                join exp in expectations.Index() on info.Key equals exp.Key
-                orderby info.Key
-                select new
-                {
-                    Expected = exp.Value,
-                    Actual   = info.Value.ToString(),
-                };
+            var assertions = expectations.Zip(infos, (exp, info) => new
+            {
+                Expected = exp,
+                Actual   = info.ToString(),
+            });
             
             foreach (var a in assertions)
                 Assert.Equal(a.Expected, a.Actual);

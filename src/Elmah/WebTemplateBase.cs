@@ -5,15 +5,15 @@ namespace Elmah
     using System;
     using System.Web;
     using Microsoft.Security.Application;
+    using Microsoft.Owin;
 
     #endregion
 
     class WebTemplateBase : RazorTemplateBase
     {
-        public HttpContextBase Context { get; set; }
-        public HttpResponseBase Response { get { return Context.Response; } }
-        public HttpRequestBase Request { get { return Context.Request; } }
-        public HttpServerUtilityBase Server { get { return Context.Server; } }
+        public IOwinContext Context { get; set; }
+        public IOwinResponse Response { get { return Context.Response; } }
+        public IOwinRequest Request { get { return Context.Request; } }
 
         public IHtmlString Html(string html)
         {

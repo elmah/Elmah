@@ -59,3 +59,33 @@ namespace Elmah
         }
     }
 }
+
+namespace Elmah
+{
+    using System;
+    using System.Threading.Tasks;
+
+    struct TaskOr<T>
+    {
+        public bool HasValue { get { return Task == null; } }
+        public T Value       { get; set; }
+        public Task Task     { get; private set; }
+
+        private TaskOr(T value)    : this() { Value = value; }
+        private TaskOr(Task value) : this() { Task = value;  }
+
+        public static TaskOr<T> Async(Task task)
+        {
+            if (task == null) throw new ArgumentNullException("task");
+            return new TaskOr<T>(task);
+        }
+
+        public static TaskOr<T> Result(T value) { return new TaskOr<T>(value); }
+    }
+
+    static class TaskOr
+    {
+        public static TaskOr<T> Value<T>(T value)          { return TaskOr<T>.Result(value); }
+        public static TaskOr<T> InsteadOf<T>(this Task ar) { return TaskOr<T>.Async(ar);     }
+    }
+}

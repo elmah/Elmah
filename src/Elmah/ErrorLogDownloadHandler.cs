@@ -30,11 +30,12 @@ namespace Elmah
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Net.Mime;
     using System.Text.RegularExpressions;
-    #if !NET_3_5 && !NET_4_0
+    #if !NET_4_0
     using System.Threading.Tasks;
     #endif
-    using System.Web;
+    using Microsoft.Owin;
     using System.Collections.Generic;
 
     #endregion
@@ -45,23 +46,19 @@ namespace Elmah
 
         private const int _pageSize = 100;
 
-        public static IEnumerable<AsyncResultOr<string>> ProcessRequest(
-            HttpContextBase context, 
-            Func<AsyncCallback> getAsyncCallback)
+        public static IEnumerable<TaskOr<string>> ProcessRequest(IOwinContext context)
         {
             if (context == null) throw new ArgumentNullException("context");
-            if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
-
-            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequest(context, getAsyncCallback, format, maxDownloadCount));
+            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequest(context, format, maxDownloadCount));
         }
 
-        private static T ProcessRequestPrelude<T>(HttpContextBase context, Func<Format, int, T> resultor)
+        private static T ProcessRequestPrelude<T>(IOwinContext context, Func<Format, int, T> resultor)
         {
             Debug.Assert(context != null);
             Debug.Assert(resultor != null);
 
             var request = context.Request;
-            var query = request.QueryString;
+            var query = request.Query;
 
             //
             // Limit the download by some maximum # of records?
@@ -80,34 +77,32 @@ namespace Elmah
             // Emit format header, initialize and then fetch results.
             //
 
-            context.Response.BufferOutput = false;
             return resultor(format, maxDownloadCount);
         }
 
-        #if !NET_3_5 && !NET_4_0
+        #if !NET_4_0
 
-        public static Task ProcessRequestAsync(HttpContextBase context)
+        public static Task ProcessRequestAsync(IOwinContext context)
         {
             if (context == null) throw new ArgumentNullException("context");
             return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequestAsync(context, format, maxDownloadCount));
         }
 
-        private static async Task ProcessRequestAsync(HttpContextBase context, Format format, int maxDownloadCount)
+        private static async Task ProcessRequestAsync(IOwinContext context, Format format, int maxDownloadCount)
         {
             var response = context.Response;
-            var output = response.Output;
+            var callCancelled = context.Request.CallCancelled;
 
             foreach (var text in format.Header())
-                await output.WriteAsync(text);
+                await response.WriteAsync(text, callCancelled);
 
-            var log = ErrorLog.GetDefault(context);
+            var log = ErrorLog.GetDefault(null /* TODO? context */);
             var errorEntryList = new List<ErrorLogEntry>(_pageSize);
             var downloadCount = 0;
-            var clientDisconnectedToken = response.ClientDisconnectedToken;
 
             for (var pageIndex = 0; ; pageIndex++)
             {
-                var total = await log.GetErrorsAsync(pageIndex, _pageSize, errorEntryList, clientDisconnectedToken);
+                var total = await log.GetErrorsAsync(pageIndex, _pageSize, errorEntryList, callCancelled);
                 var count = errorEntryList.Count;
 
                 if (maxDownloadCount > 0)
@@ -118,11 +113,11 @@ namespace Elmah
                 }
 
                 foreach (var entry in format.Entries(errorEntryList, 0, count, total))
-                    await output.WriteAsync(entry);
+                    await response.WriteAsync(entry, callCancelled);
 
                 downloadCount += count;
 
-                await Task.Factory.FromAsync(response.BeginFlush, response.EndFlush, null);
+                await response.Body.FlushAsync(callCancelled);
 
                 //
                 // Done if either the end of the list (no more errors found) or
@@ -134,12 +129,12 @@ namespace Elmah
                     if (count > 0)
                     {
                         foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
-                            await output.WriteAsync(entry);
+                            await response.WriteAsync(entry, callCancelled);
                     }
                     break;
                 }
 
-                if (clientDisconnectedToken.IsCancellationRequested)
+                if (callCancelled.IsCancellationRequested)
                     break;
 
                 //
@@ -150,27 +145,27 @@ namespace Elmah
             }
         }
 
-        #endif // !NET_3_5 && !NET_4_0
+        #endif // !NET_4_0
 
-        private static IEnumerable<AsyncResultOr<string>> ProcessRequest(HttpContextBase context, Func<AsyncCallback> getAsyncCallback, Format format, int maxDownloadCount)
+        private static IEnumerable<TaskOr<string>> ProcessRequest(IOwinContext context, Format format, int maxDownloadCount)
         {
             var response = context.Response;
+            var callCancelled = context.Request.CallCancelled;
 
             foreach (var text in format.Header())
-                yield return AsyncResultOr.Value(text);
+                yield return TaskOr.Value(text);
 
-            var log = ErrorLog.GetDefault(context);
+            var log = ErrorLog.GetDefault(null /* TODO? context */);
             var lastBeatTime = DateTime.Now;
             var errorEntryList = new List<ErrorLogEntry>(_pageSize);
             var downloadCount = 0;
 
             for (var pageIndex = 0; ; pageIndex++)
             {
-                var ar = log.BeginGetErrors(pageIndex, _pageSize, errorEntryList,
-                                            getAsyncCallback(), null);
-                yield return ar.InsteadOf<string>();
+                var task = log.GetErrorsAsync(pageIndex, _pageSize, errorEntryList, callCancelled);
+                yield return task.InsteadOf<string>();
 
-                var total = log.EndGetErrors(ar);
+                var total = task.Result;
                 var count = errorEntryList.Count;
 
                 if (maxDownloadCount > 0)
@@ -181,11 +176,11 @@ namespace Elmah
                 }
 
                 foreach (var entry in format.Entries(errorEntryList, 0, count, total))
-                    yield return AsyncResultOr.Value(entry);
+                    yield return TaskOr.Value(entry);
 
                 downloadCount += count;
 
-                response.Flush();
+                response.Body.Flush();
 
                 //
                 // Done if either the end of the list (no more errors found) or
@@ -197,7 +192,7 @@ namespace Elmah
                     if (count > 0)
                     {
                         foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
-                            yield return AsyncResultOr.Value(entry);
+                            yield return TaskOr.Value(entry);
                     }
                     break;
                 }
@@ -210,7 +205,7 @@ namespace Elmah
 
                 if (DateTime.Now - lastBeatTime > _beatPollInterval)
                 {
-                    if (!response.IsClientConnected)
+                    if (!callCancelled.IsCancellationRequested)
                         break;
 
                     lastBeatTime = DateTime.Now;
@@ -224,7 +219,7 @@ namespace Elmah
             }
         }
 
-        private static Format GetFormat(HttpContextBase context, string format)
+        private static Format GetFormat(IOwinContext context, string format)
         {
             Debug.Assert(context != null);
             switch (format)
@@ -239,15 +234,15 @@ namespace Elmah
 
         private abstract class Format
         {
-            private readonly HttpContextBase _context;
+            private readonly IOwinContext _context;
 
-            protected Format(HttpContextBase context)
+            protected Format(IOwinContext context)
             {
                 Debug.Assert(context != null);
                 _context = context;
             }
 
-            protected HttpContextBase Context { get { return _context; } }
+            protected IOwinContext Context { get { return _context; } }
 
             public virtual IEnumerable<string> Header() { yield break; }
 
@@ -261,14 +256,20 @@ namespace Elmah
 
         private sealed class CsvFormat : Format
         {
-            public CsvFormat(HttpContextBase context) : 
+            public CsvFormat(IOwinContext context) : 
                 base(context) {}
 
             public override IEnumerable<string> Header()
             {
                 var response = Context.Response;
-                response.AppendHeader("Content-Type", "text/csv; header=present");
-                response.AppendHeader("Content-Disposition", "attachment; filename=errorlog.csv");
+                var contentType = new ContentType
+                {
+                    MediaType = "text/csv", 
+                    /* TODO CharSet */
+                    Parameters = { { "header", "present" } },
+                };
+                response.ContentType = contentType.ToString();
+                response.Headers["Content-Disposition"] = "attachment; filename=errorlog.csv";
                 yield return "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
             }
 
@@ -301,7 +302,7 @@ namespace Elmah
                     var error = entry.Error;
                     var time = error.Time.ToUniversalTime();
                     var query = "?id=" + Uri.EscapeDataString(entry.Id);
-                    var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                    // TODO var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                     csv.Field(error.ApplicationName)
                        .Field(error.HostName)
@@ -312,9 +313,9 @@ namespace Elmah
                        .Field(error.User)
                        .Field(error.StatusCode.ToString(culture))
                        .Field(error.Message)
-                       .Field(new Uri(requestUrl, "detail" + query).ToString())
-                       .Field(new Uri(requestUrl, "xml" + query).ToString())
-                       .Field(new Uri(requestUrl, "json" + query).ToString())
+                       .Field(string.Empty /* TODO new Uri(requestUrl, "detail" + query).ToString() */)
+                       .Field(string.Empty /* TODO new Uri(requestUrl, "xml" + query).ToString()    */)
+                       .Field(string.Empty /* TODO new Uri(requestUrl, "json" + query).ToString()   */)
                        .Record();
                 }
 
@@ -336,10 +337,10 @@ namespace Elmah
             private string _callback;
             private readonly bool _wrapped;
 
-            public JsonPaddingFormat(HttpContextBase context) :
+            public JsonPaddingFormat(IOwinContext context) :
                 this(context, false) {}
 
-            public JsonPaddingFormat(HttpContextBase context, bool wrapped) : 
+            public JsonPaddingFormat(IOwinContext context, bool wrapped) : 
                 base(context)
             {
                 _wrapped = wrapped;
@@ -347,7 +348,7 @@ namespace Elmah
 
             public override IEnumerable<string> Header()
             {
-                var callback = Context.Request.QueryString[Mask.EmptyString(null, "callback")] 
+                var callback = Context.Request.Query[Mask.EmptyString(null, "callback")] 
                                   ?? string.Empty;
                 
                 if (callback.Length == 0)
@@ -362,12 +363,14 @@ namespace Elmah
 
                 if (!_wrapped)
                 {
-                    response.AppendHeader("Content-Type", "text/javascript");
-                    response.AppendHeader("Content-Disposition", "attachment; filename=errorlog.js");
+                    var contentType = new ContentType { MediaType = "text/javascript", /* TODO CharSet */ };
+                    response.ContentType = contentType.ToString();
+                    response.Headers["Content-Disposition"] = "attachment; filename=errorlog.js";
                 }
                 else
                 {
-                    response.AppendHeader("Content-Type", "text/html");
+                    var contentType = new ContentType { MediaType = "text/html", /* TODO CharSet */ };
+                    response.ContentType = contentType.ToString();
 
                     yield return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
                     yield return @"
@@ -402,7 +405,7 @@ namespace Elmah
                     .Member("total").Number(total)
                     .Member("errors").Array();
 
-                var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
+                // TODO var requestUrl = ErrorLogPageFactory.GetRequestUrl(Context);
 
                 for (var i = index; i < count; i++)
                 {
@@ -411,7 +414,7 @@ namespace Elmah
                     if (i == 0) writer.Write(' ');
                     writer.Write("  ");
 
-                    var urlTemplate = new Uri(requestUrl, "{0}?id=" + Uri.EscapeDataString(entry.Id)).ToString();
+                    // TODO var urlTemplate = new Uri(requestUrl, "{0}?id=" + HttpUtility.UrlEncode(entry.Id)).ToString();
                     
                     json.Object();
                             ErrorJson.EncodeMembers(entry.Error, json);
@@ -419,13 +422,13 @@ namespace Elmah
                             .Array()
                                 .Object()
                                     .Member("type").String("text/html")
-                                    .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
+                                    .Member("href").String(null /* TODO string.Format(urlTemplate, "detail") */).Pop()
                                 .Object()
                                     .Member("type").String("aplication/json")
-                                    .Member("href").String(string.Format(urlTemplate, "json")).Pop()
+                                    .Member("href").String(null /* TODO string.Format(urlTemplate, "json") */).Pop()
                                 .Object()
                                     .Member("type").String("application/xml")
-                                    .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
+                                    .Member("href").String(null /* TODO string.Format(urlTemplate, "xml") */).Pop()
                             .Pop()
                         .Pop();
                 }

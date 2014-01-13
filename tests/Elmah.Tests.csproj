@@ -88,6 +88,10 @@
       <Name>Elmah</Name>
       <Aliases>e</Aliases>
     </ProjectReference>
+    <ProjectReference Include="..\src\Elmah\Elmah.Owin.csproj">
+      <Project>{1b37efef-9e4a-4b5e-bd03-9499aa0bf8f6}</Project>
+      <Name>Elmah.Owin</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

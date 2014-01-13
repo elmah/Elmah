@@ -25,14 +25,6 @@
 
 namespace Elmah
 {
-    #region Imports
-
-    using System;
-    using System.Reflection;
-    using System.Web.UI;
-
-    #endregion
-
     /// <summary>
     /// Renders an HTML page that presents information about the version,
     /// build configuration, source files as well as a method to check

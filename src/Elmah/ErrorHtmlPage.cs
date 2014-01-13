@@ -28,8 +28,8 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Web;
-    using System.Web.UI;
+    using System.Threading.Tasks;
+    using Microsoft.Owin;
 
     #endregion
 
@@ -38,11 +38,9 @@ namespace Elmah
     /// HTML recorded for an error from the error log.
     /// </summary>
     
-    internal sealed class ErrorHtmlPage : IHttpHandler
+    static class ErrorHtmlPage
     {
-        public ErrorLog ErrorLog { get; set; }
-
-        public void ProcessRequest(HttpContextBase context)
+        public static Task ProcessRequest(IOwinContext context, ErrorLog log)
         {
             if (context == null) throw new ArgumentNullException("context");
 
@@ -51,12 +49,11 @@ namespace Elmah
             // the log.
             //
 
-            var errorId = context.Request.QueryString["id"] ?? string.Empty;
+            var errorId = context.Request.Query["id"] ?? string.Empty;
 
             if (errorId.Length == 0)
-                return;
+                return CompletedTask.Return(); // TODO Throw error?
 
-            var log = ErrorLog ?? ErrorLog.GetDefault(context);
             var errorEntry = log.GetError(errorId);
 
             var response = context.Response;
@@ -64,8 +61,8 @@ namespace Elmah
             if (errorEntry == null)
             {
                 // TODO: Send error response entity
-                response.Status = HttpStatus.NotFound.ToString();
-                return;
+                response.StatusCode = HttpStatus.NotFound.Code;
+                return CompletedTask.Return();
             }
 
             //
@@ -73,18 +70,7 @@ namespace Elmah
             // for the error then just stream it out as our response.
             //
 
-            if (errorEntry.Error.WebHostHtmlMessage.Length == 0)
-                return;
-
-            response.Write(errorEntry.Error.WebHostHtmlMessage);
+            return context.Response.WriteUtf8TextAsync("text/html", errorEntry.Error.WebHostHtmlMessage);
         }
-
-        void IHttpHandler.ProcessRequest(HttpContext context)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-            ProcessRequest(new HttpContextWrapper(context));
-        }
-
-        bool IHttpHandler.IsReusable { get { return true; } }
     }
 }

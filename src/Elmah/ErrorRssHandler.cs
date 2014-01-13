@@ -29,8 +29,10 @@ namespace Elmah
 
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using System.Web;
     using System.Collections.Generic;
+    using Microsoft.Owin;
 
     #endregion
 
@@ -41,21 +43,14 @@ namespace Elmah
 
     static class ErrorRssHandler
     {
-        public static void ProcessRequest(HttpContextBase context)
+        public static Task ProcessRequest(IOwinContext context, ErrorLog log, Uri channelLink, Func<ErrorLogEntry, Uri> errorUrlSelector)
         {
             const int pageSize = 15;
             var entries = new List<ErrorLogEntry>(pageSize);
-            var log = ErrorLog.GetDefault(context);
             log.GetErrors(0, pageSize, entries);
-
-            var response = context.Response;
-            response.ContentType = "application/xml";
 
             var title = string.Format(@"Error log of {0} on {1}",
                                       log.ApplicationName, Environment.MachineName);
-
-            var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + context.Request.ServerVariables["URL"];
-            var baseUrl = new Uri(link.TrimEnd('/') + "/");
 
             var items =
                 from entry in entries
@@ -64,11 +59,11 @@ namespace Elmah
                     error.Message,
                     "An error of type " + error.Type + " occurred. " + error.Message,
                     error.Time,
-                    baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
+                    /* TODO baseUrl + "detail?id=" + HttpUtility.UrlEncode(entry.Id)*/
+                    errorUrlSelector(entry).AbsoluteUri);
             
-            var rss = RssXml.Rss(title, link, "Log of recent errors", items);
-
-            response.Write(XmlText.StripIllegalXmlCharacters(rss.ToString()));
+            var rss = RssXml.Rss(title, channelLink.AbsoluteUri, "Log of recent errors", items);
+            return context.Response.WriteUtf8TextAsync("application/xml", XmlText.StripIllegalXmlCharacters(rss.ToString()));
         }
     }
 }

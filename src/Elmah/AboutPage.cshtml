@@ -4,7 +4,7 @@
 @using Elmah
 @inherits WebTemplateBase
 @{
-    var basePageName = Request.ServerVariables["URL"];
+    var basePageName = Request.Uri.AbsolutePath;
 
     const string title = "About ELMAH";
     Layout = new Elmah.MasterPage
@@ -20,8 +20,8 @@
     };
 
     var stamps = SccStamp.FindAll(typeof (ErrorLog).Assembly)
-                          .OrderByDescending(s => s.Revision)
-                          .ToArray();
+                         .OrderByDescending(s => s.Revision)
+                         .ToArray();
 }        
 @*
 // Emit a script that emit version info and checks for updates.

@@ -31,9 +31,10 @@ namespace Elmah
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Web;
+    using System.Threading.Tasks;
     using System.Xml.Linq;
     using System.Collections.Generic;
+    using Microsoft.Owin;
 
     #endregion
 
@@ -45,32 +46,20 @@ namespace Elmah
 
     static class ErrorDigestRssHandler
     {
-        public static void ProcessRequest(HttpContextBase context)
+        public static Task ProcessRequest(IOwinContext context, ErrorLog log, Uri channelLink, Func<ErrorLogEntry, Uri> errorUrlSelector)
         {
-            var log = ErrorLog.GetDefault(context);
-
-            var request = context.Request;
-            var response = context.Response;
-            
-            response.ContentType = "application/xml";
-
             var title = string.Format(@"Daily digest of errors in {0} on {1}", 
                                       log.ApplicationName, Environment.MachineName);
 
-            var link = ErrorLogPageFactory.GetRequestUrl(context).GetLeftPart(UriPartial.Authority) + request.ServerVariables["URL"];
-            var baseUrl = new Uri(link.TrimEnd('/') + "/");
-
-            var items = GetItems(log, baseUrl, 30, 30).Take(30);
-            var rss = RssXml.Rss(title, link, "Daily digest of application errors", items);
-
-            context.Response.Write(XmlText.StripIllegalXmlCharacters(rss.ToString()));
+            var items = GetItems(log, errorUrlSelector, 30, 30).Take(30);
+            var rss = RssXml.Rss(title, channelLink.AbsoluteUri, "Daily digest of application errors", items);
+            return context.Response.WriteUtf8TextAsync("application/xml", XmlText.StripIllegalXmlCharacters(rss.ToString()));
         }
         
-        private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit) 
+        private static IEnumerable<XElement> GetItems(ErrorLog log, Func<ErrorLogEntry, Uri> errorUrlSelector, int pageSize, int maxPageLimit) 
         {
             Debug.Assert(log != null);
-            Debug.Assert(baseUrl != null);
-            Debug.Assert(baseUrl.IsAbsoluteUri);
+            Debug.Assert(errorUrlSelector != null);
             Debug.Assert(pageSize > 0);
 
             var runningDay = DateTime.MaxValue;
@@ -112,7 +101,7 @@ namespace Elmah
                     RenderStart(writer);
                 }
 
-                RenderError(writer, entry, baseUrl);
+                RenderError(writer, entry, errorUrlSelector(entry));
                 runningErrorCount++;
             }
 
@@ -152,12 +141,12 @@ namespace Elmah
             writer.Write("<ul>");
         }
 
-        private static void RenderError(TextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
+        private static void RenderError(TextWriter writer, ErrorLogEntry entry, Uri url) 
         {
             Debug.Assert(writer != null);
             Debug.Assert(entry != null);
-            Debug.Assert(baseUrl != null);
-            Debug.Assert(baseUrl.IsAbsoluteUri);
+            Debug.Assert(url != null);
+            Debug.Assert(url.IsAbsoluteUri);
 
             var error = entry.Error;
             writer.Write("<li>");
@@ -179,7 +168,7 @@ namespace Elmah
                 writer.Write(": ");
             }
 
-            writer.Write("<a href='{0}'>", Html.Encode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id)).ToHtmlString());
+            writer.Write("<a href='{0}'>", Html.Encode(url.AbsoluteUri).ToHtmlString());
             writer.Write(Html.Encode(error.Message).ToHtmlString());
             writer.Write("</a>");
 

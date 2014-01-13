@@ -27,9 +27,13 @@ namespace Elmah
 {
     #region Imports
 
+    using System.IO;
     using System.Net;
+    using System.Text;
+    using System.Threading.Tasks;
     using System.Web;
     using System.Xml;
+    using Microsoft.Owin;
 
     #endregion
 
@@ -39,7 +43,7 @@ namespace Elmah
 
     static class ErrorXmlHandler
     {
-        public static void ProcessRequest(HttpContextBase context)
+        public static Task ProcessRequest(IOwinContext context, ErrorLog log)
         {
             var response = context.Response;
             response.ContentType = "application/xml";
@@ -49,12 +53,12 @@ namespace Elmah
             // the store.
             //
 
-            var errorId = context.Request.QueryString["id"] ?? string.Empty;
+            var errorId = context.Request.Query["id"] ?? string.Empty;
 
             if (errorId.Length == 0)
                 throw new ApplicationException("Missing error identifier specification.");
 
-            var entry = ErrorLog.GetDefault(context).GetError(errorId);
+            var entry = log.GetError(errorId);
 
             //
             // Perhaps the error has been deleted from the store? Whatever
@@ -63,26 +67,33 @@ namespace Elmah
 
             if (entry == null)
             {
-                throw new HttpException((int) HttpStatusCode.NotFound, 
-                    string.Format("Error with ID '{0}' not found.", errorId));
+                return response.NotFound(string.Format("Error with ID '{0}' not found.", errorId));
             }
 
             //
             // Stream out the error as formatted XML.
             //
 
-            var settings = new XmlWriterSettings();
-            settings.Indent = true;
-            settings.NewLineOnAttributes = true;
-            settings.CheckCharacters = false;
-            var writer = XmlWriter.Create(response.Output, settings);
+            using (var sw = new StringWriter())
+            {
+                using (var writer = XmlWriter.Create(sw, new XmlWriterSettings
+                {
+                    Indent = true,
+                    NewLineOnAttributes = true,
+                    CheckCharacters = false
+                }))
+                {
 
-            writer.WriteStartDocument();
-            writer.WriteStartElement("error");
-            ErrorXml.Encode(entry.Error, writer);
-            writer.WriteEndElement(/* error */);
-            writer.WriteEndDocument();
-            writer.Flush();
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("error");
+                    ErrorXml.Encode(entry.Error, writer);
+                    writer.WriteEndElement(/* error */);
+                    writer.WriteEndDocument();
+                    writer.Flush();
+                }
+
+                return response.WriteUtf8TextAsync("application/xml", sw.GetStringBuilder().ToString());
+            }
         }
     }
 }

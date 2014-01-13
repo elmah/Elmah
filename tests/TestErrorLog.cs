@@ -50,7 +50,7 @@ namespace Elmah.Tests
     {
         readonly EntryCollection _entries = new EntryCollection();
 
-        static Error Clone(Error error) { return Mannex.ICloneableExtensions.CloneObject(error); }
+        static Error Clone(Error error) { return (Error) ((ICloneable) error).Clone(); }
 
         public override string Log(Error error)
         {

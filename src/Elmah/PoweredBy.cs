@@ -67,7 +67,7 @@ namespace Elmah
             }
         }
 
-        static T GetAbout<T>(Func<Version, Version, string, string, T> selector)
+        public static T GetAbout<T>(Func<Version, Version, string, string, T> selector)
         {
             var tuple = CachedAbout;
             if (tuple != null)

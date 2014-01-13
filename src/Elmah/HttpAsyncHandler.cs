@@ -26,30 +26,30 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Threading.Tasks;
     using System.Web;
+    using Mannex.Threading.Tasks;
 
     #endregion
 
     class HttpAsyncHandler : IHttpAsyncHandler
     {
-        private readonly Func<HttpContextBase, Func<AsyncCallback>, IEnumerable<IAsyncResult>> _handler;
+        readonly Func<HttpContextBase, Task> _handler;
 
         public HttpAsyncHandler() : this(null) {}
 
-        public HttpAsyncHandler(Func<HttpContextBase, Func<AsyncCallback>, IEnumerable<IAsyncResult>> handler)
+        public HttpAsyncHandler(Func<HttpContextBase, Task> handler)
         {
+            if (handler == null) throw new ArgumentNullException("handler");
             _handler = handler;
         }
 
         void IHttpHandler.ProcessRequest(HttpContext context)
         {
-            OnProcessRequest(new HttpContextWrapper(context));
+            ProcessRequest(new HttpContextWrapper(context));
         }
 
-        protected virtual void OnProcessRequest(HttpContextBase context)
+        public virtual void ProcessRequest(HttpContextBase context)
         {
             if (context == null) throw new ArgumentNullException("context");
             EndProcessRequest(BeginProcessRequest(context, null, null));
@@ -67,23 +67,16 @@ namespace Elmah
             AsyncCallback cb, object extraData)
         {
             if (context == null) throw new ArgumentNullException("context");
-            
-            return Apm.Begin(cbf => ProcessRequest(context, cbf), 
-                             cb, extraData, 
-                             this, "ProcessRequest");
+
+            return _handler(context).Apmize(cb, extraData, null);
         }
 
         public virtual void EndProcessRequest(IAsyncResult result)
         {
-            AsyncResult.End(result, this, "ProcessRequest");
-        }
-
-        protected virtual IEnumerable<IAsyncResult> ProcessRequest(
-            HttpContextBase context, Func<AsyncCallback> getAsyncCallback)
-        {
-            return _handler != null 
-                 ? _handler(context, getAsyncCallback)
-                 : Enumerable.Empty<IAsyncResult>();
+            if (result == null) throw new ArgumentNullException("result");
+            var task = result as Task;
+            if (task == null) throw new ArgumentException(null, "result");
+            task.Wait();
         }
     }
 }

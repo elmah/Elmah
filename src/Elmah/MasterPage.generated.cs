@@ -57,7 +57,7 @@ WriteLiteral("\r\n");
             
             #line 11 "..\..\MasterPage.cshtml"
   
-    var basePageName = Request.ServerVariables["URL"];
+    var basePageName = Request.MyBaseUrl().AbsoluteUri;
     
     var now = DateTime.Now;
     var tz = TimeZone.CurrentTimeZone;
@@ -116,17 +116,17 @@ WriteLiteral(@"        <!-- Le HTML5 shim, for IE6-8 support of HTML elements --
 
             
             #line 31 "..\..\MasterPage.cshtml"
-                                                Write(basePageName);
+                                                 Write(basePageName);
 
             
             #line default
             #line hidden
-WriteLiteral("/stylesheet?h=");
+WriteLiteral("stylesheet?h=");
 
 
             
             #line 31 "..\..\MasterPage.cshtml"
-                                                                           Write(Uri.EscapeDataString(StyleSheetHelper.StyleSheetHash));
+                                                                            Write(Uri.EscapeDataString(StyleSheetHelper.StyleSheetHash));
 
             
             #line default

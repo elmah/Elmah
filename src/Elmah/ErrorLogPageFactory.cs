@@ -29,8 +29,10 @@ namespace Elmah
 
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using System.Web;
     using System.Collections.Generic;
+    using Mannex.Threading.Tasks;
     using Encoding = System.Text.Encoding;
 
     #endregion
@@ -40,6 +42,7 @@ namespace Elmah
     /// resources needed to display the error log.
     /// </summary>
 
+    [Obsolete("Use OWIN API instead.")]
     public class ErrorLogPageFactory : IHttpHandlerFactory
     {
         private static readonly object _authorizationHandlersKey = new object();
@@ -69,7 +72,7 @@ namespace Elmah
                          ? string.Empty 
                          : request.PathInfo.Substring(1).ToLowerInvariant();
 
-            var handler = FindHandler(resource);
+            var handler = OwinSupport.FindHandler(resource);
 
             if (handler == null)
                 throw new HttpException(404, "Resource not found.");
@@ -84,7 +87,7 @@ namespace Elmah
                     && !request.IsLocal 
                     && !SecurityConfiguration.Default.AllowRemoteAccess))
             {
-                ManifestResourceHandler.Create("RemoteAccessError.htm", "text/html")(context);
+                ManifestResourceHandler.ProcessRequest(context.GetOwinContext(), "RemoteAccessError.htm", "text/html").Wait();
                 var response = context.Response;
                 response.Status = "403 Forbidden";
                 response.End();
@@ -99,51 +102,11 @@ namespace Elmah
                 return null;
             }
 
-            return handler;
-        }
-
-        private static IHttpHandler FindHandler(string name) 
-        {
-            Debug.Assert(name != null);
-
-            switch (name)
-            {
-                case "detail":
-                    return CreateTemplateHandler<ErrorDetailPage>();
-                case "html":
-                    return new ErrorHtmlPage();
-                case "xml":
-                    return new DelegatingHttpHandler(ErrorXmlHandler.ProcessRequest);
-                case "json":
-                    return new DelegatingHttpHandler(ErrorJsonHandler.ProcessRequest);
-                case "rss":
-                    return new DelegatingHttpHandler(ErrorRssHandler.ProcessRequest);
-                case "digestrss":
-                    return new DelegatingHttpHandler(ErrorDigestRssHandler.ProcessRequest);
-                case "download":
-                    #if NET_3_5 || NET_4_0
-                    return new HttpAsyncHandler((context, getAsyncCallback) => HttpTextAsyncHandler.Create(ErrorLogDownloadHandler.ProcessRequest)(context, getAsyncCallback));
-                    #else
-                    return new DelegatingHttpTaskAsyncHandler(ErrorLogDownloadHandler.ProcessRequestAsync);
-                    #endif
-                case "stylesheet":
-                    return new DelegatingHttpHandler(ManifestResourceHandler.Create(StyleSheetHelper.StyleSheetResourceNames, "text/css", Encoding.GetEncoding("Windows-1252"), true));
-                case "test":
-                    throw new TestException();
-                case "about":
-                    return CreateTemplateHandler<AboutPage>();
-                default:
-                    return name.Length == 0 ? CreateTemplateHandler<ErrorLogPage>() : null;
-            }
-        }
-
-        static IHttpHandler CreateTemplateHandler<T>() where T : WebTemplateBase, new()
-        {
-            return new DelegatingHttpHandler(context =>
-            {
-                var template = new T { Context = context };
-                context.Response.Write(template.TransformText());
-            });
+#if NET_4_0
+            return new HttpAsyncHandler(ctx => handler(context.GetOwinContext()));
+#else
+            return new DelegatingHttpTaskAsyncHandler(ctx => handler(ctx.GetOwinContext()));
+#endif
         }
 
         /// <summary>
@@ -203,6 +166,7 @@ namespace Elmah
         }
     }
 
+    [Obsolete("Use OWIN API instead.")]
     public interface IRequestAuthorizationHandler
     {
         bool Authorize(HttpContextBase context);

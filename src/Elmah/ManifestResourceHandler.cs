@@ -29,7 +29,10 @@ namespace Elmah
 
     using System;
     using System.Collections.Generic;
+    using System.Net.Mime;
+    using System.Threading.Tasks;
     using System.Web;
+    using Microsoft.Owin;
     using Encoding = System.Text.Encoding;
 
     #endregion
@@ -41,48 +44,52 @@ namespace Elmah
 
     static class ManifestResourceHandler
     {
-        public static Action<HttpContextBase> Create(string resourceName, string mediaType)
+        public static Task ProcessRequest(IOwinContext context, string resourceName, string mediaType)
         {
-            return Create(resourceName, mediaType, null);
+            return ProcessRequest(context, resourceName, mediaType, null);
         }
 
-        public static Action<HttpContextBase> Create(string resourceName, string mediaType, Encoding responseEncoding)
+        public static Task ProcessRequest(IOwinContext context, string resourceName, string mediaType, Encoding responseEncoding)
         {
-            return Create(new[] { resourceName }, mediaType, responseEncoding, false);
+            return ProcessRequest(context, new[] { resourceName }, mediaType, responseEncoding, false);
         }
 
-        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType)
+        public static Task ProcessRequest(IOwinContext context, IEnumerable<string> resourceNames, string mediaType)
         {
-            return Create(resourceNames, mediaType, null, false);
+            return ProcessRequest(context, resourceNames, mediaType, null, false);
         }
 
-        public static Action<HttpContextBase> Create(IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
+        public static Task ProcessRequest(IOwinContext context, IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
         {
             Debug.Assert(resourceNames != null);
             Debug.AssertStringNotEmpty(mediaType);
 
-            return context =>
+            //
+            // Set the response headers for indicating the content type 
+            // and encoding (if specified).
+            //
+
+            var response = context.Response;
+
+            var contentType = new ContentType
             {
-                //
-                // Set the response headers for indicating the content type 
-                // and encoding (if specified).
-                //
-
-                var response = context.Response;
-                response.ContentType = mediaType;
-
-                if (cacheResponse)
-                {
-                    response.Cache.SetCacheability(HttpCacheability.Public);
-                    response.Cache.SetExpires(DateTime.MaxValue);
-                }
-
-                if (responseEncoding != null)
-                    response.ContentEncoding = responseEncoding;
-
-                foreach (var resourceName in resourceNames)
-                    ManifestResourceHelper.WriteResourceToStream(response.OutputStream, typeof(ManifestResourceHandler), resourceName);
+                MediaType = mediaType, 
+                CharSet   = responseEncoding != null 
+                            ? responseEncoding.WebName 
+                            : null
             };
+            response.ContentType = contentType.ToString();
+
+            if (cacheResponse)
+            {
+                response.Expires = DateTimeOffset.Now.AddYears(5);
+                response.Headers["Cache-Control"] = "public";
+            }
+
+            foreach (var resourceName in resourceNames)
+                ManifestResourceHelper.WriteResourceToStream(response.Body, typeof(ManifestResourceHandler), resourceName);
+
+            return CompletedTask.Return();
         }
     }
 }

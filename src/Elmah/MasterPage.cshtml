@@ -9,7 +9,7 @@
     public IEnumerable<SpeedBar.FormattedItem> SpeedBarItems { get; set; }
 }
 @{
-    var basePageName = Request.ServerVariables["URL"];
+    var basePageName = Request.MyBaseUrl().AbsoluteUri;
     
     var now = DateTime.Now;
     var tz = TimeZone.CurrentTimeZone;
@@ -28,7 +28,7 @@
         <!--[if lt IE 9]>
           <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-        <link rel="stylesheet" type="text/css" href="@basePageName/stylesheet?h=@Uri.EscapeDataString(StyleSheetHelper.StyleSheetHash)" />
+        <link rel="stylesheet" type="text/css" href="@(basePageName)stylesheet?h=@Uri.EscapeDataString(StyleSheetHelper.StyleSheetHash)" />
         <style type="text/css">
           body {
             padding-top: 60px;

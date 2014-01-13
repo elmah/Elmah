@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7B2D89
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.AspNet", "src\Elmah\Elmah.AspNet.csproj", "{2990960B-2CB4-484C-819A-EF186B8FCAC5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Owin", "src\Elmah\Elmah.Owin.csproj", "{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.SqlServer", "src\Elmah.SqlServer\Elmah.SqlServer.csproj", "{FD960C29-E686-4EE0-B4BC-1D826877CB2E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.MsAccess", "src\Elmah.MsAccess\Elmah.MsAccess.csproj", "{1B32804F-CE8D-4259-9591-FECF31DF9B95}"
@@ -33,7 +35,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "http://localhost:51
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
-		ProjectReferences = "{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}|Elmah.dll;{2990960b-2cb4-484c-819a-ef186b8fcac5}|Elmah.AspNet.dll;{30de3b3a-87b5-4025-a04a-882769090c60}|Elmah.SQLite.dll;"
+		ProjectReferences = "{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}|Elmah.dll;{2990960b-2cb4-484c-819a-ef186b8fcac5}|Elmah.AspNet.dll;{30de3b3a-87b5-4025-a04a-882769090c60}|Elmah.SQLite.dll;{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}|Elmah.Owin.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51296"
 		Debug.AspNetCompiler.PhysicalPath = "samples\Demo\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51296\"
@@ -91,6 +93,14 @@ Global
 		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.NETFX 4.5 Debug|Any CPU.Build.0 = NETFX 4.5 Debug|Any CPU
 		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.NETFX 4.5 Release|Any CPU.ActiveCfg = NETFX 4.5 Release|Any CPU
 		{2990960B-2CB4-484C-819A-EF186B8FCAC5}.NETFX 4.5 Release|Any CPU.Build.0 = NETFX 4.5 Release|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.0 Debug|Any CPU.ActiveCfg = NETFX 4.0 Debug|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.0 Debug|Any CPU.Build.0 = NETFX 4.0 Debug|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.0 Release|Any CPU.ActiveCfg = NETFX 4.0 Release|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.0 Release|Any CPU.Build.0 = NETFX 4.0 Release|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.5 Debug|Any CPU.ActiveCfg = NETFX 4.5 Debug|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.5 Debug|Any CPU.Build.0 = NETFX 4.5 Debug|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.5 Release|Any CPU.ActiveCfg = NETFX 4.5 Release|Any CPU
+		{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}.NETFX 4.5 Release|Any CPU.Build.0 = NETFX 4.5 Release|Any CPU
 		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.NETFX 4.0 Debug|Any CPU.ActiveCfg = NETFX 4.0 Debug|Any CPU
 		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.NETFX 4.0 Debug|Any CPU.Build.0 = NETFX 4.0 Debug|Any CPU
 		{FD960C29-E686-4EE0-B4BC-1D826877CB2E}.NETFX 4.0 Release|Any CPU.ActiveCfg = NETFX 4.0 Release|Any CPU

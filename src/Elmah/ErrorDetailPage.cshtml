@@ -5,21 +5,21 @@
 @using Elmah
 @inherits WebTemplateBase
 @{
-    var basePageName = Request.ServerVariables["URL"];
+    var basePageName = Request.Uri.AbsolutePath;
     
     //
     // Retrieve the ID of the error to display and read it from 
     // the store.
     //
 
-    var errorId = Request.QueryString["id"] ?? string.Empty;
+    var errorId = Request.Query["id"] ?? string.Empty;
 
     if (errorId.Length == 0)
     { 
         return;
     }
 
-    var log = this.ErrorLog ?? ErrorLog.GetDefault(Context);
+    var log = this.ErrorLog ?? ErrorLog.GetDefault(null /* TODO? Context */);
     var errorEntry = log.GetError(errorId);
 
     //
@@ -29,7 +29,7 @@
 
     if (errorEntry == null)
     {
-        Response.Status = HttpStatus.NotFound.ToString();
+        Response.StatusCode = HttpStatus.NotFound.Code;
         <p>Error not found in log.</p>
         return;
     }
@@ -115,11 +115,11 @@
     <li>Raw/Source data in 
         <a rel="@HtmlLinkType.Alternate" 
            type="application/xml" 
-           href="xml@(Request.Url.Query)">XML</a>
+           href="xml@(Request.Uri.Query)">XML</a>
         or in
         <a rel="@HtmlLinkType.Alternate" 
            type="application/json" 
-           href="json@(Request.Url.Query)">JSON</a>
+           href="json@(Request.Uri.Query)">JSON</a>
     </li>
 </ul>
 

@@ -41,7 +41,8 @@ namespace Elmah
 
     /// <summary>
     /// Provides data expression evaluation facilites similar to 
-    /// <see cref="System.Web.UI.DataBinder"/> in ASP.NET.
+    /// <a href="http://msdn.microsoft.com/en-us/library/4hx47hfe.aspx">System.Web.UI.DataBinder</a> 
+    /// in ASP.NET.
     /// </summary>
 
     public static class DataBinder

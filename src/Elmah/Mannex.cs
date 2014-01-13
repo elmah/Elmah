@@ -155,8 +155,22 @@ namespace Mannex.Threading.Tasks
 
         public static bool TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
         {
+            return source.TryConcludeFrom(task, t => t.Result);
+        }
+
+        /// <summary>
+        /// Attempts to conclude <see cref="TaskCompletionSource{TResult}"/>
+        /// as being canceled, faulted or having completed successfully
+        /// based on the corresponding status of the given 
+        /// <see cref="Task{T}"/>.
+        /// </summary>
+
+        public static bool TryConcludeFrom<T, TTask>(this TaskCompletionSource<T> source, TTask task, Func<TTask, T> resultSelector)
+            where TTask : Task
+        {
             if (source == null) throw new ArgumentNullException("source");
             if (task == null) throw new ArgumentNullException("task");
+            if (resultSelector == null) throw new ArgumentNullException("resultSelector");
 
             if (task.IsCanceled)
             {
@@ -170,7 +184,7 @@ namespace Mannex.Threading.Tasks
             }
             else if (TaskStatus.RanToCompletion == task.Status)
             {
-                source.TrySetResult(task.Result);
+                source.TrySetResult(resultSelector(task));
             }
             else
             {
@@ -250,6 +264,47 @@ namespace Mannex.Threading.Tasks
                                    scheduler ?? TaskScheduler.Default);
             }
             
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Task{T}"/> that can be used as the
+        /// <see cref="IAsyncResult"/> return value from the method
+        /// that begin the operation of an API following the 
+        /// <a href="http://msdn.microsoft.com/en-us/library/ms228963.aspx">Asynchronous Programming Model</a>.
+        /// If an <see cref="AsyncCallback"/> is supplied, it is invoked
+        /// when the supplied task concludes (fails, cancels or completes
+        /// successfully).
+        /// </summary>
+
+        public static Task Apmize(this Task task, AsyncCallback callback, object state, TaskScheduler scheduler)
+        {
+            var result = task;
+
+            TaskCompletionSource<object> tcs = null;
+            if (task.AsyncState != state)
+            {
+                tcs = new TaskCompletionSource<object>(state);
+                result = tcs.Task;
+            }
+
+            var t = task;
+            if (tcs != null)
+            {
+                t = t.ContinueWith(delegate { tcs.TryConcludeFrom(task, delegate { return null; }); },
+                                   CancellationToken.None,
+                                   TaskContinuationOptions.ExecuteSynchronously,
+                                   TaskScheduler.Default);
+            }
+            if (callback != null)
+            {
+                // ReSharper disable RedundantAssignment
+                t = t.ContinueWith(delegate { callback(result); }, // ReSharper restore RedundantAssignment
+                                   CancellationToken.None,
+                                   TaskContinuationOptions.None,
+                                   scheduler ?? TaskScheduler.Default);
+            }
+
             return result;
         }
     }

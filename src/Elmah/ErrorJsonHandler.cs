@@ -27,8 +27,13 @@ namespace Elmah
 {
     #region Imports
 
+    using System.IO;
     using System.Net;
+    using System.Net.Mime;
+    using System.Text;
+    using System.Threading.Tasks;
     using System.Web;
+    using Microsoft.Owin;
 
     #endregion
 
@@ -38,39 +43,33 @@ namespace Elmah
 
     static class ErrorJsonHandler
     {
-        public static void ProcessRequest(HttpContextBase context)
+        public static Task ProcessRequest(IOwinContext context, ErrorLog log)
         {
             var response = context.Response;
-            response.ContentType = "application/json";
 
             //
             // Retrieve the ID of the requested error and read it from 
             // the store.
             //
 
-            var errorId = context.Request.QueryString["id"] ?? string.Empty;
+            var errorId = context.Request.Query["id"] ?? string.Empty;
 
             if (errorId.Length == 0)
                 throw new ApplicationException("Missing error identifier specification.");
 
-            var entry = ErrorLog.GetDefault(context).GetError(errorId);
+            var entry = log.GetError(errorId);
 
-            //
-            // Perhaps the error has been deleted from the store? Whatever
-            // the reason, pretend it does not exist.
-            //
 
-            if (entry == null)
-            {
-                throw new HttpException((int) HttpStatusCode.NotFound, 
-                    string.Format("Error with ID '{0}' not found.", errorId));
-            }
-
-            //
-            // Stream out the error as formatted JSON.
-            //
-
-            ErrorJson.Encode(entry.Error, response.Output);
+            return entry == null
+                   //
+                   // Perhaps the error has been deleted from the store? Whatever
+                   // the reason, pretend it does not exist.
+                   //
+                 ? response.NotFound(string.Format("Error with ID '{0}' not found.", errorId))
+                   //
+                   // Stream out the error as formatted JSON.
+                   //
+                 : response.WriteUtf8TextAsync("application/json", ErrorJson.EncodeString(entry.Error));
         }
     }
 }

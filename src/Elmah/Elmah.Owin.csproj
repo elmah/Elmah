@@ -4,14 +4,14 @@
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2990960B-2CB4-484C-819A-EF186B8FCAC5}</ProjectGuid>
+    <ProjectGuid>{1B37EFEF-9E4A-4B5E-BD03-9499AA0BF8F6}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">NETFX 4.5 Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ApplicationIcon>
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>Elmah.AspNet</AssemblyName>
+    <AssemblyName>Elmah.Owin</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
@@ -58,7 +58,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;DEBUG;NET_4_0</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.0\Elmah.AspNet.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.0\Elmah.Owin.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -83,7 +83,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;NET_4_0</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.0\Elmah.AspNet.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.0\Elmah.Owin.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -108,7 +108,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;DEBUG;NET_4_5</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.5\Elmah.AspNet.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.5\Elmah.Owin.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -133,7 +133,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;NET_4_5</DefineConstants>
-    <DocumentationFile>xmldoc\net-4.5\Elmah.AspNet.xml</DocumentationFile>
+    <DocumentationFile>xmldoc\net-4.5\Elmah.Owin.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -151,17 +151,8 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'NETFX 4.0 Debug' Or '$(Configuration)' == 'NETFX 4.0 Release'">
-      <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.JScript" />
-    <Reference Include="Microsoft.Owin.Host.SystemWeb" Condition="'$(Configuration)' == 'NETFX 4.0 Debug' Or '$(Configuration)' == 'NETFX 4.0 Release'">
-      <HintPath>..\..\packages\Microsoft.Owin.Host.SystemWeb.2.0.2\lib\net40\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Host.SystemWeb" Condition="'$(Configuration)' != 'NETFX 4.0 Debug' And '$(Configuration)' != 'NETFX 4.0 Release'">
-      <HintPath>..\..\packages\Microsoft.Owin.Host.SystemWeb.2.0.2\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Owin" Condition="'$(Configuration)' == 'NETFX 4.0 Debug' Or '$(Configuration)' == 'NETFX 4.0 Release'">
       <HintPath>..\..\packages\Microsoft.Owin.2.0.2\lib\net40\Microsoft.Owin.dll</HintPath>
     </Reference>
@@ -169,6 +160,9 @@
       <HintPath>..\..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Vsa" />
+    <Reference Include="Owin">
+      <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -179,63 +173,17 @@
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
-    <Reference Include="System.Web">
-      <Name>System.Web</Name>
-    </Reference>
-    <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Apm.cs" />
+    <Compile Include="AboutPage.cs" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Assertions\AssertionFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\ComparisonAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\ComparisonResults.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\CompositeAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\DataBoundAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\DelegatedContextExpression.cs">
-    </Compile>
-    <Compile Include="Assertions\IAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\IContextExpression.cs">
-    </Compile>
-    <Compile Include="Assertions\IsNullAssertion.cs">
-    </Compile>
-    <Compile Include="Assertions\JScriptAssertion.cs">
-    </Compile>
-    <Compile Include="Assertions\LogicalAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\RegexMatchAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\StaticAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\TypeAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\UnaryNotAssertion.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Assertions\WebDataBindingExpression.cs">
-    </Compile>
+    <Compile Include="Assertions\DataBinder.cs" />
     <Compile Include="Async.cs" />
     <Compile Include="AsyncResult.cs" />
     <Compile Include="AsyncResultOr.cs" />
@@ -243,84 +191,29 @@
     </Compile>
     <Compile Include="Configuration.cs">
     </Compile>
-    <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
-    <Compile Include="DelegatingDisposable.cs" />
-    <Compile Include="ErrorLogPageFactory.cs" />
-    <Compile Include="HttpAsyncHandler.cs">
-      <SubType>Code</SubType>
+    <Compile Include="AboutPage.generated.cs">
+      <DependentUpon>AboutPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="KeyValuePair.cs" />
-    <Compile Include="ManifestResourceHandler.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
-    <Compile Include="PoweredBy.cs" />
-    <Compile Include="RazorTemplateBase.cs" />
-    <Compile Include="PreApplicationStart.cs" />
-    <Compile Include="HelperResult.cs" />
-    <Compile Include="HttpTextAsyncHandler.cs" />
-    <Compile Include="Debug.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DelegatingHttpHandler.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="ErrorFilterConfiguration.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ErrorFilterModule.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ErrorFilterSectionHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ErrorLogDataSourceAdapter.cs">
-    </Compile>
-    <Compile Include="ErrorLogModule.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ErrorLogSectionHandler.cs">
-    </Compile>
-    <Compile Include="ErrorMailHtmlFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ErrorMailModule.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="ErrorDigestRssHandler.cs" />
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ErrorMailHtmlPage.cs" />
-    <Compile Include="ErrorMailSectionHandler.cs">
-    </Compile>
-    <Compile Include="ErrorSignal.cs">
-    </Compile>
-    <Compile Include="ErrorTextFormatter.cs">
+    <Compile Include="KeyValuePair.cs" />
+    <Compile Include="MoreLinq\MoreEnumerable.Index.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorTweetModule.cs">
-    </Compile>
-    <Compile Include="ErrorTweetSectionHandler.cs">
-    </Compile>
-    <Compile Include="ExceptionFiltering.cs">
+    <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HtmlLinkType.cs">
-    </Compile>
-    <Compile Include="HtmlString.cs" />
-    <Compile Include="HttpModuleBase.cs">
-    </Compile>
-    <Compile Include="HttpModuleRegistry.cs">
+    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HttpStatus.cs">
-    </Compile>
-    <Compile Include="JetBrains.Annotations.cs">
-    </Compile>
-    <Compile Include="Mannex.cs" />
-    <Compile Include="Mask.cs">
+    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PoweredBy.generated.cs">
@@ -328,6 +221,64 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PoweredBy.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Owin.cs" />
+    <Compile Include="StackTraceParser.cs" />
+    <Compile Include="StyleSheetHelper.cs" />
+    <Compile Include="ErrorDetailPage.generated.cs">
+      <DependentUpon>ErrorDetailPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="FuzzyTime.cs" />
+    <Compile Include="HelperResult.cs" />
+    <Compile Include="MasterPage.generated.cs">
+      <DependentUpon>MasterPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Debug.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="ErrorDetailPage.cs" />
+    <Compile Include="ErrorDisplay.cs">
+    </Compile>
+    <Compile Include="ErrorHtmlPage.cs" />
+    <Compile Include="ErrorJsonHandler.cs">
+    </Compile>
+    <Compile Include="ErrorLogDownloadHandler.cs">
+    </Compile>
+    <Compile Include="ErrorLogPage.cs" />
+    <Compile Include="ErrorLogPage.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorLogPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ErrorLogSectionHandler.cs">
+    </Compile>
+    <Compile Include="ErrorRssHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ErrorXmlHandler.cs">
+    </Compile>
+    <Compile Include="HtmlLinkType.cs">
+    </Compile>
+    <Compile Include="HtmlString.cs" />
+    <Compile Include="HttpStatus.cs">
+    </Compile>
+    <Compile Include="JetBrains.Annotations.cs">
+    </Compile>
+    <Compile Include="ManifestResourceHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mannex.cs" />
+    <Compile Include="Mask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PoweredBy.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RazorTemplateBase.cs" />
     <Compile Include="RssXml.cs" />
     <Compile Include="SecurityConfiguration.cs">
     </Compile>
@@ -338,6 +289,8 @@
     </Compile>
     <Compile Include="SpeedBar.cs">
     </Compile>
+    <Compile Include="StringFormatter.cs">
+    </Compile>
     <Compile Include="StringSeparatorStock.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -346,17 +299,37 @@
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="WebTemplateBase.cs" />
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
+    <EmbeddedResource Include="ErrorLog.css" />
     <EmbeddedResource Include="RemoteAccessError.htm">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Bootstrap.css">
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="AboutPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
+    </None>
     <None Include="ErrorMailHtmlPage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ErrorMailHtmlPage.generated.cs</LastGenOutput>
     </None>
+    <None Include="ErrorDetailPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorDetailPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>MasterPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="ErrorLogPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ErrorLogPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
     <None Include="PoweredBy.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PoweredBy.generated.cs</LastGenOutput>
@@ -389,10 +362,6 @@
     <ProjectReference Include="Elmah.csproj">
       <Project>{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}</Project>
       <Name>Elmah</Name>
-    </ProjectReference>
-    <ProjectReference Include="Elmah.Owin.csproj">
-      <Project>{1b37efef-9e4a-4b5e-bd03-9499aa0bf8f6}</Project>
-      <Name>Elmah.Owin</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

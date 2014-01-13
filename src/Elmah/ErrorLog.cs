@@ -276,7 +276,9 @@ namespace Elmah
 
         internal static ErrorLog GetDefaultImpl(object context)
         {
-            return ErrorLogCache.GetValue(context, key => GetDefaultImpl(key as HttpContextBase));
+            return context != null 
+                 ? ErrorLogCache.GetValue(context, key => GetDefaultImpl(key as HttpContextBase))
+                 : GetDefaultImpl(null);
         }
 
         static ErrorLog GetDefaultImpl(HttpContextBase context)
