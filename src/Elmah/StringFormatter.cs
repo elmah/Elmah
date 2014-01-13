@@ -172,20 +172,8 @@ namespace Elmah
                 token = null;
             }
 
-            object result;
-
-            try
-            {
-                result = DataBinder.Eval(source, token);
-                if (result == null)
-                    result = string.Empty;
-            }
-            catch (HttpException e) // Map silly exception type from DataBinder.Eval
-            {
-                throw new FormatException(e.Message, e);
-            }
-
-            return (format ?? string.Empty).Length > 0
+            var result = DataBinder.Eval(source, token) ?? string.Empty;
+            return format.Length > 0
                  ? string.Format(provider, format, result)
                  : result.ToString();
         }

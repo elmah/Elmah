@@ -34,6 +34,7 @@ namespace Elmah
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.Serialization;
     using System.Text.RegularExpressions;
 
     #endregion
@@ -72,8 +73,8 @@ namespace Elmah
 
         public static IEnumerable<Func<object, object>> Parse(string expression, bool strict)
         {
-            var mp = strict ? (obj, name)  => { throw new Exception(string.Format(@"DataBinding: '{0}' does not contain a property with the name '{1}'.", obj.GetType(), name)); } : (Func<object, string, object>) null;
-            var mi = strict ? (obj, index) => { throw new Exception(string.Format(@"DataBinding: '{0}' does not allow indexed access.", obj.GetType())); }                         : (Func<object, object, object>) null;
+            var mp = strict ? (obj, name)  => { throw new DataBindingException(string.Format(@"DataBinding: '{0}' does not contain a property with the name '{1}'.", obj.GetType(), name)); } : (Func<object, string, object>) null;
+            var mi = strict ? (obj, index) => { throw new DataBindingException(string.Format(@"DataBinding: '{0}' does not allow indexed access.", obj.GetType())); } : (Func<object, object, object>)null;
 
             var binders = Parse(expression, p => PassThru((object obj) => GetProperty(obj, p, mp)),
                                             i => PassThru((object obj) => GetIndex(obj, i, mi)));
@@ -200,5 +201,17 @@ namespace Elmah
                                         | RegexOptions.IgnoreCase
                                         | RegexOptions.CultureInvariant);        
         }
+    }
+
+    [Serializable]
+    public class DataBindingException : Exception
+    {
+        public DataBindingException() {}
+        public DataBindingException(string message) :
+            this(message, null) {}
+        public DataBindingException(string message, Exception inner) :
+            base(message, inner) {}
+        protected DataBindingException(SerializationInfo info, StreamingContext context) :
+            base(info, context) {}
     }
 }
