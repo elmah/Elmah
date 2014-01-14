@@ -32,6 +32,7 @@ namespace Elmah
     #region Imports
     
     using System;
+    using System.Runtime.CompilerServices;
     using System.Web;
     using System.Collections.Generic;
 
@@ -266,12 +267,19 @@ namespace Elmah
         /// none is configured.
         /// </summary>
 
-        public static ErrorLog GetDefault(HttpContextBase context)
+        public static ErrorLog GetDefault(object context)
         {
             return (ErrorLog) ServiceCenter.GetService(context, typeof(ErrorLog));
         }
 
-        internal static ErrorLog GetDefaultImpl(HttpContextBase context)
+        static readonly ConditionalWeakTable<object, ErrorLog> ErrorLogCache = new ConditionalWeakTable<object, ErrorLog>();
+
+        internal static ErrorLog GetDefaultImpl(object context)
+        {
+            return ErrorLogCache.GetValue(context, key => GetDefaultImpl(key as HttpContextBase));
+        }
+
+        static ErrorLog GetDefaultImpl(HttpContextBase context)
         {
             ErrorLog log;
 
