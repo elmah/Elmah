@@ -151,6 +151,10 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'NETFX 4.0 Debug' Or '$(Configuration)' == 'NETFX 4.0 Release'">
+      <Private>True</Private>
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="Microsoft.Vsa" />
     <Reference Include="System">
@@ -254,6 +258,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PoweredBy.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="PreApplicationStart.cs" />
     <Compile Include="StackTraceParser.cs" />
     <Compile Include="StyleSheetHelper.cs" />
     <Compile Include="ErrorDetailPage.generated.cs">
