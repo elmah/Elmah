@@ -39,40 +39,6 @@ namespace Elmah
 
     #endregion
 
-    namespace Owin
-    {
-        public static class Startup
-        {
-            public static void Configuration(IAppBuilder app)
-            {
-                if (app == null) throw new ArgumentNullException("app");
-
-                // TODO Review if versioning info is done as suggested and intended in the OWIN spec:
-                //
-                // "Implementers SHOULD include a technology specific version 
-                //  key that clearly identifies not only the version of the 
-                //  underlying component, but also the version of any OWIN 
-                //  specific wrapper of that component.  E.g. 
-                //  'mshttplistener.Version: .NET 4.0, OWIN wrapper 1.0.1'.  
-                //  This is intended to help consumers cross reference 
-                //  documentation with implementations, facilitating both 
-                //  development and debugging.
-                //
-                //  Where the version includes the .NET framework version, 
-                //  specify the version compiled against, not the version 
-                //  currently running.  E.g. if the component targeted 
-                //  .NET 4.0 and is running on .NET 4.5, specify 4.0."
-                //
-                //  - Section 3, OWIN Key Guidelines and Common Keys
-                //    http://owin.org/spec/CommonKeys.html#_3._Naming_conventions
-
-                app.Properties["elmah.Version"] = PoweredBy.GetAbout((v, fv, p, cr) => v.ToString());
-                
-                app.UseElmahWeb();
-            }
-        }        
-    }
-
     /// <summary>
     /// HTTP handler factory that dispenses handlers for rendering views and 
     /// resources needed to display the error log.
@@ -131,33 +97,62 @@ namespace Elmah
             return new Uri(context.Request.MyBaseUrl(), "detail?id=" + Uri.EscapeDataString(e.Id));
         }
 
+        static IAppBuilder CommonConfiguration(this IAppBuilder app)
+        {
+            if (app == null) throw new ArgumentNullException("app");
+
+            // TODO Review if versioning info is done as suggested and intended in the OWIN spec:
+            //
+            // "Implementers SHOULD include a technology specific version 
+            //  key that clearly identifies not only the version of the 
+            //  underlying component, but also the version of any OWIN 
+            //  specific wrapper of that component.  E.g. 
+            //  'mshttplistener.Version: .NET 4.0, OWIN wrapper 1.0.1'.  
+            //  This is intended to help consumers cross reference 
+            //  documentation with implementations, facilitating both 
+            //  development and debugging.
+            //
+            //  Where the version includes the .NET framework version, 
+            //  specify the version compiled against, not the version 
+            //  currently running.  E.g. if the component targeted 
+            //  .NET 4.0 and is running on .NET 4.5, specify 4.0."
+            //
+            //  - Section 3, OWIN Key Guidelines and Common Keys
+            //    http://owin.org/spec/CommonKeys.html#_3._Naming_conventions
+
+            app.Properties["elmah.Version"] = PoweredBy.GetAbout((v, fv, p, cr) => v.ToString());
+            return app;
+        }
+
         public static void UseElmahWeb(this IAppBuilder builder)
         {
             // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
-            
-            builder.Use((context, next) => GetHandler(context) ?? next());
+
+            builder.CommonConfiguration()
+                   .Use((context, next) => GetHandler(context) ?? next());
         }
 
         public static void UseElmahLogging(this IAppBuilder builder)
         {
             // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
 
-            builder.Use((context, next) =>
-            {
-                try
-                {
-                    return next().ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            ErrorLog.GetDefault(null).Log(new Error(t.Exception));
-                    });
-                }
-                catch (Exception e)
-                {
-                    ErrorLog.GetDefault(null).Log(new Error(e));
-                    return CompletedTask.Error(e);
-                }
-            });
+            builder.CommonConfiguration()
+                   .Use((context, next) =>
+                   {
+                       try
+                       {
+                           return next().ContinueWith(t =>
+                           {
+                               if (t.IsFaulted)
+                                   ErrorLog.GetDefault(null).Log(new Error(t.Exception));
+                           });
+                       }
+                       catch (Exception e)
+                       {
+                           ErrorLog.GetDefault(null).Log(new Error(e));
+                           return CompletedTask.Error(e);
+                       }
+                   });
         }
 
         internal static Task NotFound(this IOwinResponse response, string message)
