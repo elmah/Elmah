@@ -184,9 +184,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Assertions\DataBinder.cs" />
-    <Compile Include="Async.cs" />
-    <Compile Include="AsyncResult.cs" />
-    <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
@@ -296,11 +293,11 @@
     </Compile>
     <Compile Include="StringTranslation.cs">
     </Compile>
+    <Compile Include="TaskOr.cs" />
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="WebTemplateBase.cs" />
-    <Compile Include="XmlSerializer.cs" />
     <Compile Include="XmlText.cs" />
     <EmbeddedResource Include="ErrorLog.css" />
     <EmbeddedResource Include="RemoteAccessError.htm">

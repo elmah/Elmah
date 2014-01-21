@@ -24,45 +24,6 @@
 namespace Elmah
 {
     using System;
-
-    struct AsyncResultOr<T>
-    {
-        public bool HasValue { get { return AsyncResult == null; } }
-        public T Value { get; set; }
-        public IAsyncResult AsyncResult { get; private set; }
-
-        private AsyncResultOr(T value) : this() { Value = value; }
-        private AsyncResultOr(IAsyncResult value) : this() { AsyncResult = value; }
-
-        public static AsyncResultOr<T> Async(IAsyncResult ar)
-        {
-            if (ar == null) throw new ArgumentNullException("ar");
-            return new AsyncResultOr<T>(ar);
-        }
-
-        public static AsyncResultOr<T> Result(T value)
-        {
-            return new AsyncResultOr<T>(value);
-        }
-    }
-
-    static class AsyncResultOr
-    {
-        public static AsyncResultOr<T> Value<T>(T value)
-        {
-            return AsyncResultOr<T>.Result(value);
-        }
-
-        public static AsyncResultOr<T> InsteadOf<T>(this IAsyncResult ar)
-        {
-            return AsyncResultOr<T>.Async(ar);
-        }
-    }
-}
-
-namespace Elmah
-{
-    using System;
     using System.Threading.Tasks;
 
     struct TaskOr<T>

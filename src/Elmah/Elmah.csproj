@@ -168,15 +168,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Apm.cs" />
     <Compile Include="ApplicationException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Async.cs" />
-    <Compile Include="AsyncResult.cs" />
+    <Compile Include="Async.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="CallerInfo.cs" />

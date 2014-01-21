@@ -189,7 +189,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Apm.cs" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -236,21 +235,12 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
-    <Compile Include="Async.cs" />
-    <Compile Include="AsyncResult.cs" />
-    <Compile Include="AsyncResultOr.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
     </Compile>
-    <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
     <Compile Include="DelegatingDisposable.cs" />
-    <Compile Include="ErrorLogPageFactory.cs" />
-    <Compile Include="HttpAsyncHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="KeyValuePair.cs" />
-    <Compile Include="ManifestResourceHandler.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
@@ -259,11 +249,9 @@
     <Compile Include="RazorTemplateBase.cs" />
     <Compile Include="PreApplicationStart.cs" />
     <Compile Include="HelperResult.cs" />
-    <Compile Include="HttpTextAsyncHandler.cs" />
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DelegatingHttpHandler.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="ErrorFilterConfiguration.cs">
       <SubType>Code</SubType>
@@ -315,8 +303,6 @@
     <Compile Include="HttpModuleRegistry.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HttpStatus.cs">
-    </Compile>
     <Compile Include="JetBrains.Annotations.cs">
     </Compile>
     <Compile Include="Mannex.cs" />
@@ -328,15 +314,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PoweredBy.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="RssXml.cs" />
-    <Compile Include="SecurityConfiguration.cs">
-    </Compile>
-    <Compile Include="SecuritySectionHandler.cs">
-    </Compile>
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SpeedBar.cs">
     </Compile>
     <Compile Include="StringSeparatorStock.cs">
       <SubType>Code</SubType>
@@ -346,10 +325,6 @@
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="XmlSerializer.cs" />
-    <Compile Include="XmlText.cs" />
-    <EmbeddedResource Include="RemoteAccessError.htm">
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
