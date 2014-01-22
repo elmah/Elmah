@@ -28,6 +28,7 @@ namespace Elmah
     #region Imports
 
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
@@ -155,6 +156,57 @@ namespace Elmah
                     return CompletedTask.Error(e);
                 }
             });
+        }
+
+        // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
+
+        public static IAppBuilder UseElmahMailing(this IAppBuilder app, ErrorMail.Settings settings)
+        {
+            if (app == null) throw new ArgumentNullException("app");
+            if (settings == null) throw new ArgumentNullException("settings");
+
+            var mailer = ErrorMail.CreateMailer(settings);
+            return app.CommonConfiguration()
+                      .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, mailer)));
+        }
+
+        static IEnumerable<Task> InvokeWithErrorReporting(Func<Task> next, Func<Error, Task> reporter)
+        {
+            Debug.Assert(next != null);
+            Debug.Assert(reporter != null);
+
+            Task nt;
+            try
+            {
+                nt = next();
+            }
+            catch (Exception e)
+            {
+                nt = CompletedTask.Error(e);
+            }
+            
+            if (!nt.IsCompleted) yield return nt;
+            if (!nt.IsFaulted) yield break;
+            
+            Task mt;
+            try
+            {
+                mt = reporter(new Error(nt.Exception));
+            }
+            catch (Exception e)
+            {
+                mt = CompletedTask.Error(e);
+            }
+
+            if (!mt.IsCompleted) yield return mt;
+            if (mt.IsFaulted)
+            {
+                Debug.Assert(mt.Exception != null);
+                Trace.TraceError(mt.Exception.ToString());
+            }
+
+            Debug.Assert(nt.Exception != null);
+            throw nt.Exception;
         }
 
         internal static Task NotFound(this IOwinResponse response, string message)

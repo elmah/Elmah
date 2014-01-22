@@ -314,8 +314,6 @@ namespace Mannex.Threading.Tasks
 
 namespace Mannex.Threading.Tasks
 {
-#if NET_4_0
-
     #region Imports
 
     using System;
@@ -496,6 +494,4 @@ namespace Mannex.Threading.Tasks
             return tcs.Task;
         }
     }
-
-#endif // NET4
 }

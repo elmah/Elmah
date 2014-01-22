@@ -235,6 +235,7 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
+    <Compile Include="Async.cs" />
     <Compile Include="Build.cs">
     </Compile>
     <Compile Include="Configuration.cs">
@@ -269,24 +270,12 @@
     </Compile>
     <Compile Include="ErrorLogSectionHandler.cs">
     </Compile>
-    <Compile Include="ErrorMailHtmlFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ErrorMailModule.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ErrorMailHtmlPage.generated.cs">
-      <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="ErrorMailHtmlPage.cs" />
     <Compile Include="ErrorMailSectionHandler.cs">
     </Compile>
     <Compile Include="ErrorSignal.cs">
-    </Compile>
-    <Compile Include="ErrorTextFormatter.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="ErrorTweetModule.cs">
     </Compile>
@@ -328,10 +317,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="ErrorMailHtmlPage.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ErrorMailHtmlPage.generated.cs</LastGenOutput>
-    </None>
     <None Include="PoweredBy.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PoweredBy.generated.cs</LastGenOutput>
