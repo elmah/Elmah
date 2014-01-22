@@ -124,35 +124,36 @@ namespace Elmah
             return app;
         }
 
-        public static void UseElmahWeb(this IAppBuilder builder)
+        // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
+        
+        public static void UseElmahWeb(this IAppBuilder app)
         {
-            // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
-
-            builder.CommonConfiguration()
-                   .Use((context, next) => GetHandler(context) ?? next());
+            if (app == null) throw new ArgumentNullException("app");
+            app.CommonConfiguration().Use((context, next) => GetHandler(context) ?? next());
         }
 
-        public static void UseElmahLogging(this IAppBuilder builder)
-        {
-            // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
+        // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
 
-            builder.CommonConfiguration()
-                   .Use((context, next) =>
-                   {
-                       try
-                       {
-                           return next().ContinueWith(t =>
-                           {
-                               if (t.IsFaulted)
-                                   ErrorLog.GetDefault(null).Log(new Error(t.Exception));
-                           });
-                       }
-                       catch (Exception e)
-                       {
-                           ErrorLog.GetDefault(null).Log(new Error(e));
-                           return CompletedTask.Error(e);
-                       }
-                   });
+        public static void UseElmahLogging(this IAppBuilder app)
+        {
+            if (app == null) throw new ArgumentNullException("app");
+
+            app.CommonConfiguration().Use((context, next) =>
+            {
+                try
+                {
+                    return next().ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                            ErrorLog.GetDefault(null).Log(new Error(t.Exception));
+                    });
+                }
+                catch (Exception e)
+                {
+                    ErrorLog.GetDefault(null).Log(new Error(e));
+                    return CompletedTask.Error(e);
+                }
+            });
         }
 
         internal static Task NotFound(this IOwinResponse response, string message)
