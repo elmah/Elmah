@@ -312,7 +312,7 @@ namespace Elmah
         }
     }
 
-    /* TODO internal */ public static class CompletedTask
+    static class CompletedTask
     {
         public static Task Error(Exception exception) { return Error<object>(exception); }
 
