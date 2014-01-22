@@ -126,19 +126,20 @@ namespace Elmah
 
         // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
         
-        public static void UseElmahWeb(this IAppBuilder app)
+        public static IAppBuilder UseElmahWeb(this IAppBuilder app)
         {
             if (app == null) throw new ArgumentNullException("app");
-            app.CommonConfiguration().Use((context, next) => GetHandler(context) ?? next());
+            return app.CommonConfiguration()
+                      .Use((context, next) => GetHandler(context) ?? next());
         }
 
         // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
 
-        public static void UseElmahLogging(this IAppBuilder app)
+        public static IAppBuilder UseElmahLogging(this IAppBuilder app)
         {
             if (app == null) throw new ArgumentNullException("app");
 
-            app.CommonConfiguration().Use((context, next) =>
+            return app.CommonConfiguration().Use((context, next) =>
             {
                 try
                 {
