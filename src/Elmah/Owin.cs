@@ -311,27 +311,6 @@ namespace Elmah
                            + request.Context.Get<string>(OwinKeys.BaseUrl));
         }
     }
-
-    static class CompletedTask
-    {
-        public static Task Error(Exception exception) { return Error<object>(exception); }
-
-        public static Task<T> Error<T>(Exception exception)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
-
-        public static Task Return() { return Return<object>(null); }
-
-        public static Task<T> Return<T>(T result)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetResult(result);
-            return tcs.Task;
-        }
-    }
 }
 
 namespace Elmah

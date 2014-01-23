@@ -186,6 +186,7 @@
     <Compile Include="Assertions\DataBinder.cs" />
     <Compile Include="Build.cs">
     </Compile>
+    <Compile Include="CompletedTask.cs" />
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="AboutPage.generated.cs">
