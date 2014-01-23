@@ -121,6 +121,14 @@ namespace Elmah
                     _size = Convert.ToInt32(sizeString, CultureInfo.InvariantCulture);
                     _size = Math.Max(0, Math.Min(MaximumSize, _size));
                 }
+
+                //
+                // Set the application name as this implementation provides
+                // per-application isolation over a single store.
+                //
+
+                var appName = config.Find("applicationName", string.Empty);
+                ApplicationName = appName;
             }
         }
 
