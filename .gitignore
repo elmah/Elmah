@@ -9,6 +9,7 @@ Bin/
 obj/
 _ReSharper.*
 *.orig
+*.rej
 dist/**
 pkg/*/**
 *.nupkg
