@@ -52,23 +52,27 @@ namespace Elmah
             public string AuthPassword { get; set; }
             public bool DontSendYsod { get; set; }
             public bool UseSsl { get; set; }
-            public CancellationToken CancellationToken { get; set; }
             public Func<Error, MailMessage, CancellationToken, Task> OnMailing { get; set; }
             public Func<Error, MailMessage, CancellationToken, Task> OnMailed { get; set; }
             /* TODO */ public Func<Error, MailMessage, CancellationToken, Task> OnDisposingMail { get; set; }
         }
 
-        public static Func<Error, Task> CreateMailer(Settings options)
+        public static Func<Error, CancellationToken, Task> CreateMailer(Settings options)
         {
-            return error => Send(error, options);
-        } 
+            return (error, cancellationToken) => Send(error, options, cancellationToken);
+        }
 
         public static Task Send(Error error, Settings options)
         {
-            return Task.Factory.StartNew(SendImpl(error, options), options.CancellationToken);
+            return Send(error, options, CancellationToken.None);
         }
 
-        static IEnumerable<Task> SendImpl(Error error, Settings options)
+        public static Task Send(Error error, Settings options, CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew(SendImpl(error, options, cancellationToken), cancellationToken);
+        }
+
+        static IEnumerable<Task> SendImpl(Error error, Settings options, CancellationToken cancellationToken)
         {
             if (error == null)
                 throw new ArgumentNullException("error");
@@ -155,7 +159,7 @@ namespace Elmah
                 if (options.OnMailing != null)
                 {
                     Task task;
-                    yield return (task = options.OnMailing(error, mail, options.CancellationToken));
+                    yield return (task = options.OnMailing(error, mail, cancellationToken));
                     /* TODO error and cancellation handling */ Debug.Assert(!task.IsCanceled && !task.IsFaulted);
                 }
 
@@ -164,7 +168,7 @@ namespace Elmah
                 if (options.OnMailed != null)
                 {
                     Task task;
-                    yield return (task = options.OnMailed(error, mail, options.CancellationToken));
+                    yield return (task = options.OnMailed(error, mail, cancellationToken));
                     /* TODO error and cancellation handling */ Debug.Assert(!task.IsCanceled && !task.IsFaulted);
                 }
             }
@@ -175,7 +179,7 @@ namespace Elmah
             }
 
             Task disposingMailTask;
-            yield return (disposingMailTask = options.OnDisposingMail(error, mail, options.CancellationToken));
+            yield return (disposingMailTask = options.OnDisposingMail(error, mail, cancellationToken));
             /* TODO error and cancellation handling */ Debug.Assert(!disposingMailTask.IsCanceled && !disposingMailTask.IsFaulted);
         }
 

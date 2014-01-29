@@ -78,7 +78,7 @@ namespace Elmah
     public class ErrorMailModule : HttpModuleBase, IExceptionFiltering
     {
         private bool _reportAsynchronously;
-        Func<Error, Task> _mailer;
+        Func<Error, CancellationToken, Task> _mailer;
 
         public event ExceptionFilterEventHandler Filtering;
         public event ErrorMailEventHandler Mailing;
@@ -257,7 +257,7 @@ namespace Elmah
 
         private void ReportError(object state)
         {
-            var task = _mailer((Error) state);
+            var task = _mailer((Error) state, CancellationToken.None);
 
             //
             // Catch and trace COM/SmtpException here because this

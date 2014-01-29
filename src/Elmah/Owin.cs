@@ -31,6 +31,7 @@ namespace Elmah
     using System.Diagnostics;
     using System.Linq;
     using System.Net.Mime;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Collections.Generic;
     using Mannex.Threading.Tasks;
@@ -170,7 +171,7 @@ namespace Elmah
                       .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, mailer)));
         }
 
-        static IEnumerable<Task> InvokeWithErrorReporting(Func<Task> next, Func<Error, Task> reporter)
+        static IEnumerable<Task> InvokeWithErrorReporting(Func<Task> next, Func<Error, CancellationToken, Task> reporter)
         {
             Debug.Assert(next != null);
             Debug.Assert(reporter != null);
@@ -191,7 +192,7 @@ namespace Elmah
             Task mt;
             try
             {
-                mt = reporter(new Error(nt.Exception));
+                mt = reporter(new Error(nt.Exception), CancellationToken.None);
             }
             catch (Exception e)
             {
