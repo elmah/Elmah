@@ -257,10 +257,7 @@ namespace Elmah
 
         private void ReportError(object state)
         {
-            try
-            {
-                _mailer((Error) state).Wait();
-            }
+            var task = _mailer((Error) state);
 
             //
             // Catch and trace COM/SmtpException here because this
@@ -274,9 +271,16 @@ namespace Elmah
             //     http://support.microsoft.com/kb/911816
             //
 
-            catch (SmtpException e)
+            if (task.IsFaulted)
             {
-                Trace.TraceError(e.ToString());
+                Debug.Assert(task.Exception != null);
+                task.Exception.Handle(ee =>
+                {
+                    if (!(ee is SmtpException))
+                        return false;
+                    Trace.TraceError(ee.ToString());
+                    return true;
+                });
             }
         }
 
