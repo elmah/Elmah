@@ -450,31 +450,40 @@ namespace Mannex.Threading.Tasks
                     Debug.Assert(task != null);
                     Debug.Assert(quantum != null);
 
-                    if (cancellationToken.IsCancellationRequested)
-                        tcs.SetCanceled();
+                    var awaiting = false;
+                    do
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                            tcs.SetCanceled();
 
-                    bool done;
-                    try
-                    {
-                        done = !task.MoveNext();
-                    }
-                    catch (Exception e)
-                    {
-                        try { task.Dispose(); } // ReSharper disable EmptyGeneralCatchClause                        
-                        catch { }               // ReSharper restore EmptyGeneralCatchClause
-                        tcs.SetException(e);
-                        return;
-                    }
+                        bool done;
+                        try
+                        {
+                            done = !task.MoveNext();
+                        }
+                        catch (Exception e)
+                        {
+                            try { task.Dispose(); } // ReSharper disable once EmptyGeneralCatchClause
+                            catch { }
+                            tcs.SetException(e);
+                            return;
+                        }
 
-                    if (done)
-                        tcs.SetResult(null);
-                    else
-                    {
-                        if (scheduler != null)
-                            task.Current.ContinueWith(s => quantum(), scheduler);
-                        else
-                            task.Current.ContinueWith(s => quantum());
+                        if (done)
+                        {
+                            tcs.SetResult(null);
+                        }
+                        else if (!task.Current.IsCompleted)
+                        {
+                            if (scheduler != null)
+                                task.Current.ContinueWith(s => quantum(), scheduler);
+                            else
+                                task.Current.ContinueWith(s => quantum());
+
+                            awaiting = true;
+                        }
                     }
+                    while (!awaiting);
                 };
                 // ReSharper restore AccessToModifiedClosure
 
