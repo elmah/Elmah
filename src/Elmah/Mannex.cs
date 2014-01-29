@@ -450,8 +450,7 @@ namespace Mannex.Threading.Tasks
                     Debug.Assert(task != null);
                     Debug.Assert(quantum != null);
 
-                    var awaiting = false;
-                    do
+                    while (true)
                     {
                         if (cancellationToken.IsCancellationRequested)
                             tcs.SetCanceled();
@@ -472,18 +471,18 @@ namespace Mannex.Threading.Tasks
                         if (done)
                         {
                             tcs.SetResult(null);
+                            break;
                         }
-                        else if (!task.Current.IsCompleted)
+
+                        if (!task.Current.IsCompleted)
                         {
                             if (scheduler != null)
                                 task.Current.ContinueWith(s => quantum(), scheduler);
                             else
                                 task.Current.ContinueWith(s => quantum());
-
-                            awaiting = true;
+                            break;
                         }
                     }
-                    while (!awaiting);
                 };
                 // ReSharper restore AccessToModifiedClosure
 
