@@ -199,7 +199,7 @@ namespace Elmah
             // so these have to be set up here.
             //
 
-            var client = new SmtpClient();
+            var client = new SmtpClient { EnableSsl = options.UseSsl };
 
             var host = options.SmtpServer ?? string.Empty;
 
@@ -219,10 +219,12 @@ namespace Elmah
             if (userName.Length > 0 && password.Length > 0)
                 client.Credentials = new NetworkCredential(userName, password);
 
+            if (cancellationToken.IsCancellationRequested)
+                return CompletedTask.Cancelled();
+
             // TODO Consider making this testable
             // May be separate initialization of SmtpClient from actual act of sending?
 
-            client.EnableSsl = options.UseSsl;
             var tcs = new TaskCompletionSource<object>();
             client.SendCompleted += (sender, args) =>
             {

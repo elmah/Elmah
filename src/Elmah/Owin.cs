@@ -37,6 +37,7 @@ namespace Elmah
     using Mannex.Threading.Tasks;
     using Microsoft.Owin;
     using global::Owin;
+    using Microsoft.Owin.BuilderProperties;
     using Encoding = System.Text.Encoding;
 
     #endregion
@@ -166,12 +167,16 @@ namespace Elmah
             if (app == null) throw new ArgumentNullException("app");
             if (settings == null) throw new ArgumentNullException("settings");
 
+            var onAppDisposing = new AppProperties(app.Properties).OnAppDisposing;
             var mailer = ErrorMail.CreateMailer(settings);
+            
             return app.CommonConfiguration()
-                      .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, mailer)));
+                      .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, mailer, onAppDisposing), onAppDisposing));
         }
 
-        static IEnumerable<Task> InvokeWithErrorReporting(Func<Task> next, Func<Error, CancellationToken, Task> reporter)
+        static IEnumerable<Task> InvokeWithErrorReporting(Func<Task> next, 
+            Func<Error, CancellationToken, Task> reporter, 
+            CancellationToken cancellationToken)
         {
             Debug.Assert(next != null);
             Debug.Assert(reporter != null);
@@ -192,7 +197,7 @@ namespace Elmah
             Task mt;
             try
             {
-                mt = reporter(new Error(nt.Exception), CancellationToken.None);
+                mt = reporter(new Error(nt.Exception), cancellationToken);
             }
             catch (Exception e)
             {
