@@ -28,6 +28,15 @@ namespace Elmah
 
     static class CompletedTask
     {
+        public static Task Cancelled() { return Cancelled<object>(); }
+
+        public static Task Cancelled<T>()
+        {
+            var tcs = new TaskCompletionSource<T>();
+            tcs.SetCanceled();
+            return tcs.Task;
+        }
+
         public static Task Error(Exception exception) { return Error<object>(exception); }
 
         public static Task<T> Error<T>(Exception exception)
