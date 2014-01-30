@@ -142,22 +142,9 @@ namespace Elmah
         {
             if (app == null) throw new ArgumentNullException("app");
 
-            return app.CommonConfiguration().Use((context, next) =>
-            {
-                try
-                {
-                    return next().ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            ErrorLog.GetDefault(null).Log(new Error(t.Exception));
-                    });
-                }
-                catch (Exception e)
-                {
-                    ErrorLog.GetDefault(null).Log(new Error(e));
-                    return CompletedTask.Error(e);
-                }
-            });
+            var onAppDisposing = new AppProperties(app.Properties).OnAppDisposing;
+            return app.CommonConfiguration()
+                      .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, (error, ct) => ErrorLog.GetDefault(null).LogAsync(error, ct), onAppDisposing), onAppDisposing));
         }
 
         // TODO Check host compatibility as pointed out at http://stackoverflow.com/a/19613529/6682
