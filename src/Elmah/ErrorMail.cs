@@ -163,7 +163,7 @@ namespace Elmah
                     /* TODO error and cancellation handling */ Debug.Assert(!task.IsCanceled && !task.IsFaulted);
                 }
 
-                yield return SendMail(mail, options);
+                yield return SendMail(mail, options, cancellationToken);
 
                 if (options.OnMailed != null)
                 {
@@ -181,11 +181,6 @@ namespace Elmah
             Task disposingMailTask;
             yield return (disposingMailTask = options.OnDisposingMail(error, mail, cancellationToken));
             /* TODO error and cancellation handling */ Debug.Assert(!disposingMailTask.IsCanceled && !disposingMailTask.IsFaulted);
-        }
-
-        static Task SendMail(MailMessage mail, Settings options)
-        {
-            return SendMail(mail, options, CancellationToken.None);
         }
 
         static Task SendMail(MailMessage mail, Settings options, CancellationToken cancellationToken)
