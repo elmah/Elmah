@@ -163,7 +163,12 @@ namespace Elmah
                     /* TODO error and cancellation handling */ Debug.Assert(!task.IsCanceled && !task.IsFaulted);
                 }
 
-                yield return SendMail(mail, options, cancellationToken);
+                {
+                    Task task;
+                    yield return (task = SendMail(mail, options, cancellationToken));
+                    /* TODO error and cancellation handling */
+                    Debug.Assert(!task.IsCanceled && !task.IsFaulted);
+                }
 
                 if (options.OnMailed != null)
                 {
