@@ -123,8 +123,9 @@ namespace Elmah
                 }
 
                 //
-                // Set the application name as this implementation provides
-                // per-application isolation over a single store.
+                // Set the application name. This implementation does not
+                // and cannot provide per-app isolation.
+                // Fixes: https://code.google.com/p/elmah/issues/detail?id=291
                 //
 
                 var appName = config.Find("applicationName", string.Empty);
