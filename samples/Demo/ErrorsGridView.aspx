@@ -64,7 +64,7 @@
             <asp:TemplateField HeaderText="Message">
                 <ItemTemplate>
                     <%# Server.HtmlEncode(Eval("Error.Message").ToString()) %>
-                    <asp:HyperLink runat="server" Text="More&hellip;" NavigateUrl='<%# "~/elmah.axd/detail?id=" + Eval("Id") %>' />
+                    <asp:HyperLink runat="server" Text="More&hellip;" NavigateUrl='<%# "~/elmah/detail?id=" + Eval("Id") %>' />
                 </ItemTemplate>
             </asp:TemplateField>
             <asp:TemplateField HeaderText="User" ItemStyle-Wrap="False">

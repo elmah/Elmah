@@ -2,7 +2,7 @@
 <%@ Import Namespace="System.Globalization" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <script runat="server">
-    const string ErrorLogRssUrl = "~/elmah.axd/rss";
+    const string ErrorLogRssUrl = "~/elmah/rss";
     protected void Page_Load(object sender, EventArgs e)
     {
         ErrorLogRssDataSource.DataBind();
