@@ -41,6 +41,7 @@ if not "%vmaj%.%vmin%.%vbld%"=="4.0.30319" (
     echo ^(MSBuild^) 4.0 installation.
     exit /b 1
 )
+"%MSBUILDEXE%" nugetRestore.proj
 set build="%MSBUILDEXE%" Elmah.sln
 if %vrev% lss 17929 (
     echo ================================= WARNING! ================================
