@@ -41,7 +41,7 @@ if not "%vmaj%.%vmin%.%vbld%"=="4.0.30319" (
     echo ^(MSBuild^) 4.0 installation.
     exit /b 1
 )
-set build="%MSBUILDEXE%" Elmah.sln /p:DownloadNuGetExe=true
+set build="%MSBUILDEXE%" Elmah.sln
 if %vrev% lss 17929 (
     echo ================================= WARNING! ================================
     echo Projects targeting Microsoft .NET Framework 4.5 will be skipped as it does 
@@ -50,6 +50,5 @@ if %vrev% lss 17929 (
     echo.
     set build=%build% /t:Elmah;Elmah_net-4_0;Elmah_Tests
 )
-set EnableNuGetPackageRestore=true
 for %%v in (3.5 4.0 4.5) do for %%c in (Debug Release) do %build% "/p:Configuration=NETFX %%v %%c;AspNetConfiguration=%%c" /v:m %* || exit /b 1
 goto :EOF
