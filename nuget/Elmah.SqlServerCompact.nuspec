@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>elmah.sqlservercompact</id>
-    <version>1.2.2</version>
+    <version>1.2.2.1</version>
     <title>ELMAH on MS SQL Server Compact</title>
     <authors>Atif Aziz</authors>
     <owners>Atif Aziz, James Driscoll</owners>
@@ -16,7 +16,7 @@
     <tags>sqlce sql compact elmah error logging unhandled exception</tags>
     <dependencies>
       <dependency id="elmah" version="1.2.2" />
-      <dependency id="SqlServerCompact" version="4.0.8482.1" />
+      <dependency id="Microsoft.SqlServer.Compact" version="4.0.8876.1" />
     </dependencies>
   </metadata>
   <files>
