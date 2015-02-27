@@ -104,6 +104,7 @@
                     OutputFilename = Path.GetFullPath(OutputFilename);
 
                     Log.LogMessage("Downloading latest version of NuGet.exe...");
+                    WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
                     WebClient webClient = new WebClient();
                     webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFilename);
 

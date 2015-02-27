@@ -79,7 +79,7 @@
       <Name>Elmah.Oracle</Name>
       <Aliases>o</Aliases>
     </ProjectReference>
-    <ProjectReference Include="..\src\Elmah\Elmah.AspNet.csproj">
+    <ProjectReference Include="..\src\Elmah.AspNet\Elmah.AspNet.csproj">
       <Project>{2990960b-2cb4-484c-819a-ef186b8fcac5}</Project>
       <Name>Elmah.AspNet</Name>
     </ProjectReference>

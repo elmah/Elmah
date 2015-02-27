@@ -240,10 +240,6 @@
     <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -282,9 +278,6 @@
     <Compile Include="ServiceCenter.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="SimpleServiceProviderFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TypeResolution.cs" />

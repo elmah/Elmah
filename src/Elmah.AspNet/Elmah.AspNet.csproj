@@ -227,8 +227,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutPage.cs" />
-    <Compile Include="Apm.cs" />
-    <Compile Include="AssemblyInfo.cs">
+    <Compile Include="..\Elmah\Apm.cs">
+      <Link>Apm.cs</Link>
+    </Compile>
+    <Compile Include="..\Elmah\AssemblyInfo.cs">
+      <Link>AssemblyInfo.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Assertions\AssertionFactory.cs">
@@ -277,12 +280,18 @@
     </Compile>
     <Compile Include="Assertions\WebDataBindingExpression.cs">
     </Compile>
-    <Compile Include="Async.cs" />
-    <Compile Include="AsyncResult.cs" />
-    <Compile Include="AsyncResultOr.cs" />
-    <Compile Include="Build.cs">
+    <Compile Include="..\Elmah\Async.cs">
+      <Link>Async.cs</Link>
     </Compile>
-    <Compile Include="Configuration.cs">
+    <Compile Include="..\Elmah\AsyncResult.cs">
+      <Link>AsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="AsyncResultOr.cs" />
+    <Compile Include="..\Elmah\Build.cs">
+      <Link>Build.cs</Link>
+    </Compile>
+    <Compile Include="..\Elmah\Configuration.cs">
+      <Link>Configuration.cs</Link>
     </Compile>
     <Compile Include="AboutPage.generated.cs">
       <DependentUpon>AboutPage.cshtml</DependentUpon>
@@ -295,9 +304,13 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="DelegatingDisposable.cs" />
+    <Compile Include="..\Elmah\DelegatingDisposable.cs">
+      <Link>DelegatingDisposable.cs</Link>
+    </Compile>
     <Compile Include="ErrorMailHtmlPage.cs" />
-    <Compile Include="KeyValuePair.cs" />
+    <Compile Include="..\Elmah\KeyValuePair.cs">
+      <Link>???.cs</Link>
+    </Compile>
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
@@ -323,11 +336,14 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Debug.cs">
+    <Compile Include="..\Elmah\Debug.cs">
+      <Link>Debug.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DelegatingHttpHandler.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="..\Elmah\DictionaryExtensions.cs">
+      <Link>DictionaryExtensions.cs</Link>
+    </Compile>
     <Compile Include="ErrorDetailPage.cs" />
     <Compile Include="ErrorDigestRssHandler.cs">
     </Compile>
@@ -398,13 +414,17 @@
     </Compile>
     <Compile Include="HttpStatus.cs">
     </Compile>
-    <Compile Include="JetBrains.Annotations.cs">
+    <Compile Include="..\Elmah\JetBrains.Annotations.cs">
+      <Link>JetBrains.Annotations.cs</Link>
     </Compile>
     <Compile Include="ManifestResourceHandler.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mannex.cs" />
-    <Compile Include="Mask.cs">
+    <Compile Include="..\Elmah\Mannex.cs">
+      <Link>Mannex.cs</Link>
+    </Compile>
+    <Compile Include="..\Elmah\Mask.cs">
+      <Link>Mask.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PoweredBy.cs">
@@ -416,7 +436,8 @@
     </Compile>
     <Compile Include="SecuritySectionHandler.cs">
     </Compile>
-    <Compile Include="SimpleServiceProviderFactory.cs">
+    <Compile Include="..\Elmah\SimpleServiceProviderFactory.cs">
+      <Link>SimpleServiceProviderFactory.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SpeedBar.cs">
@@ -491,7 +512,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Elmah.csproj">
+    <ProjectReference Include="..\Elmah\Elmah.csproj">
       <Project>{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}</Project>
       <Name>Elmah</Name>
     </ProjectReference>
