@@ -84,7 +84,16 @@ namespace Elmah
         /// context during the exception.
         /// </summary>
 
-        public Error(Exception e, HttpContextBase context)
+        public Error(Exception e, HttpContextBase context) :
+            this(e, context, ExtensionHub.Default) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Error"/> class
+        /// from a given <see cref="Exception"/> instance and an
+        /// object representing the context during the exception.
+        /// </summary>
+
+        public Error(Exception e, object context, ExtensionHub station)
         {
             if (e == null)
                 throw new ArgumentNullException("e");
@@ -96,65 +105,11 @@ namespace Elmah
             // Load the basic information.
             //
 
-            try
-            {
-                _hostName = Environment.MachineName;
-            }
-            catch (SecurityException)
-            {
-                // A SecurityException may occur in certain, possibly 
-                // user-modified, Medium trust environments.
-                _hostName = string.Empty;
-            }
-
             _typeName = baseException.GetType().FullName;
             _message = baseException.Message;
             _source = baseException.Source;
             _detail = e.ToString();
-            _user = Thread.CurrentPrincipal.Identity.Name ?? string.Empty;
             _time = DateTime.Now;
-
-            //
-            // If this is an HTTP exception, then get the status code
-            // and detailed HTML message provided by the host.
-            //
-
-            var httpException = e as HttpException;
-
-            if (httpException != null)
-            {
-                _statusCode = httpException.GetHttpCode();
-                _webHostHtmlMessage = TryGetHtmlErrorMessage(httpException) ?? string.Empty;
-            }
-
-            //
-            // If the HTTP context is available, then capture the
-            // collections that represent the state request as well as
-            // the user.
-            //
-
-            if (context != null)
-            {
-                var webUser = context.User;
-                if (webUser != null 
-                    && (webUser.Identity.Name ?? string.Empty).Length > 0)
-                {
-                    _user = webUser.Identity.Name;
-                }
-
-                var request = context.Request;
-                var qsfc = request.TryGetUnvalidatedCollections((form, qs, cookies) => new
-                {
-                    QueryString = qs,
-                    Form = form, 
-                    Cookies = cookies,
-                });
-
-                _serverVariables = CopyCollection(request.ServerVariables);
-                _queryString = CopyCollection(qsfc.QueryString);
-                _form = CopyCollection(qsfc.Form);
-                _cookies = CopyCollection(qsfc.Cookies);
-            }
 
             var callerInfo = e.TryGetCallerInfo() ?? CallerInfo.Empty;
             if (!callerInfo.IsEmpty)
@@ -163,9 +118,12 @@ namespace Elmah
                         + System.Environment.NewLine
                         + _detail;
             }
+
+            if (station != null)
+                ErrorInitialization.Initialize(station, new ErrorInitializationContext(this, context));
         }
 
-        private static string TryGetHtmlErrorMessage(HttpException e)
+        internal static string TryGetHtmlErrorMessage(HttpException e)
         {
             Debug.Assert(e != null);
 

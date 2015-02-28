@@ -237,15 +237,18 @@
     </Compile>
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="DelegatingDisposable.cs" />
+    <Compile Include="ExceptionFiltering.cs" />
     <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DictionarySectionHandler.cs" />
     <Compile Include="Error.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ErrorBuilding.cs" />
     <Compile Include="ErrorJson.cs">
     </Compile>
     <Compile Include="ErrorLog.cs">
@@ -280,6 +283,7 @@
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="StringSeparatorStock.cs" />
     <Compile Include="TypeResolution.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>

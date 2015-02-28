@@ -174,25 +174,4 @@ namespace Elmah
             get { return true; }
         }
     }
-
-    public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
-
-    [ Serializable ]
-    public sealed class ErrorLoggedEventArgs : EventArgs
-    {
-        private readonly ErrorLogEntry _entry;
-
-        public ErrorLoggedEventArgs(ErrorLogEntry entry)
-        {
-            if (entry == null)
-                throw new ArgumentNullException("entry");
-
-            _entry = entry;
-        }
-
-        public ErrorLogEntry Entry
-        {
-            get { return _entry; }
-        }
-    }
 }

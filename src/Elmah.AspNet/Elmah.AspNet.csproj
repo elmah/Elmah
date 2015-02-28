@@ -299,6 +299,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
+    <Compile Include="ErrorModule.cs" />
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -401,9 +402,6 @@
     </Compile>
     <Compile Include="ErrorXmlHandler.cs">
     </Compile>
-    <Compile Include="ExceptionFiltering.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="HtmlLinkType.cs">
     </Compile>
     <Compile Include="HtmlString.cs" />
@@ -443,9 +441,6 @@
     <Compile Include="SpeedBar.cs">
     </Compile>
     <Compile Include="StringFormatter.cs">
-    </Compile>
-    <Compile Include="StringSeparatorStock.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="StringTranslation.cs">
     </Compile>

@@ -359,7 +359,7 @@ namespace Elmah.Assertions
         /// environments such as ASP.NET medium trust.
         /// </remarks>
         
-        private static bool DecodeClrTypeNamespaceFromXmlNamespace(string xmlns, out string typeNamespace, out string assemblyName)
+        internal static bool DecodeClrTypeNamespaceFromXmlNamespace(string xmlns, out string typeNamespace, out string assemblyName)
         {
             Debug.Assert(xmlns != null);
 
