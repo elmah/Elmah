@@ -241,15 +241,11 @@
     <Compile Include="Configuration.cs">
     </Compile>
     <Compile Include="DelegatingDisposable.cs" />
-    <Compile Include="KeyValuePair.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
-    <Compile Include="PoweredBy.cs" />
-    <Compile Include="RazorTemplateBase.cs" />
     <Compile Include="PreApplicationStart.cs" />
-    <Compile Include="HelperResult.cs" />
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -284,9 +280,6 @@
     <Compile Include="ExceptionFiltering.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HtmlLinkType.cs">
-    </Compile>
-    <Compile Include="HtmlString.cs" />
     <Compile Include="HttpModuleBase.cs">
     </Compile>
     <Compile Include="HttpModuleRegistry.cs">
@@ -298,29 +291,11 @@
     <Compile Include="Mask.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PoweredBy.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PoweredBy.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="SimpleServiceProviderFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="StringSeparatorStock.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="StringTranslation.cs">
-    </Compile>
-    <Compile Include="TestException.cs">
-      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="PoweredBy.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>PoweredBy.generated.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
