@@ -487,6 +487,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PoweredBy.generated.cs</LastGenOutput>
     </None>
+    <None Include="razorgenerator.directives" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
