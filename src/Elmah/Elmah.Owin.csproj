@@ -280,9 +280,6 @@
     </Compile>
     <Compile Include="SecuritySectionHandler.cs">
     </Compile>
-    <Compile Include="SimpleServiceProviderFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SpeedBar.cs">
     </Compile>
     <Compile Include="StringFormatter.cs">
