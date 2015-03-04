@@ -41,7 +41,6 @@ if not "%vmaj%.%vmin%.%vbld%"=="4.0.30319" (
     echo ^(MSBuild^) 4.0 installation.
     exit /b 1
 )
-"%MSBUILDEXE%" nugetRestore.proj
 set build="%MSBUILDEXE%" Elmah.sln
 if %vrev% lss 17929 (
     echo ================================= WARNING! ================================
@@ -51,5 +50,6 @@ if %vrev% lss 17929 (
     echo.
     set build=%build% /t:Elmah;Elmah_net-4_0;Elmah_Tests
 )
-for %%v in (3.5 4.0 4.5) do for %%c in (Debug Release) do %build% "/p:Configuration=NETFX %%v %%c;AspNetConfiguration=%%c" /v:m %* || exit /b 1
+"%MSBUILDEXE%" nugetRestore.proj ^
+ && (for %%v in (3.5 4.0 4.5) do for %%c in (Debug Release) do %build% "/p:Configuration=NETFX %%v %%c;AspNetConfiguration=%%c" /v:m %* || exit /b 1)
 goto :EOF
