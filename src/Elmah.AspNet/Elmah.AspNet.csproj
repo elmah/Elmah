@@ -308,7 +308,7 @@
     </Compile>
     <Compile Include="ErrorMailHtmlPage.cs" />
     <Compile Include="..\Elmah\KeyValuePair.cs">
-      <Link>???.cs</Link>
+      <Link>KeyValuePair.cs</Link>
     </Compile>
     <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
     <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
