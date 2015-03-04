@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "src\Elmah\Elmah.csproj", "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}"
 EndProject
@@ -49,7 +49,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		buildw.cmd = buildw.cmd
 		COPYING.txt = COPYING.txt
-		prestore.cmd = prestore.cmd
 		README.html = README.html
 		README.txt = README.txt
 	EndProjectSection
