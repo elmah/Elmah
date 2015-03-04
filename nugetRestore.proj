@@ -65,18 +65,36 @@
             <Using Namespace="Microsoft.Build.Utilities" />
             <Code Type="Fragment" Language="cs">
                 <![CDATA[
-                try {
-                    OutputFilename = Path.GetFullPath(OutputFilename);
-
-                    Log.LogMessage("Downloading latest version of NuGet.exe...");
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile("https://www.nuget.org/nuget.exe", OutputFilename);
-
-                    return true;
-                }
-                catch (Exception ex) {
-                    Log.LogErrorFromException(ex);
-                    return false;
+                OutputFilename = Path.GetFullPath(OutputFilename);
+                IWebProxy proxy = null;
+                while (true) {
+                    try {
+                        Log.LogMessage("Downloading latest version of NuGet.exe...");
+                        var webClient = new WebClient();
+                        if (proxy != null)
+                            webClient.Proxy = proxy;
+                        webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFilename);
+                        return true;
+                    }
+                    catch (WebException ex) {
+                        HttpWebResponse response;
+                        if (ex.Status == WebExceptionStatus.ProtocolError
+                            && (response = ex.Response as HttpWebResponse) != null
+                            && response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired
+                            && proxy == null) {
+                            Log.LogWarningFromException(ex);
+                            proxy = WebRequest.GetSystemWebProxy();
+                            proxy.Credentials = CredentialCache.DefaultNetworkCredentials;
+                        }
+                        else {
+                            Log.LogErrorFromException(ex);
+                            return false;
+                        }
+                    }
+                    catch (Exception ex) {
+                        Log.LogErrorFromException(ex);
+                        return false;
+                    }
                 }
             ]]>
             </Code>
