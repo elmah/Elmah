@@ -45,7 +45,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.0 Debug|AnyCPU' ">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -193,6 +192,7 @@
     <Compile Include="DictionaryExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ErrorLogSectionHandler.cs" />
     <Compile Include="ErrorMail.cs" />
     <Compile Include="ErrorMailHtmlFormatter.cs" />
     <Compile Include="ErrorMailHtmlPage.generated.cs">
@@ -209,10 +209,6 @@
     <Compile Include="HttpRequestValidation.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Index.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.Pairwise.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.cs" />
-    <Compile Include="MoreLinq\MoreEnumerable.ToDelimitedString.g.cs" />
     <Compile Include="Debug.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -261,9 +257,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskOr.cs" />
-    <Compile Include="TestException.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="TypeResolution.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>
@@ -279,6 +272,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PoweredBy.generated.cs</LastGenOutput>
     </None>
+    <None Include="razorgenerator.directives" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -310,5 +304,4 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

@@ -17,8 +17,6 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <DownloadNuGetExe Condition=" '$(DownloadNuGetExe)' == '' ">true</DownloadNuGetExe>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NETFX 4.5 Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -79,7 +77,7 @@
       <Name>Elmah.Oracle</Name>
       <Aliases>o</Aliases>
     </ProjectReference>
-    <ProjectReference Include="..\src\Elmah\Elmah.AspNet.csproj">
+    <ProjectReference Include="..\src\Elmah.AspNet\Elmah.AspNet.csproj">
       <Project>{2990960b-2cb4-484c-819a-ef186b8fcac5}</Project>
       <Name>Elmah.AspNet</Name>
     </ProjectReference>
@@ -88,7 +86,7 @@
       <Name>Elmah</Name>
       <Aliases>e</Aliases>
     </ProjectReference>
-    <ProjectReference Include="..\src\Elmah\Elmah.Owin.csproj">
+    <ProjectReference Include="..\src\Elmah.Owin\Elmah.Owin.csproj">
       <Project>{1b37efef-9e4a-4b5e-bd03-9499aa0bf8f6}</Project>
       <Name>Elmah.Owin</Name>
     </ProjectReference>
@@ -102,7 +100,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

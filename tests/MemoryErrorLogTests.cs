@@ -106,6 +106,22 @@ namespace Elmah.Tests
         }
 
         [Fact]
+        public void CanSetApplicationName()
+        {
+            var applicationName = "MyApp";
+            var hashtable = new Hashtable {{"applicationName", applicationName}};
+            var memoryErrorLog = new MemoryErrorLog(hashtable);
+            Assert.Equal(applicationName, memoryErrorLog.ApplicationName);
+        }
+
+        [Fact]
+        public void CanCreateWithoutApplicationName()
+        {
+            var memoryErrorLog = new MemoryErrorLog(new Hashtable());
+            Assert.Equal(string.Empty, memoryErrorLog.ApplicationName);
+        }
+
+        [Fact]
         public void ThrowExceptionOnSizeLessThanZero()
         {
             var e = Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryErrorLog(-1));
