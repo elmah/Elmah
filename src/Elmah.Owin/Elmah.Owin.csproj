@@ -306,9 +306,7 @@
     </Compile>
     <Compile Include="StringTranslation.cs">
     </Compile>
-    <Compile Include="..\Elmah\TaskOr.cs">
-      <Link>TaskOr.cs</Link>
-    </Compile>
+    <Compile Include="TaskOr.cs" />
     <Compile Include="TestException.cs">
       <SubType>Code</SubType>
     </Compile>

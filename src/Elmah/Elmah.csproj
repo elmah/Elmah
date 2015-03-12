@@ -256,7 +256,6 @@
     <Compile Include="SimpleServiceProviderFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TaskOr.cs" />
     <Compile Include="TypeResolution.cs" />
     <Compile Include="XmlFileErrorLog.cs">
       <SubType>Code</SubType>
