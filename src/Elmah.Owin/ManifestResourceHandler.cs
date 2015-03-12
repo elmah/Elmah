@@ -31,8 +31,7 @@ namespace Elmah
     using System.Collections.Generic;
     using System.Net.Mime;
     using System.Threading.Tasks;
-    using System.Web;
-    using Microsoft.Owin;
+    using LibOwin;
     using Encoding = System.Text.Encoding;
 
     #endregion

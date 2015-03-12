@@ -34,7 +34,7 @@ namespace Elmah
     using System.Threading.Tasks;
     using System.Xml.Linq;
     using System.Collections.Generic;
-    using Microsoft.Owin;
+    using LibOwin;
 
     #endregion
 

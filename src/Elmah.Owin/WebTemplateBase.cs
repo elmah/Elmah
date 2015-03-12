@@ -3,9 +3,8 @@ namespace Elmah
     #region Imports
 
     using System;
-    using System.Web;
     using Microsoft.Security.Application;
-    using Microsoft.Owin;
+    using LibOwin;
 
     #endregion
 

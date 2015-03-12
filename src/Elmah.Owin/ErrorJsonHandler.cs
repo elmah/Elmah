@@ -27,13 +27,8 @@ namespace Elmah
 {
     #region Imports
 
-    using System.IO;
-    using System.Net;
-    using System.Net.Mime;
-    using System.Text;
     using System.Threading.Tasks;
-    using System.Web;
-    using Microsoft.Owin;
+    using LibOwin;
 
     #endregion
 

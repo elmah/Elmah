@@ -35,7 +35,7 @@ namespace Elmah
     #if !NET_4_0
     using System.Threading.Tasks;
     #endif
-    using Microsoft.Owin;
+    using LibOwin;
     using System.Collections.Generic;
 
     #endregion

@@ -29,7 +29,7 @@ namespace Elmah
 
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Owin;
+    using LibOwin;
 
     #endregion
 

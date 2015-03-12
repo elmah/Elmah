@@ -35,9 +35,8 @@ namespace Elmah
     using System.Threading.Tasks;
     using System.Collections.Generic;
     using Mannex.Threading.Tasks;
-    using Microsoft.Owin;
-    using global::Owin;
-    using Microsoft.Owin.BuilderProperties;
+    using LibOwin;
+    using Owin;
     using Encoding = System.Text.Encoding;
 
     #endregion
@@ -58,7 +57,13 @@ namespace Elmah
             return response.WriteAsync(template.TransformText());
         }
 
-        public static Func<IOwinContext, Task> FindHandler(string name)
+        public static Func<IDictionary<string, object>, Task> FindHandler(string name)
+        {
+            var handler = FindHandlerInternal(name);
+            return env => handler(new OwinContext(env));
+        }
+
+        static Func<IOwinContext, Task> FindHandlerInternal(string name)
         {
             Debug.Assert(name != null);
 
@@ -142,7 +147,7 @@ namespace Elmah
         {
             if (app == null) throw new ArgumentNullException("app");
 
-            var onAppDisposing = new AppProperties(app.Properties).OnAppDisposing;
+            var onAppDisposing = (CancellationToken) app.Properties[OwinConstants.CommonKeys.OnAppDisposing];
             return app.CommonConfiguration()
                       .Use((context, next) => Task.Factory.StartNew(InvokeWithErrorReporting(next, (error, ct) => ErrorLog.GetDefault(null).LogAsync(error, ct), onAppDisposing), onAppDisposing));
         }
@@ -154,7 +159,7 @@ namespace Elmah
             if (app == null) throw new ArgumentNullException("app");
             if (settings == null) throw new ArgumentNullException("settings");
 
-            var onAppDisposing = new AppProperties(app.Properties).OnAppDisposing;
+            var onAppDisposing = (CancellationToken)app.Properties[OwinConstants.CommonKeys.OnAppDisposing];
             var mailer = ErrorMail.CreateMailer(settings);
             
             return app.CommonConfiguration()
@@ -224,7 +229,7 @@ namespace Elmah
                          ? (pathInfo.ToString().Substring(1)).ToLowerInvariant()
                          : string.Empty;
 
-            var handler = FindHandler(resource);
+            var handler = FindHandlerInternal(resource);
 
             if (handler == null) // TODO logging?
                 return context.Response.NotFound("Resource not found.");
@@ -366,7 +371,9 @@ namespace Elmah
     using System.Collections.Generic;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Owin;
+    using LibOwin;
+    using Owin;
+    using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
     #endregion
 
@@ -433,6 +440,16 @@ namespace Elmah
             }
 
             output.Flush();
+        }
+    }
+
+    static class AppBuilderUseExtensions
+    {
+        public static IAppBuilder Use(this IAppBuilder app, Func<IOwinContext, Func<Task>, Task> handler)
+        {
+            if (app == null) throw new ArgumentNullException("app");
+            if (handler == null) throw new ArgumentNullException("handler");
+            return app.Use(new Func<AppFunc, AppFunc>(next => (context => handler(new OwinContext(context), () => next(context)))));
         }
     }
 }
