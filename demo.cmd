@@ -27,6 +27,30 @@ REM -------------------------------------------------------------------------
 REM
 
 setlocal
+pushd "%~dp0"
+call :main %*
+popd
+goto :EOF
+
+:main
+set DEMO_PORT=51296
+set IIS_EXPRESS_PATH=%ProgramFiles%\IIS Express\iisexpress.exe
+if not exist "%IIS_EXPRESS_PATH%" (
+    echo The demo site requires Microsoft IIS Express for hosting but IIS Express does
+    echo not appear to be installed on this system. Download and install IIS Express
+    echo and then try to run this script again. Use the following Google search to
+    echo look for IIS Express downloads on microsoft.com:
+    echo.
+    echo   https://www.google.com/search?q=site:microsoft.com+iis+express+download
+    exit /b 1
+)
+call prestore ^
+  && msbuild Elmah.sln "/p:Configuration=NETFX 4.5 Debug;AspNetConfiguration=Debug" /v:m ^
+  && start "ELMAH Demo on IIS Express" /min "%IIS_EXPRESS_PATH%" "/path:%cd%\samples\Demo" /port:%DEMO_PORT% ^
+  && echo The demo web site will launching in a moment...^
+  && timeout /t:3 ^
+  && start http://localhost:%DEMO_PORT%/
+goto :EOF
 
 REM Check if delayed evaluation of environment variables is enabled.
 REM If not then re-start the script with them enabled.
@@ -55,7 +79,7 @@ if "%answer%"=="Y" goto go
 exit /b 1
 
 :go
-if not exist "%BIN_PATH%" call build 2.0
+call build
 if not exist "%DEMO_BIN_PATH%" md "%DEMO_BIN_PATH%"
 copy /y "%BIN_PATH%" "%DEMO_BIN_PATH%"
 
