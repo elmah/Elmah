@@ -692,7 +692,7 @@ since BETA 2a so existing data in your logs can be left as it is.</p>
 ELMAH from sources between BETA 2 and 3 and using Oracle for your
 error log then you should re-create the <code>ELMAH$Error</code> table, its
 indicies and related packages using the supplied SQL script (see
-Oracle.sql in your distribution). The script does not contain any DROP
+Oracle.sql in your distribution). The script does not contain any <code>DROP</code>
 statements so you will have to drop the table and package manually
 before applying the script. If you wish to preserve the logged error
 data, you should consider archiving it in a backup. Please read the
@@ -718,7 +718,7 @@ the configuration looks like now.</p>
 <p>If you are using the Microsoft SQL Server for your error log then you
 should re-create the <code>ELMAH_Error</code> table, its indicies and related
 stored procedures using the supplied SQL script (see <code>Database.sql</code> in
-your distribution). The script does not contain DDL DROP statements so
+your distribution). The script does not contain DDL <code>DROP</code> statements so
 you will have to drop the table and stored procedures manually before
 applying the script. If you wish to preserve the logged error data,
 you should consider archiving it in a backup.</p>

@@ -34,7 +34,7 @@ The Oracle error log is new in BETA 3, but if you have been compiling
 ELMAH from sources between BETA 2 and 3 and using Oracle for your
 error log then you should re-create the `ELMAH$Error` table, its
 indicies and related packages using the supplied SQL script (see
-Oracle.sql in your distribution). The script does not contain any DROP
+Oracle.sql in your distribution). The script does not contain any `DROP`
 statements so you will have to drop the table and package manually
 before applying the script. If you wish to preserve the logged error
 data, you should consider archiving it in a backup. Please read the
@@ -68,7 +68,7 @@ the configuration looks like now.
 If you are using the Microsoft SQL Server for your error log then you
 should re-create the `ELMAH_Error` table, its indicies and related
 stored procedures using the supplied SQL script (see `Database.sql` in
-your distribution). The script does not contain DDL DROP statements so
+your distribution). The script does not contain DDL `DROP` statements so
 you will have to drop the table and stored procedures manually before
 applying the script. If you wish to preserve the logged error data,
 you should consider archiving it in a backup.
