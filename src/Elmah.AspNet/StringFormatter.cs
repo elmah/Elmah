@@ -35,8 +35,8 @@ namespace Elmah
     #endregion
 
     // TODO Consider replacing with String.FormatWith[1][2] from Mannex
-    // [1] http://code.google.com/p/mannex/source/browse/src/String.cs?r=ab928fd40b1e073db133d18ac31021991fd750b9#187
-    // [2] http://code.google.com/p/mannex/source/browse/src/Web/UI/DataBindingExtensions.cs?r=ab928fd40b1e073db133d18ac31021991fd750b9#108
+    // [1] https://bitbucket.org/raboof/mannex/src/ab928fd40b1e073db133d18ac31021991fd750b9/src/String.cs?at=default#cl-187
+    // [2] https://bitbucket.org/raboof/mannex/src/ab928fd40b1e073db133d18ac31021991fd750b9/src/Web/UI/DataBindingExtensions.cs?at=default#cl-108
 
     public delegate string StringFormatTokenBindingHandler(string token, object[] args, IFormatProvider provider);
 
