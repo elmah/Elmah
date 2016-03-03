@@ -692,7 +692,10 @@ namespace Elmah
 
             client.EnableSsl = UseSsl;
 
-            client.Send(mail);
+            using (client as IDisposable) // allow client not to implement IDisposable, but correctly handle the 4.0+ implementation as well
+            {
+                client.Send(mail);
+            }
 #endif
         }
 
