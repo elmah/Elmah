@@ -21,21 +21,19 @@ REM limitations under the License.
 REM
 REM -------------------------------------------------------------------------
 REM
-setlocal
+setlocal enableextensions
 pushd "%~dp0"
 call :main %*
 popd
 goto :EOF
 
 :main
-set MSBUILDEXE=%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe
-if not exist "%MSBUILDEXE%" (
-    echo Microsoft Build Engine ^(MSBuild^) 4.0 does not appear to be
-    echo installed on this machine, which is required to build the
-    echo solution.
-    exit /b 1
-)
-for /f %%v in ('%MSBUILDEXE% /version /nologo') do for /f "delims=. tokens=1-4" %%i in ("%%v") do set vmaj=%%i& set vmin=%%j& set vbld=%%k& set vrev=%%l
+if defined ProgramFiles(x86) if exist "%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe"            set MSBUILDEXE=%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
+if not defined MSBUILDEXE    if exist "%ProgramFiles%\MSBuild\14.0\Bin\MSBuild.exe"                 set MSBUILDEXE=%ProgramFiles%\MSBuild\14.0\Bin\MSBuild.exe
+if not defined MSBUILDEXE    if exist "%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe" set MSBUILDEXE=%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe
+if not defined MSBUILDEXE goto :no-msbuild
+if not exist "%MSBUILDEXE%" goto :no-msbuild
+for /f %%v in ('"%MSBUILDEXE%" /version /nologo') do for /f "delims=. tokens=1-4" %%i in ("%%v") do set vmaj=%%i& set vmin=%%j& set vbld=%%k& set vrev=%%l
 echo %vmaj% | findstr [0-9][0-9]* > nul || goto :unknown-msbuild-version
 echo %vmin% | findstr [0-9][0-9]* > nul || goto :unknown-msbuild-version
 echo %vbld% | findstr [0-9][0-9]* > nul || goto :unknown-msbuild-version
@@ -58,4 +56,10 @@ goto :EOF
 :unknown-msbuild-version
 echo There was a problem determining the version of your Microsoft Build Engine
 echo ^(MSBuild^) 4.0 installation.
+exit /b 1
+
+:no-msbuild
+echo Microsoft Build Engine ^(MSBuild^) 4.0 does not appear to be
+echo installed on this machine, which is required to build the
+echo solution.
 exit /b 1
