@@ -24,7 +24,7 @@
         <file src="..\bin\net-4.5\Release\Elmah.dll" target="lib\net45" />
         <file src="..\bin\net-4.5\Release\Elmah.pdb" target="lib\net45" />
         <file src="..\bin\net-4.5\Release\Elmah.xml" target="lib\net45" />
-        <file src="..\src\**.cs" target="src" />
+        <file src="..\src\Elmah\**.cs" target="src" />
         <file src="..\COPYING.txt" target="COPYING.txt" />
     </files>
 </package>
