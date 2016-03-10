@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "Elmah.csproj", "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah", "src\Elmah.csproj", "{C92DC151-A0BA-4A5E-A20E-620EC9C06AFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -39,7 +39,7 @@ if not "!DELAY_TEST!"=="test" (
 pushd "%~dp0"
 
 set LIB_PATH_x64=lib\x64
-set BIN_PATH=bin\net-2.0\Release
+set BIN_PATH=bin\Release
 set DEMO_PATH=samples\Demo
 set DEMO_BIN_PATH=%DEMO_PATH%\bin
 set DEMO_PORT=54321
@@ -55,7 +55,7 @@ if "%answer%"=="Y" goto go
 exit /b 1
 
 :go
-if not exist "%BIN_PATH%" call build 2.0
+if not exist "%BIN_PATH%" call build
 if not exist "%DEMO_BIN_PATH%" md "%DEMO_BIN_PATH%"
 copy /y "%BIN_PATH%" "%DEMO_BIN_PATH%"
 
