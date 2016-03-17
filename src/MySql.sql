@@ -30,7 +30,7 @@
 -- If you continue with the current setup, please report any compatibility 
 -- issues you encounter over at:
 -- 
--- http://code.google.com/p/elmah/issues/list
+-- https://github.com/elmah/Elmah/issues
 -- 
 -- ===========================================================================
 

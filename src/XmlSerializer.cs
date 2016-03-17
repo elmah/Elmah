@@ -66,7 +66,7 @@ namespace Elmah
             if (sw != null)
             {
                 // HACK for issue #220:
-                // http://code.google.com/p/elmah/issues/detail?id=220
+                // https://github.com/elmah/Elmah/issues/220
                 //
                 // Have the declaration omitted by clearing the underlying
                 // StringBuilder object after starting the XML document.

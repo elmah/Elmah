@@ -224,7 +224,7 @@ namespace Elmah
                 // multiple rows of 2,033 characters each. 
                 //
                 // See also comment 18 in issue 129:
-                // http://code.google.com/p/elmah/issues/detail?id=129#c18
+                // https://github.com/elmah/Elmah/issues/129#issuecomment-134659717
                 //
 
                 StringBuilder sb = new StringBuilder(/* capacity */ 2033);

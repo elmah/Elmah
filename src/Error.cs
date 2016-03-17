@@ -137,7 +137,7 @@ namespace Elmah
                 if (_serverVariables != null)
                 {
                     // Hack for issue #140:
-                    // http://code.google.com/p/elmah/issues/detail?id=140
+                    // https://github.com/elmah/Elmah/issues/140
  
                     const string authPasswordKey = "AUTH_PASSWORD";
                     string authPassword = _serverVariables[authPasswordKey];
@@ -167,7 +167,7 @@ namespace Elmah
                 // permission of type 'System.Web.AspNetHostingPermission' failed.
                 // 
                 // See issue #179 for more background:
-                // http://code.google.com/p/elmah/issues/detail?id=179
+                // https://github.com/elmah/Elmah/issues/179
                 
                 Trace.WriteLine(se);
                 return null;

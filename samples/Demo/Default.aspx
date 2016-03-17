@@ -217,10 +217,10 @@
         <dt><a name="Wiki" />How do I find out more about getting started?</dt>
         <dd><p>There are a few key places to go if you need more help getting started:</p>
         <ul>
-            <li>Firstly, there's the <a href="http://code.google.com/p/elmah/">project home page</a>.
+            <li>Firstly, there's the <a href="https://elmah.github.io">project home page</a>.
             You've probably already been there, but it's a good place to start when looking for
             information.</li>
-            <li>Next up is the <a href="http://code.google.com/p/elmah/w/list">project wiki pages</a>.
+            <li>Next up is the <a href="https://elmah.github.io/a/">project wiki pages</a>.
             There are several articles there which will help you set up ELMAH and also describe
             some of the more involved features.</li>
             <li>You should also look at the sample <code>web.config</code> file that ships with
