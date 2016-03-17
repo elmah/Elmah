@@ -59,7 +59,9 @@ if not exist "%BIN_PATH%" call build
 if not exist "%DEMO_BIN_PATH%" md "%DEMO_BIN_PATH%"
 copy /y "%BIN_PATH%" "%DEMO_BIN_PATH%"
 
-if %PROCESSOR_ARCHITECTURE%==AMD64 copy /y "%LIB_PATH_x64%\System.Data.SQLite.DLL" "%DEMO_BIN_PATH%"
+set PROCARCH=%PROCESSOR_ARCHITEW6432%
+if not defined PROCARCH set PROCARCH=%PROCESSOR_ARCHITECTURE%
+if %PROCARCH%==AMD64 copy /y "%LIB_PATH_x64%\System.Data.SQLite.DLL" "%DEMO_BIN_PATH%"
 
 set MAIL_PATH=%DEMO_PATH%\Mails
 if not exist "%MAIL_PATH%" md "%MAIL_PATH%"
