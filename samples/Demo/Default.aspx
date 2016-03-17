@@ -5,16 +5,15 @@
 <%@ Import Namespace="System.Web.Configuration"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <script runat="server">
-    protected SccStamp Stamp = new SccStamp("$Id$");
     protected string MailPath;
     protected string SampleWebConfigPath;
-    
+
     protected override void OnLoad(EventArgs e)
     {
         SmtpSection smtpSection = (SmtpSection) WebConfigurationManager.GetSection("system.net/mailSettings/smtp");
 
-        MailPath = (smtpSection != null && smtpSection.SpecifiedPickupDirectory != null 
-                    ? smtpSection.SpecifiedPickupDirectory.PickupDirectoryLocation 
+        MailPath = (smtpSection != null && smtpSection.SpecifiedPickupDirectory != null
+                    ? smtpSection.SpecifiedPickupDirectory.PickupDirectoryLocation
                     : null) ?? string.Empty;
 
         SampleWebConfigPath = Path.Combine(Path.GetDirectoryName(Server.MapPath(".")), "web.config");
@@ -36,7 +35,7 @@
         catch (Exception ex)
         {
             ErrorSignal.FromContext(Context).Raise(ex);
-            SignalMessage.InnerText = "Error trapped and signaled at " 
+            SignalMessage.InnerText = "Error trapped and signaled at "
                 + DateTime.Now.ToLongTimeString();
         }
 
@@ -109,7 +108,7 @@
     </p>
     <h2>Got Exceptions?</h2>
     <p>
-        Exceptions in applications fall into two basic buckets: 
+        Exceptions in applications fall into two basic buckets:
         <em>handled</em> and <em>unhandled</em>. ELMAH can work with both.
     </p>
     <h3>Unhandled Exceptions</h3>
@@ -117,9 +116,9 @@
         Click the button below to generate an exception. The exception
         will not be handled by this sample application. As a result,
         ELMAH will log the error and <em>send</em> an e-mail. Bear in
-        mind that the exception will generate what has come to be known as 
+        mind that the exception will generate what has come to be known as
         the <em><a href="http://en.wikipedia.org/wiki/Yellow_Screen_of_Death#ASP.NET">yellow screen of death</a></em>
-        that ASP.NET developers often dread. You will need to hit the 
+        that ASP.NET developers often dread. You will need to hit the
         &ldquo;back&rdquo; button on your browser to return here.</p>
     <p>
         <asp:Button ID="ErrorButton" runat="server" Text="Throw Exception" OnClick="ErrorButton_Click" />
@@ -133,7 +132,7 @@
     <h3>Handled Exceptions</h3>
     <p>
         Click the button below to <em>signal</em> an exception to ELMAH.
-        Signaling is useful when you usually handle or swallow an exception 
+        Signaling is useful when you usually handle or swallow an exception
         in the application code but still want to report it to ELMAH.
     </p>
     <p>
@@ -162,11 +161,11 @@
     <p>
         To see the notification mails, go to the <a href="Mails/"
         title='<%= Server.HtmlEncode(MailPath) %>'>pick-up directory</a>.
-        There you should find files with the <code>eml</code> extension and which 
+        There you should find files with the <code>eml</code> extension and which
         you can open and inspect using any text editor.
     </p>
     <p>
-        See also the following samples:        
+        See also the following samples:
     </p>
     <ul>
         <li><a href="ErrorsGridView.aspx">Error Log Sample Using ObjectDataSource and GridView</a></li>
@@ -186,11 +185,11 @@
     </ul>
     <dl>
         <dt><a name="Cassini" />How does the sample run?</dt>
-        <dd><p>The sample runs regardless of whether you have Microsoft Visual Studio or 
+        <dd><p>The sample runs regardless of whether you have Microsoft Visual Studio or
         Microsoft Internet Information Services (IIS) installed or not. All you need is the
         .NET Framework 2.0 run-time installed on the machine. It runs without any other
-        dependencies because it ships with a version of <a href="http://www.asp.net/Downloads/archived/cassini/">Cassini</a> 
-        Personal Web Server. Cassini is light-weight and self-contained ASP.NET hosting Web server 
+        dependencies because it ships with a version of <a href="http://www.asp.net/Downloads/archived/cassini/">Cassini</a>
+        Personal Web Server. Cassini is light-weight and self-contained ASP.NET hosting Web server
         that allows this ELMAH sample to run with as little as possible.</p>
         <p>You will probably have noticed that when the sample starts, an icon appears
         for Cassini in your task bar. If you shut this down, the sample with cease to work
@@ -198,12 +197,12 @@
         <p><a href="#Questions">Back to top</a></p></dd>
         <dt><a name="DataLocation" />Where is the ELMAH data stored?</dt>
         <dd><p>This sample uses <code>SQLiteErrorLog</code> to log errors to a <a href="http://www.sqlite.org/">SQLite</a> database.
-        This database is created on the fly by ELMAH making it perfect for the sample. 
+        This database is created on the fly by ELMAH making it perfect for the sample.
         If you are curious and would like to look at it, you can find it at:</p>
         <pre><%= Server.HtmlEncode(Server.MapPath("~/App_Data/errors.s3db")) %></pre>
         <p>There are several clients available for querying and administrating a
         SQLite database. If you don't have one handy, check out <a href="http://sqliteadmin.orbmu2k.de/">SQLite Administrator</a> (freeware).</p>
-        <p>The sample could have just as easily used Access as its database, 
+        <p>The sample could have just as easily used Access as its database,
         logged to XML files or even memory and it still could have shipped as is with just
         a couple of changes to the <code>web.config</code> file.</p>
         <p><a href="#Questions">Back to top</a></p></dd>
@@ -218,14 +217,14 @@
         <dt><a name="Wiki" />How do I find out more about getting started?</dt>
         <dd><p>There are a few key places to go if you need more help getting started:</p>
         <ul>
-            <li>Firstly, there's the <a href="http://code.google.com/p/elmah/">project home page</a>. 
+            <li>Firstly, there's the <a href="http://code.google.com/p/elmah/">project home page</a>.
             You've probably already been there, but it's a good place to start when looking for
             information.</li>
             <li>Next up is the <a href="http://code.google.com/p/elmah/w/list">project wiki pages</a>.
             There are several articles there which will help you set up ELMAH and also describe
             some of the more involved features.</li>
             <li>You should also look at the sample <code>web.config</code> file that ships with
-            ELMAH. You should be able to find it in the following location: 
+            ELMAH. You should be able to find it in the following location:
             <code><% =Server.HtmlEncode(SampleWebConfigPath)%></code>.
             This file contains lots of comments regarding how you can configure ELMAH for your
             environment.</li>
@@ -254,7 +253,7 @@
     }
     catch (Exception ex)
     {
-        ErrorSignal.FromCurrentContext().Raise(ex);            
+        ErrorSignal.FromCurrentContext().Raise(ex);
     }
 </pre>
         <p>or this if you are working in VB.NET:</p>
@@ -271,15 +270,11 @@
         error page instead of the <em><a href="http://en.wikipedia.org/wiki/Yellow_Screen_of_Death#ASP.NET">yellow screen of death</a></em>.</p>
         <p><a href="#Questions">Back to top</a></p></dd>
         <dt><a name="MediumTrustSupport"></a>Can I use ELMAH in a medium trust application?</dt>
-        <dd><p>Yes, medium trust is fully supported by ELMAH as long as you use 
+        <dd><p>Yes, medium trust is fully supported by ELMAH as long as you use
         <code>SqlErrorLog</code> (Microsoft SQL Server) or <code>SqlServerCompactErrorLog</code> (Microsoft SQL Server Compact Edition)
         as the log implementations.</p></dd>
-    </dl>   
+    </dl>
     </form>
     <hr />
-    <p>        
-        Updated: <%= Server.HtmlEncode(Stamp.LastChanged.ToString("f")) %>
-        (revision <%= Server.HtmlEncode(Stamp.Revision.ToString()) %>)
-    </p>
 </body>
 </html>

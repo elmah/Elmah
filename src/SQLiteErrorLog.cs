@@ -25,8 +25,6 @@
 
 #if !NET_1_1 && !NET_1_0
 
-[assembly: Elmah.Scc("$Id$")]
-
 namespace Elmah
 {
 

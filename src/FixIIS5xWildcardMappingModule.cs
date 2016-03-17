@@ -21,8 +21,6 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id$")]
-
 //
 // this module is not currently available for .Net 1.0
 // if someone can get the context.RewritePath line working in 1.0, 

@@ -25,8 +25,6 @@
 #define ASYNC_ADONET
 #endif
 
-[assembly: Elmah.Scc("$Id$")]
-
 namespace Elmah
 {
     #region Imports

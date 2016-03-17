@@ -21,8 +21,6 @@
 //
 #endregion
 
-[assembly: Elmah.Scc("$Id$")]
-
 namespace Elmah.Assertions
 {
     public sealed class IsNullAssertion : DataBoundAssertion

@@ -44,4 +44,3 @@ using ComVisible = System.Runtime.InteropServices.ComVisibleAttribute;
 [assembly: CLSCompliant(true)] 
 [assembly: ComVisible(false)]
 
-[assembly: Elmah.Scc("$Id$")]
