@@ -49,12 +49,13 @@ namespace Elmah
     public class XmlFileErrorLog : ErrorLog
     {
         private readonly string _logPath;
+        private readonly int _fileListSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlFileErrorLog"/> class
         /// using a dictionary of configured settings.
         /// </summary>
-        
+
         public XmlFileErrorLog(IDictionary config)
         {
             if (config == null) throw new ArgumentNullException("config");
@@ -78,6 +79,20 @@ namespace Elmah
                 logPath = MapPath(logPath);
 
             _logPath = logPath;
+
+
+            var fileListSizString = config.Find("size", string.Empty);
+
+            if (fileListSizString.Length == 0)
+            {
+                _fileListSize = MemoryErrorLog.DefaultSize;
+            }
+            else
+            {
+                _fileListSize = Convert.ToInt32(fileListSizString, CultureInfo.InvariantCulture);
+                _fileListSize = Math.Max(0, Math.Min(MemoryErrorLog.MaximumSize, _fileListSize));
+            }
+
         }
 
         /// <remarks>
@@ -86,8 +101,8 @@ namespace Elmah
         /// by the caller.
         /// </remarks>
 
-        [ MethodImpl(MethodImplOptions.NoInlining) ]
-        private static string MapPath(string path) 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static string MapPath(string path)
         {
             return System.Web.Hosting.HostingEnvironment.MapPath(path);
         }
@@ -96,7 +111,7 @@ namespace Elmah
         /// Initializes a new instance of the <see cref="XmlFileErrorLog"/> class
         /// to use a specific path to store/load XML files.
         /// </summary>
-        
+
         public XmlFileErrorLog(string logPath)
         {
             if (logPath == null) throw new ArgumentNullException("logPath");
@@ -107,7 +122,7 @@ namespace Elmah
         /// <summary>
         /// Gets the path to where the log is stored.
         /// </summary>
-        
+
         public virtual string LogPath
         {
             get { return _logPath; }
@@ -116,7 +131,7 @@ namespace Elmah
         /// <summary>
         /// Gets the name of this error log implementation.
         /// </summary>
-        
+
         public override string Name
         {
             get { return "XML File-Based Error Log"; }
@@ -130,7 +145,7 @@ namespace Elmah
         /// sortable date and a unique identifier. Currently the XML files are stored indefinately.
         /// As they are stored as files, they may be managed using standard scheduled jobs.
         /// </remarks>
-        
+
         public override string Log(Error error)
         {
             var logPath = LogPath;
@@ -138,12 +153,12 @@ namespace Elmah
                 Directory.CreateDirectory(logPath);
 
             var errorId = Guid.NewGuid().ToString();
-            
+
             var timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
-            
-            var fileName = string.Format(CultureInfo.InvariantCulture, 
-                                  @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml", 
-                                  /* 0 */ timeStamp.ToUniversalTime(), 
+
+            var fileName = string.Format(CultureInfo.InvariantCulture,
+                                  @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml",
+                                  /* 0 */ timeStamp.ToUniversalTime(),
                                   /* 1 */ errorId);
 
             var path = Path.Combine(logPath, fileName);
@@ -158,8 +173,34 @@ namespace Elmah
                 writer.Flush();
             }
 
+            DeleteOldFiles();
             return errorId;
         }
+
+        /// <summary>
+        /// Deletes Old files according the <code>size</code> parameter
+        /// </summary>
+        private void DeleteOldFiles()
+        {
+            try
+            {
+                if (!Directory.Exists(LogPath))
+                    return;
+
+                DirectoryInfo dir = new DirectoryInfo(LogPath);
+                FileInfo[] logFiles = dir.GetFiles("error*.xml");
+
+                foreach (var file in logFiles.OrderByDescending(f => f.CreationTime).Skip(_fileListSize))
+                {
+                    file.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException(string.Format("Error during cleaning old log files for the XML file-based error log. Exceprion: {0}", ex.StackTrace));
+            }
+        }
+
 
         /// <summary>
         /// Returns a page of errors from the folder in descending order 
@@ -205,7 +246,7 @@ namespace Elmah
             {
                 if (!reader.IsStartElement("error"))
                     return null;
-                                           
+
                 var id = reader.GetAttribute("errorId");
                 var error = ErrorXml.Decode(reader);
                 return new ErrorLogEntry(this, id, error);
@@ -215,7 +256,7 @@ namespace Elmah
         /// <summary>
         /// Returns the specified error from the filesystem, or throws an exception if it does not exist.
         /// </summary>
-        
+
         public override ErrorLogEntry GetError(string id)
         {
             try
@@ -229,7 +270,7 @@ namespace Elmah
 
             var file = new DirectoryInfo(LogPath).GetFiles(string.Format("error-*-{0}.xml", id))
                                                  .FirstOrDefault();
-            
+
             if (file == null)
                 return null;
 
@@ -242,8 +283,8 @@ namespace Elmah
 
         private static bool IsUserFile(FileAttributes attributes)
         {
-            return 0 == (attributes & (FileAttributes.Directory | 
-                                       FileAttributes.Hidden | 
+            return 0 == (attributes & (FileAttributes.Directory |
+                                       FileAttributes.Hidden |
                                        FileAttributes.System));
         }
     }
