@@ -206,7 +206,7 @@ namespace Elmah
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("{0} {1}", ex.Message));
+                throw new Exception(string.Format("{0} {1}", ErrorLogMessage, ex.Message));
             }
         }
 
