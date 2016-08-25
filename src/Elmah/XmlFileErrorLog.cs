@@ -38,6 +38,7 @@ namespace Elmah
     using System.Collections.Generic;
 
     using IDictionary = System.Collections.IDictionary;
+    using System.Security;
 
     #endregion
 
@@ -80,19 +81,10 @@ namespace Elmah
 
             _logPath = logPath;
 
+            var fileListSizeString = config.Find("size", string.Empty);
 
-            var fileListSizString = config.Find("size", string.Empty);
-
-            if (fileListSizString.Length == 0)
-            {
-                _fileListSize = MemoryErrorLog.DefaultSize;
-            }
-            else
-            {
-                _fileListSize = Convert.ToInt32(fileListSizString, CultureInfo.InvariantCulture);
-                _fileListSize = Math.Max(0, Math.Min(MemoryErrorLog.MaximumSize, _fileListSize));
-            }
-
+            if (fileListSizeString.Length > 0)
+                _fileListSize = Convert.ToInt32(fileListSizeString, CultureInfo.InvariantCulture);
         }
 
         /// <remarks>
@@ -182,22 +174,39 @@ namespace Elmah
         /// </summary>
         private void DeleteOldFiles()
         {
+            if (_fileListSize == 0)
+                return;
+
+            string ErrorLogMessage = "Error during cleaning old log files for the XML file-based error log.";
+
             try
             {
-                if (!Directory.Exists(LogPath))
-                    return;
-
-                DirectoryInfo dir = new DirectoryInfo(LogPath);
-                FileInfo[] logFiles = dir.GetFiles("error*.xml");
-
-                foreach (var file in logFiles.OrderByDescending(f => f.CreationTime).Skip(_fileListSize))
+                var dir = new DirectoryInfo(LogPath);
+                if (dir.Exists)
                 {
-                    file.Delete();
+                    var infos = dir.GetFiles("error-*.xml");
+                    if (infos.Any())
+                    {
+
+                        var files = infos.Where(info => IsUserFile(info.Attributes))
+                                         .OrderByDescending(f => f.CreationTime).Skip(_fileListSize);
+
+                        foreach (var file in files)
+                            file.Delete();
+                    }
                 }
+            }
+            catch (IOException)
+            {
+                throw new Exception(string.Format("{0} The target file is open or memory-mapped or there is an open handle on the file", ErrorLogMessage));
+            }
+            catch (Exception ex) when (ex is SecurityException || ex is UnauthorizedAccessException)
+            {
+                throw new Exception(string.Format("{0} Elmah does not have permission to delete old files.", ErrorLogMessage));
             }
             catch (Exception ex)
             {
-                throw new ApplicationException(string.Format("Error during cleaning old log files for the XML file-based error log. Exceprion: {0}", ex.StackTrace));
+                throw new Exception(string.Format("{0} {1}", ex.Message));
             }
         }
 
