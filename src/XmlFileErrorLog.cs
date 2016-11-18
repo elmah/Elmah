@@ -43,15 +43,35 @@ namespace Elmah
     public class XmlFileErrorLog : ErrorLog
     {
         private readonly string _logPath;
+        private const int MaxAppNameLength = 60;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlFileErrorLog"/> class
         /// using a dictionary of configured settings.
         /// </summary>
-        
+
         public XmlFileErrorLog(IDictionary config)
         {
             string logPath = Mask.NullString(config["logPath"] as string);
+
+            //
+            // Set the application name as this implementation provides
+            // per-application isolation over shared location.
+            //
+
+            string appName = string.Empty;
+            if (config.Contains("applicationName"))
+            {
+                appName = config["applicationName"].ToString();
+            }
+
+            if (appName.Length > MaxAppNameLength)
+            {
+                throw new ApplicationException(string.Format(
+                    "Application name is too long. Maximum length allowed is {0} characters.",
+                    MaxAppNameLength));
+            }
+            ApplicationName = appName;
 
             if (logPath.Length == 0)
             {
