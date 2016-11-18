@@ -43,7 +43,7 @@ namespace Elmah
     public class XmlFileErrorLog : ErrorLog
     {
         private readonly string _logPath;
-        private const int MaxAppNameLength = 50;
+        private const int MaxAppNameLength = 60;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlFileErrorLog"/> class
