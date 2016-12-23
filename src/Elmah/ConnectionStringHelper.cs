@@ -160,12 +160,12 @@ namespace Elmah
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static string MapPath(string path)
+        static string MapPath(string path)
         {
             return System.Web.Hosting.HostingEnvironment.MapPath(path);
         }
 
-        private static string GetDataSourceFilePath(DbConnectionStringBuilder builder, string connectionString)
+        static string GetDataSourceFilePath(DbConnectionStringBuilder builder, string connectionString)
         {
             builder.ConnectionString = connectionString;
             if (!builder.ContainsKey("Data Source"))
@@ -174,9 +174,9 @@ namespace Elmah
             return ResolveDataSourceFilePath(dataSource);
         }
 
-        private static readonly char[] _dirSeparators = new char[] { Path.DirectorySeparatorChar };
+        static readonly char[] _dirSeparators = { Path.DirectorySeparatorChar };
 
-        private static string ResolveDataSourceFilePath(string path)
+        static string ResolveDataSourceFilePath(string path)
         {
             const string dataDirectoryMacroString = "|DataDirectory|";
 
@@ -215,7 +215,7 @@ namespace Elmah
             // trailing backslashes into account to avoid duplication.
             //
 
-            return (baseDirectory ?? string.Empty).TrimEnd(_dirSeparators) 
+            return baseDirectory.TrimEnd(_dirSeparators) 
                  + Path.DirectorySeparatorChar
                  + path.Substring(dataDirectoryMacroString.Length).TrimStart(_dirSeparators);
         }
