@@ -81,7 +81,7 @@ namespace Elmah
 
             //
             // As a last resort, check for another setting called 
-            // connectionStringAppKey. The specifies the key in 
+            // connectionStringAppKey that specifies the key in 
             // <appSettings> that contains the actual connection string to 
             // be used.
             //
@@ -121,10 +121,10 @@ namespace Elmah
         }
 
         /// <summary>
-        /// Extracts the Data Source file path from a connection string
-        /// ~/ gets resolved as does |DataDirectory|
+        /// Extracts the Data Source file path from a connection string,
+        /// resolving <c>~/</c> and <c>|DataDirectory|</c>.
         /// </summary>
-        
+
         public static string GetDataSourceFilePath(string connectionString)
         {
             Debug.AssertStringNotEmpty(connectionString);
@@ -134,8 +134,8 @@ namespace Elmah
         }
 
         /// <summary>
-        /// Gets the connection string from the given configuration,
-        /// resolving ~/ and DataDirectory if necessary.
+        /// Gets the connection string from the given configuration, 
+        /// resolving <c>~/</c> and <c>|DataDirectory|</c> if requested.
         /// </summary>
 
         public static string GetConnectionString(IDictionary config, bool resolveDataSource)
@@ -146,9 +146,10 @@ namespace Elmah
 
         /// <summary>
         /// Converts the supplied connection string so that the Data Source 
-        /// specification contains the full path and not ~/ or DataDirectory.
+        /// specification contains the full path and not <c>~/</c> or
+        /// <c>|DataDirectory|</c>.
         /// </summary>
-        
+
         public static string GetResolvedConnectionString(string connectionString)
         {
             Debug.AssertStringNotEmpty(connectionString);
