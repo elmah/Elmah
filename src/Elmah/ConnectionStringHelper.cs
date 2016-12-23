@@ -1,12 +1,7 @@
-#region License, Terms and Author(s)
+#region Copyright (c) 2004 Atif Aziz. All rights reserved.
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//      James Driscoll, mailto:jamesdriscoll@btinternet.com
+// Copyright (c) 2004 Atif Aziz. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +16,6 @@
 // limitations under the License.
 //
 #endregion
-
-[assembly: Elmah.Scc("$Id: ConnectionStringHelper.cs 641 2009-06-01 17:38:40Z azizatif $")]
 
 namespace Elmah
 {
