@@ -105,9 +105,6 @@
     <Compile Include="..\Elmah\JetBrains.Annotations.cs">
       <Link>JetBrains.Annotations.cs</Link>
     </Compile>
-    <Compile Include="..\Elmah\Mannex.cs">
-      <Link>Mannex.cs</Link>
-    </Compile>
     <Compile Include="AccessErrorLog.cs" />
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>

@@ -109,9 +109,6 @@
     <Compile Include="..\Elmah\KeyValuePair.cs">
       <Link>KeyValuePair.cs</Link>
     </Compile>
-    <Compile Include="..\Elmah\Mannex.cs">
-      <Link>Mannex.cs</Link>
-    </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DbCommandExtensions.cs" />
     <Compile Include="DbProviderFactoryQuery.cs" />
