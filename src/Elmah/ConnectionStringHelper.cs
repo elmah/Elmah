@@ -174,7 +174,7 @@ namespace Elmah
             return ResolveDataSourceFilePath(dataSource);
         }
 
-        static readonly char[] _dirSeparators = { Path.DirectorySeparatorChar };
+        static readonly char[] DirSeparators = { Path.DirectorySeparatorChar };
 
         static string ResolveDataSourceFilePath(string path)
         {
@@ -215,9 +215,9 @@ namespace Elmah
             // trailing backslashes into account to avoid duplication.
             //
 
-            return baseDirectory.TrimEnd(_dirSeparators) 
+            return baseDirectory.TrimEnd(DirSeparators) 
                  + Path.DirectorySeparatorChar
-                 + path.Substring(dataDirectoryMacroString.Length).TrimStart(_dirSeparators);
+                 + path.Substring(dataDirectoryMacroString.Length).TrimStart(DirSeparators);
         }
     }
 }
