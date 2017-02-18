@@ -91,7 +91,7 @@ namespace Elmah
         private string _authUserName;
         private string _authPassword;
         private bool _noYsod;
-        private bool _useSsl;
+        private bool? _useSsl;
 
         public event ExceptionFilterEventHandler Filtering;
         public event ErrorMailEventHandler Mailing;
@@ -133,7 +133,7 @@ namespace Elmah
             var authUserName = GetSetting(config, "userName", string.Empty);
             var authPassword = GetSetting(config, "password", string.Empty);
             var sendYsod = Convert.ToBoolean(GetSetting(config, "noYsod", bool.FalseString));
-            var useSsl = Convert.ToBoolean(GetSetting(config, "useSsl", bool.FalseString));
+            var useSsl = GetSetting(config, "useSsl", string.Empty);
             //
             // Hook into the Error event of the application.
             //
@@ -157,7 +157,7 @@ namespace Elmah
             _authUserName = authUserName;
             _authPassword = authPassword;
             _noYsod = sendYsod;
-            _useSsl = useSsl;
+            _useSsl = string.IsNullOrEmpty(useSsl) ? null : (bool?)Convert.ToBoolean(useSsl);
         }
         
         /// <summary>
@@ -290,7 +290,7 @@ namespace Elmah
         /// mail server.
         /// </summary>
 
-        protected bool UseSsl
+        protected bool? UseSsl
         {
             get { return _useSsl; }
         }
@@ -564,7 +564,8 @@ namespace Elmah
             if (userName.Length > 0 && password.Length > 0)
                 client.Credentials = new NetworkCredential(userName, password);
 
-            client.EnableSsl = UseSsl;
+            if (UseSsl.HasValue)
+                client.EnableSsl = UseSsl.Value;
 
             client.Send(mail);
         }
