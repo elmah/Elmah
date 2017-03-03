@@ -148,14 +148,27 @@ namespace Elmah
 
             var path = Path.Combine(logPath, fileName);
 
-            using (var writer = new XmlTextWriter(path, Encoding.UTF8))
+            try
             {
-                writer.Formatting = Formatting.Indented;
-                writer.WriteStartElement("error");
-                writer.WriteAttributeString("errorId", errorId);
-                ErrorXml.Encode(error, writer);
-                writer.WriteEndElement();
-                writer.Flush();
+                using (var writer = new XmlTextWriter(path, Encoding.UTF8))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.WriteStartElement("error");
+                    writer.WriteAttributeString("errorId", errorId);
+                    ErrorXml.Encode(error, writer);
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+            }
+            catch (IOException)
+            {
+                // If an IOException is thrown during writing the file,
+                // it means that we will have an either empty or
+                // partially written XML file on disk. In both cases,
+                // the file won't be valid and would cause an error in
+                // the UI.
+                File.Delete(path);
+                throw;
             }
 
             return errorId;
