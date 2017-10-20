@@ -12,13 +12,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Pgsql", "src\Elmah.Pg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Tests", "tests\Elmah.Tests.csproj", "{8F619C74-74F2-48B5-A06B-780BD329DD43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.SQLite", "src\Elmah.SQLite\Elmah.SQLite.csproj", "{30DE3B3A-87B5-4025-A04A-882769090C60}"
-EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Demo", "http://localhost:51296", "{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
-		ProjectReferences = "{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}|Elmah.dll;{2990960b-2cb4-484c-819a-ef186b8fcac5}|Elmah.AspNet.dll;{30de3b3a-87b5-4025-a04a-882769090c60}|Elmah.SQLite.dll;"
+		ProjectReferences = "{c92dc151-a0ba-4a5e-a20e-620ec9c06aff}|Elmah.dll;{2990960b-2cb4-484c-819a-ef186b8fcac5}|Elmah.AspNet.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51296"
 		Debug.AspNetCompiler.PhysicalPath = "samples\Demo\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51296\"
@@ -121,18 +119,6 @@ Global
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.NETFX 4.5 Debug|Any CPU.ActiveCfg = NETFX 4.5 Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.NETFX 4.5 Debug|Any CPU.Build.0 = NETFX 4.5 Debug|Any CPU
 		{8F619C74-74F2-48B5-A06B-780BD329DD43}.NETFX 4.5 Release|Any CPU.ActiveCfg = NETFX 4.5 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 3.5 Debug|Any CPU.ActiveCfg = NETFX 3.5 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 3.5 Debug|Any CPU.Build.0 = NETFX 3.5 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 3.5 Release|Any CPU.ActiveCfg = NETFX 3.5 Release|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 3.5 Release|Any CPU.Build.0 = NETFX 3.5 Release|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.0 Debug|Any CPU.ActiveCfg = NETFX 4.0 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.0 Debug|Any CPU.Build.0 = NETFX 4.0 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.0 Release|Any CPU.ActiveCfg = NETFX 4.0 Release|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.0 Release|Any CPU.Build.0 = NETFX 4.0 Release|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.5 Debug|Any CPU.ActiveCfg = NETFX 4.5 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.5 Debug|Any CPU.Build.0 = NETFX 4.5 Debug|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.5 Release|Any CPU.ActiveCfg = NETFX 4.5 Release|Any CPU
-		{30DE3B3A-87B5-4025-A04A-882769090C60}.NETFX 4.5 Release|Any CPU.Build.0 = NETFX 4.5 Release|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.NETFX 3.5 Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.NETFX 3.5 Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CC1005D-2D8F-4B8A-9E82-DE8F03CE4861}.NETFX 3.5 Release|Any CPU.ActiveCfg = Debug|Any CPU
