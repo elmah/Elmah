@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">NETFX 4.5 Debug</Configuration>
@@ -61,22 +61,14 @@
     <Compile Include="ErrorTests.cs" />
     <Compile Include="ErrorTweetModuleTests.cs" />
     <Compile Include="Mannex.cs" />
-    <Compile Include="MemoizationTests.cs" />
     <Compile Include="MessageTests.cs" />
-    <Compile Include="OracleErrorLogTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestErrorLog.cs" />
-    <Compile Include="TypeExtensionsTests.cs" />
     <Compile Include="XmlFileErrorLogTests.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Elmah.Oracle\Elmah.Oracle.csproj">
-      <Project>{1eff8e01-6259-4e57-a2e7-a44f201077de}</Project>
-      <Name>Elmah.Oracle</Name>
-      <Aliases>o</Aliases>
-    </ProjectReference>
     <ProjectReference Include="..\src\Elmah.AspNet\Elmah.AspNet.csproj">
       <Project>{2990960b-2cb4-484c-819a-ef186b8fcac5}</Project>
       <Name>Elmah.AspNet</Name>
