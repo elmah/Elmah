@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+        <id>elmah.aspnet</id>
+        <version>2.0.0-alpha001</version>
+        <title>ELMAH for ASP.NET</title>
+        <authors>Atif Aziz</authors>
+        <owners>Atif Aziz, James Driscoll</owners>
+        <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+        <projectUrl>https://elmah.github.io/</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>ELMAH (Error Logging Modules and Handlers) for ASP.NET</description>
+        <language>en-US</language>
+        <tags>elmah aspnet asp.net error logging unhandled exception</tags>
+        <dependencies>
+          <dependency id="elmah.corelibrary" version="2.0.0-alpha001" />
+          <dependency id="AntiXSS" version="4.2.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\bin\net-3.5\Release\Elmah.AspNet.dll" target="lib\net35" />
+        <file src="..\bin\net-3.5\Release\Elmah.AspNet.pdb" target="lib\net35" />
+        <file src="..\bin\net-3.5\Release\Elmah.AspNet.xml" target="lib\net35" />
+        <file src="..\bin\net-4.0\Release\Elmah.AspNet.dll" target="lib\net40" />
+        <file src="..\bin\net-4.0\Release\Elmah.AspNet.pdb" target="lib\net40" />
+        <file src="..\bin\net-4.0\Release\Elmah.AspNet.xml" target="lib\net40" />
+        <file src="..\bin\net-4.5\Release\Elmah.AspNet.dll" target="lib\net45" />
+        <file src="..\bin\net-4.5\Release\Elmah.AspNet.pdb" target="lib\net45" />
+        <file src="..\bin\net-4.5\Release\Elmah.AspNet.xml" target="lib\net45" />
+        <file src="..\src\Elmah.AspNet\**.cs" target="src" />
+        <file src="..\COPYING.txt" target="COPYING.txt" />
+    </files>
+</package>
