@@ -47,6 +47,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{82A2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packaging", "Packaging", "{744FC8DC-9A01-4EF7-B309-101D1EC1F1AD}"
 	ProjectSection(SolutionItems) = preProject
+		pkg\Elmah.AspNet.nuspec = pkg\Elmah.AspNet.nuspec
 		pkg\Elmah.CoreLibrary.nuspec = pkg\Elmah.CoreLibrary.nuspec
 	EndProjectSection
 EndProject
