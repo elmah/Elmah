@@ -73,6 +73,17 @@ namespace Elmah
                 if (logPath.Length == 0)
                     throw new ApplicationException("Log path is missing for the XML file-based error log.");
             }
+            
+                string appName = config.Find("applicationName", string.Empty);
+
+            if (appName.Length > _maxAppNameLength)
+            {
+                throw new ApplicationException(string.Format(
+                    "Application name is too long. Maximum length allowed is {0} characters.",
+                    _maxAppNameLength.ToString("N0")));
+            }
+
+            ApplicationName = appName;
 
             if (logPath.StartsWith("~/"))
                 logPath = MapPath(logPath);
@@ -138,7 +149,7 @@ namespace Elmah
                 Directory.CreateDirectory(logPath);
 
             var errorId = Guid.NewGuid().ToString();
-            
+             error.ApplicationName = ApplicationName;
             var timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
             
             var fileName = string.Format(CultureInfo.InvariantCulture, 
