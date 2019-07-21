@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
@@ -215,6 +215,9 @@
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
+    <Reference Include="System.Threading, Version=1.0.2856.102, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web">
       <Name>System.Web</Name>
     </Reference>
@@ -297,7 +300,13 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="DeduplicatedErrorMailModule.cs" />
     <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
+    <Compile Include="DeduplicatedErrorMailHtmlPage.cs">
+      <DependentUpon>DeduplicatedErrorMailHtmlPage.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -464,6 +473,10 @@
     <None Include="AboutPage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
+    </None>
+    <None Include="DeduplicatedErrorMailHtmlPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DeduplicatedErrorMailHtmlPage.cs</LastGenOutput>
     </None>
     <None Include="ErrorMailHtmlPage.cshtml">
       <Generator>RazorGenerator</Generator>

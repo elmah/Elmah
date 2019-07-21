@@ -1,5 +1,6 @@
 bin/
 Bin/
+.vs/
 *.dll
 *.pdb
 *.user

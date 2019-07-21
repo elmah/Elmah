@@ -31,7 +31,7 @@ namespace Elmah
     // [1] http://razorgenerator.codeplex.com/SourceControl/changeset/view/964fcd1393be#RazorGenerator.Templating%2fRazorTemplateBase.cs
     // [2] http://razorgenerator.codeplex.com/license
 
-    class RazorTemplateBase
+    public class RazorTemplateBase
     {
         string _content;
         private readonly StringBuilder _generatingEnvironment = new StringBuilder();
