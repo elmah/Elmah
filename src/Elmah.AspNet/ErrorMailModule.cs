@@ -410,15 +410,8 @@ namespace Elmah
             }
         }
 
-        /// <summary>
-        /// Schedules the error to be e-mailed synchronously.
-        /// </summary>
-
-        protected virtual void ReportError(Error error)
+        protected virtual MailMessage GetMailMessage(string subject, string body, string mimeType, string webHostHtmlMessage)
         {
-            if (error == null)
-                throw new ArgumentNullException("error");
-
             //
             // Start by checking if we have a sender and a recipient.
             // These values may be null if someone overrides the
@@ -431,7 +424,7 @@ namespace Elmah
             var copyRecipient = this.MailCopyRecipient ?? string.Empty;
 
             if (recipient.Length == 0)
-                return;
+                return null;
 
             //
             // Create the mail, setting up the sender and recipient and priority.
@@ -446,54 +439,67 @@ namespace Elmah
             if (copyRecipient.Length > 0)
                 mail.CC.Add(copyRecipient);
 
-            //
-            // Format the mail subject.
-            // 
+            mail.Subject = subject;
+            mail.Body = body;
 
-            var subjectFormat = Mask.EmptyString(this.MailSubjectFormat, "Error ({1}): {0}");
-            mail.Subject = string.Format(subjectFormat, error.Message, error.Type).
-                Replace('\r', ' ').Replace('\n', ' ');
-
-            //
-            // Format the mail body.
-            //
-
-            var formatter = CreateErrorFormatter();
-
-            var bodyWriter = new StringWriter();
-            formatter.Format(bodyWriter, error);
-            mail.Body = bodyWriter.ToString();
-
-            switch (formatter.MimeType)
+            switch (mimeType)
             {
                 case "text/html": mail.IsBodyHtml = true; break;
                 case "text/plain": mail.IsBodyHtml = false; break;
 
                 default :
                 {
-                    throw new ApplicationException(string.Format(
-                        "The error mail module does not know how to handle the {1} media type that is created by the {0} formatter.",
-                        formatter.GetType().FullName, formatter.MimeType));
+                    throw new ApplicationException(string.Format("The error mail module does not know how to handle the {0} media type.", mimeType));
                 }
+            }
+            //
+            // If an HTML message was supplied by the web host then attach 
+            // it to the mail if not explicitly told not to do so.
+            //
+
+            if (!NoYsod && !string.IsNullOrEmpty(webHostHtmlMessage))
+            {
+                var ysodAttachment = CreateHtmlAttachment("YSOD", webHostHtmlMessage);
+
+                if (ysodAttachment != null)
+                    mail.Attachments.Add(ysodAttachment);
+            }
+
+            return mail;
+        }
+
+        /// <summary>
+        /// Schedules the error to be e-mailed synchronously.
+        /// </summary>
+
+        protected virtual void ReportError(Error error)
+        {
+            if (error == null)
+                throw new ArgumentNullException("error");
+
+            //
+            // Format the mail subject.
+            // 
+
+            var subjectFormat = Mask.EmptyString(this.MailSubjectFormat, "Error ({1}): {0}");
+            var subject = string.Format(subjectFormat, error.Message, error.Type). Replace('\r', ' ').Replace('\n', ' ');
+
+            //
+            // Format the mail body.
+            //
+            var formatter = CreateErrorFormatter();
+            var bodyWriter = new StringWriter();
+            formatter.Format(bodyWriter, error);
+            var mail = GetMailMessage(subject, bodyWriter.ToString(), formatter.MimeType, error.WebHostHtmlMessage);
+            if (mail == null)
+            {
+                return;
             }
 
             var args = new ErrorMailEventArgs(error, mail);
 
             try
             {
-                //
-                // If an HTML message was supplied by the web host then attach 
-                // it to the mail if not explicitly told not to do so.
-                //
-
-                if (!NoYsod && error.WebHostHtmlMessage.Length > 0)
-                {
-                    var ysodAttachment = CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
-
-                    if (ysodAttachment != null)
-                        mail.Attachments.Add(ysodAttachment);
-                }
-
                 //
                 // Send off the mail with some chance to pre- or post-process
                 // using event.
@@ -629,7 +635,7 @@ namespace Elmah
             return GetSetting(config, name, null);
         }
 
-        protected static string GetSetting(IDictionary config, string name, string defaultValue)
+        public static string GetSetting(IDictionary config, string name, string defaultValue)
         {
             Debug.Assert(config != null);
             Debug.AssertStringNotEmpty(name);

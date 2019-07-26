@@ -41,6 +41,10 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Xml" />
+     <Reference Include="System.Threading, Version=1.0.2856.102, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+           <HintPath>..\..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
+         </Reference>
+
     <Reference Include="xunit, Version=1.9.2.1705, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
@@ -48,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallerInfoTests.cs" />
+    <Compile Include="ErrorGroupCollectionTests.cs" />
+    <Compile Include="ErrorGroupMailModuleTests.cs" />
+    <Compile Include="ErrorGroupTests.cs" />
     <Compile Include="ErrorJsonTests.cs" />
     <Compile Include="DataBinderTests.cs" />
     <Compile Include="MemoryErrorLogTests.cs" />

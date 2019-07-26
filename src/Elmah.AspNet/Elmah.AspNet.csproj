@@ -300,13 +300,13 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="DeduplicatedErrorMailModule.cs" />
-    <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
-    <Compile Include="DeduplicatedErrorMailHtmlPage.cs">
-      <DependentUpon>DeduplicatedErrorMailHtmlPage.cshtml</DependentUpon>
+    <Compile Include="ErrorGroupMailHtmlPage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorGroupMailHtmlPage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ErrorGroupMailModule.cs" />
+    <Compile Include="DelegatingHttpTaskAsyncHandler.cs" />
     <Compile Include="ErrorMailHtmlPage.generated.cs">
       <DependentUpon>ErrorMailHtmlPage.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -474,9 +474,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AboutPage.generated.cs</LastGenOutput>
     </None>
-    <None Include="DeduplicatedErrorMailHtmlPage.cshtml">
+    <None Include="ErrorGroupMailHtmlPage.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>DeduplicatedErrorMailHtmlPage.cs</LastGenOutput>
+      <LastGenOutput>ErrorGroupMailHtmlPage.generated.cs</LastGenOutput>
     </None>
     <None Include="ErrorMailHtmlPage.cshtml">
       <Generator>RazorGenerator</Generator>

@@ -37,7 +37,7 @@ namespace Elmah
 
     // See http://msdn.microsoft.com/en-us/library/system.web.webpages.helperresult.aspx
 
-    public sealed class HelperResult : IHtmlString
+    sealed class HelperResult : IHtmlString
     {
         private readonly Action<TextWriter> _action;
 
