@@ -28,7 +28,7 @@
             <table class="collection">
                 <tr>
                     <th> Type / Message </th>
-                    <th> Details </th>
+                    <th width="15%"> Details </th>
                 </tr>
         @foreach (var errorTypeAndMessage in errorGroup.Errors
             .GroupBy(x => x.Type.ToString() + ": " + x.Message)

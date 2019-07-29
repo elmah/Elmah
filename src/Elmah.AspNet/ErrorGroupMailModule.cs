@@ -269,10 +269,9 @@
         private ErrorGroupCollection _errorCollection;
         public delegate void ErrorGroupMailEventHandler(object sender, ErrorGroupMailEventArgs eventArgs);
 
-        public event ExceptionFilterEventHandler Filtering;
-        public event ErrorGroupMailEventHandler Mailing;
-        public event ErrorGroupMailEventHandler Mailed;
-        public event ErrorGroupMailEventHandler DisposingMail;
+        public new event ErrorGroupMailEventHandler Mailing;
+        public new event ErrorGroupMailEventHandler Mailed;
+        public new event ErrorGroupMailEventHandler DisposingMail;
 
         protected override void OnInit(HttpApplication application)
         {
